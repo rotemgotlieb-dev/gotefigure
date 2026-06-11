@@ -45,7 +45,8 @@ function destroyAll() {
 }
 
 export function startMotion() {
-  initAll(); // first load (astro:page-load already fired or about to — guard below)
+  // astro:page-load fires on the initial load too (ClientRouter) — initializing here AND
+  // at import time would double-init and e.g. kill the intro instantly (session key races itself).
   document.addEventListener('astro:page-load', () => { destroyAll(); initAll(); });
   document.addEventListener('astro:before-swap', destroyAll);
 }

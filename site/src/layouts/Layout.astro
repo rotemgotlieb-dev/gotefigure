@@ -36,7 +36,7 @@ const { title, description } = Astro.props;
       <slot />
     </main>
     <Footer />
-    <div transition:persist="cart">
+    <div transition:persist="cart" style="position: relative; z-index: var(--z-drawer);">
       <CartDrawer />
     </div>
     <script>

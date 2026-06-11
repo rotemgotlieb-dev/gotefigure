@@ -106,9 +106,11 @@ const typeLabel = p.type === 'apparel' ? 'wearable art' : p.type === 'poster' ? 
       if (!sel) return;
       const variantId = form.dataset.mock === 'true' ? `${form.dataset.slug}::${sel.value}` : sel.value;
       const btn = form.querySelector<HTMLButtonElement>('[data-add-btn]')!;
-      btn.disabled = true;
+      // NOTE: never disable the focused button mid-flight — disabling dumps focus to <body>
+      // and breaks the drawer's focus-restore on close. aria-busy carries the state instead.
+      btn.setAttribute('aria-busy', 'true');
       await add(variantId, 1);
-      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
       document.dispatchEvent(new CustomEvent('gf:added', { detail: { from: btn } }));
       document.dispatchEvent(new CustomEvent('gf:open-cart'));
     });

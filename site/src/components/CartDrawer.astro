@@ -95,7 +95,8 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
   }
 
   function open() {
-    lastFocus = document.activeElement as HTMLElement;
+    const ae = document.activeElement as HTMLElement;
+    lastFocus = ae && ae !== document.body ? ae : document.getElementById('cart-open');
     drawer.hidden = false; backdrop.hidden = false;
     requestAnimationFrame(() => { drawer.classList.add('open'); backdrop.classList.add('open'); });
     ($('cart-close') as HTMLElement).focus();
