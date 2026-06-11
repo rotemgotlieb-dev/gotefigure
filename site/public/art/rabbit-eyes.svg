@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 110">
+  <g id="eye-l"><ellipse cx="62" cy="56" rx="44" ry="48" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-l" class="pupil" cx="74" cy="62" r="15" fill="#111"/></g>
+  <g id="eye-r"><ellipse cx="150" cy="52" rx="36" ry="42" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-r" class="pupil" cx="142" cy="44" r="11" fill="#111"/></g>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="g-plus" viewBox="0 0 24 24"><path d="M12.3 4.2 Q11.8 12 12.1 19.8 M4.4 12.2 Q12 11.6 19.6 12.1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="g-equal" viewBox="0 0 24 24"><path d="M5 9.2 Q12 8.7 19.2 9.1 M4.8 15.1 Q12 14.6 19 15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="g-hash" viewBox="0 0 24 24"><path d="M9.2 4.5 Q8.8 12 9 19.5 M15.1 4.3 Q14.7 12 14.9 19.6 M4.5 9.3 Q12 8.9 19.5 9.1 M4.3 15 Q12 14.7 19.6 14.9" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+  <symbol id="g-x" viewBox="0 0 24 24"><path d="M5.5 5.8 Q12 11.6 18.6 18.3 M18.2 5.4 Q11.9 12 5.7 18.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+  <symbol id="g-dot" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.1" fill="currentColor"/></symbol>
+</svg>
