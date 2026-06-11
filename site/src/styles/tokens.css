@@ -1,0 +1,30 @@
+/* Design tokens — §3.1 colors verbatim + Phase-1 type/space/motion vocabulary.
+   The ONLY place colors and scale are defined. */
+:root {
+  /* color */
+  --paper: #F2F1EA;
+  --ink: #111111;
+  --amber: #F0A028;
+  --teal: #2AA79B;
+  --og-pink: #F27C8D;   /* RESERVED: archive/OG-era only (§3.1 rule) */
+  --sunset: #E8836B;
+  --paper-dim: #E5E2D8;
+
+  /* type */
+  --font-ui: 'Space Grotesk Variable', system-ui, sans-serif;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
+  --text-display: clamp(2.25rem, 1.5rem + 4vw, 4.5rem);
+
+  /* space (4px base) */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
+  --s-6: 1.5rem; --s-8: 2rem; --s-12: 3rem; --s-16: 4rem; --s-24: 6rem;
+
+  /* shape & motion */
+  --oval: 50% / 42%;           /* cameo mask ratio (§3.3) */
+  --ease-ink: cubic-bezier(0.33, 1, 0.68, 1);
+  --dur-quick: 180ms;
+  --dur-moment: 420ms;
+}

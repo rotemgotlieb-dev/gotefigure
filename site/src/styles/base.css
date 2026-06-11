@@ -1,0 +1,44 @@
+/* Base — reset, defaults, a11y. No component styles here. */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+
+html { color-scheme: light; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100svh;
+}
+
+img, picture, svg, video { display: block; max-width: 100%; }
+button { font: inherit; cursor: pointer; }
+a { color: inherit; }
+
+h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
+h1 { font-size: var(--text-display); font-weight: 700; }
+h2 { font-size: var(--text-xl); }
+
+:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.skip-link {
+  position: absolute; left: var(--s-4); top: var(--s-4);
+  background: var(--ink); color: var(--paper);
+  padding: var(--s-2) var(--s-4);
+  transform: translateY(-200%);
+}
+.skip-link:focus { transform: none; z-index: 100; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
