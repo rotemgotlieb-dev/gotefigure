@@ -189,7 +189,7 @@ Cursor-tracked googly pupils (one eye lags ~80ms — the deranged charm; clamped
 
 ### 8.2 Data flow
 
-Rebuild mechanics: CI builds on git push; a **GitHub Actions weekly cron** hits a **Cloudflare deploy hook**; the same hook URL is the owner's "rebuild now" bookmark for after Fourthwall dashboard edits (optionally wired to Fourthwall `PRODUCT_UPDATED`/`COLLECTION_UPDATED` webhooks later). Build quota: if CI builds run in GitHub Actions with `wrangler deploy`, Cloudflare imposes no build cap at all (Workers Builds' own free tier meters ~3,000 build minutes/mo; legacy Pages allowed 500 builds/mo) — any of these fits this cadence with enormous margin. Build policy: a failed Fourthwall product fetch **fails the build loudly** (never ship an empty shop); a failed YouTube RSS fetch falls back to the last committed snapshot.
+Rebuild mechanics: CI builds on git push; a **GitHub Actions weekly cron** runs build+deploy; the owner's "rebuild now" control is the same workflow's **manual Run button** (GitHub → Actions → deploy) after Fourthwall dashboard edits (optionally wired to Fourthwall `PRODUCT_UPDATED`/`COLLECTION_UPDATED` webhooks later). Build quota: if CI builds run in GitHub Actions with `wrangler deploy`, Cloudflare imposes no build cap at all (Workers Builds' own free tier meters ~3,000 build minutes/mo; legacy Pages allowed 500 builds/mo) — any of these fits this cadence with enormous margin. Build policy: a failed Fourthwall product fetch **fails the build loudly** (never ship an empty shop); a failed YouTube RSS fetch falls back to the last committed snapshot.
 
 ```
 BUILD TIME (git push · weekly cron → deploy hook · owner "rebuild now" hook)
@@ -259,7 +259,7 @@ gotefigure-site/
 
 ## 11. Build phases (2-week shape; detail lives in the implementation plan)
 
-1. **Foundation** — repo, Astro 6 scaffold, tokens, fonts, layout shell, Cloudflare deploy pipeline. *Exit: empty-but-branded site live on a preview URL.*
+1. **Foundation** — repo, Astro 6 scaffold, tokens, fonts, layout shell, Cloudflare deploy pipeline. *Exit: empty-but-branded site live on a preview URL.* (The preview-URL deploy may trail the rest of Phase 1 if Cloudflare credentials arrive late — it must exist before Phase 2 ends.)
 2. **Asset pipeline** — trace/clean priority art (nine-head lineup, silhouette, alien, rabbit eyes, glyphs); rotation/cleanup fixes; production SVG set. *Exit: `public/art/` populated AND each asset animates as §7 specifies (the §4.1 contract).*
 3. **Commerce spine** — Fourthwall store setup (owner) + adapter + content layer + shop/PDP/cart-drawer functional with placeholder styling. *Exit: a real test purchase completes.*
 4. **The art layer** — §7 signature moments + micro-layer + 404. *Exit: motion system on-budget on a mid-range phone.*

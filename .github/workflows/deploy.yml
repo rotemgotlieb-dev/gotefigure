@@ -1,0 +1,26 @@
+# Deploys on push + weekly rebuild (§8.2: keeps Fourthwall stock + YouTube strip fresh).
+# Until secrets CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are set, the deploy step
+# SKIPS (secrets-gated below) — build+tests still run green, no red runs, no failure emails.
+name: deploy
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC — the §8.2 weekly rebuild
+  workflow_dispatch: {}  # the owner's "rebuild now" button (GitHub UI → Actions → deploy → Run)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: site } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: site/package-lock.json }
+      - run: npm ci
+      - run: npm run verify   # build + smoke tests; a failed product fetch fails loudly here (§8.2)
+      - run: npx wrangler deploy
+        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}  # secrets context is valid in step-level if
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
