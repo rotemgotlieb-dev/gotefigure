@@ -2,10 +2,11 @@
 // Used ONLY by the fourthwall provider; the mock catalog embeds these directly.
 // When real products publish: add one entry per slug. Era/type drive shop filters,
 // card sizing, the cart sticker row, and the PDP provenance line.
-import type { Era, ProductType } from './types';
+import type { Category, Era, ProductType } from './types';
 
 export interface OverlayEntry {
   type?: ProductType;
+  category?: Category;
   era?: Era;
   marginNote?: string;
   artSvg?: string;        // path under /art/ — when present, replaces the FW image as card face

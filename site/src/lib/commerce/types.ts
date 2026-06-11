@@ -2,6 +2,15 @@
 
 export type ProductType = 'apparel' | 'poster' | 'sticker';
 export type Era = 'og' | 'new';
+// Owner's store categories (2026-06-11): one store, category-led. Categories render
+// only when they contain products — 'hats' exists for the day embroidered hats land.
+export type Category = 'tees' | 'sweats' | 'hats' | 'prints';
+export const CATEGORY_LABELS: Record<Category, string> = {
+  tees: 'Tees',
+  sweats: 'Sweatshirts & Jackets',
+  hats: 'Hats',
+  prints: 'Prints & Stickers',
+};
 
 export interface Variant {
   id: string;
@@ -15,6 +24,7 @@ export interface Product {
   name: string;
   description: string;
   type: ProductType;
+  category: Category;
   era: Era;
   price: number;          // base/from price, USD
   artSrc: string;         // card face (site art or product image)

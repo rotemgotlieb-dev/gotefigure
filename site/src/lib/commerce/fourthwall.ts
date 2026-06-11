@@ -52,6 +52,7 @@ function mapProduct(raw: any): Product {
     name: raw.name,
     description: raw.description ?? '',
     type: o.type ?? 'apparel',
+    category: o.category ?? (o.type === 'poster' || o.type === 'sticker' ? 'prints' : 'tees'),
     era: o.era ?? 'new',
     price: variants[0]?.price ?? money(raw.unitPrice),
     artSrc: o.artSvg ?? firstImage ?? '/art/alien.svg',

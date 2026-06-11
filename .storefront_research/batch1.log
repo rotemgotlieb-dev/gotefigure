@@ -1,0 +1,44 @@
+=== onlineceramics (https://online-ceramics.com)
+  OK  product=https://www.online-ceramics.com/products/toward-the-fun-off-black-tee
+=== realfunwow (https://realfunwow.com)
+  OK  product=https://realfunwow.com/products/real-talk-session
+=== braindead (https://wearebraindead.com)
+  OK  product=https://wearebraindead.com/products/coach-x-brain-dead-pointelle-mockneck-top-brown
+=== arhoj (https://arhoj.com)
+  OK  product=https://arhoj.com/products/denmark-mug-2024
+=== tuesdaybassen (https://tuesdaybassen.com)
+  OK  product=https://tuesdaybassen.com/products/diner-dress
+=== stayhomeclub (https://stayhomeclub.com)
+  OK  product=https://stayhomeclub.com/products/hot-dang-press-iron-on-art-sheets
+[
+ {
+  "name": "onlineceramics",
+  "url": "https://online-ceramics.com",
+  "product_url": "https://www.online-ceramics.com/products/toward-the-fun-off-black-tee"
+ },
+ {
+  "name": "realfunwow",
+  "url": "https://realfunwow.com",
+  "product_url": "https://realfunwow.com/products/real-talk-session"
+ },
+ {
+  "name": "braindead",
+  "url": "https://wearebraindead.com",
+  "product_url": "https://wearebraindead.com/products/coach-x-brain-dead-pointelle-mockneck-top-brown"
+ },
+ {
+  "name": "arhoj",
+  "url": "https://arhoj.com",
+  "product_url": "https://arhoj.com/products/denmark-mug-2024"
+ },
+ {
+  "name": "tuesdaybassen",
+  "url": "https://tuesdaybassen.com",
+  "product_url": "https://tuesdaybassen.com/products/diner-dress"
+ },
+ {
+  "name": "stayhomeclub",
+  "url": "https://stayhomeclub.com",
+  "product_url": "https://stayhomeclub.com/products/hot-dang-press-iron-on-art-sheets"
+ }
+]

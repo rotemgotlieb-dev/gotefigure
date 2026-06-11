@@ -1,0 +1,16 @@
+=== carpetcompany (https://www.carpetco.us)
+  OK  product=None
+=== jonburgerman (https://jonburgerman.com)
+  OK  product=None
+[
+ {
+  "name": "carpetcompany",
+  "url": "https://www.carpetco.us",
+  "product_url": null
+ },
+ {
+  "name": "jonburgerman",
+  "url": "https://jonburgerman.com",
+  "product_url": null
+ }
+]

@@ -18,7 +18,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'Alien Logo Tee',
     description:
       'The little guy who started it all. Big back print, chest hit on the front — drawn by hand, scribbles left in on purpose.',
-    type: 'apparel', era: 'og', price: 26,
+    type: 'apparel', category: 'tees', era: 'og', price: 26,
     artSrc: '/art/alien.svg', artIsPhoto: false,
     lifestylePhoto: 'alien-tee-boat',
     marginNote: 'the logo himself',
@@ -29,7 +29,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'Nine Eyes Tee',
     description:
       'Nine hand-inked eyes in a grid, all looking somewhere slightly wrong. Our most-asked-about back print.',
-    type: 'apparel', era: 'og', price: 24,
+    type: 'apparel', category: 'tees', era: 'og', price: 24,
     artSrc: 'photo:hero-nine-eyes-sunset', artIsPhoto: true,
     lifestylePhoto: 'hero-nine-eyes-sunset',
     marginNote: 'they’re watching',
@@ -40,7 +40,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'Gold Swirl Tee',
     description:
       'One continuous gold-and-black inkblot, like a thumbprint that got ambitious. No two stares at it are the same.',
-    type: 'apparel', era: 'og', price: 24,
+    type: 'apparel', category: 'tees', era: 'og', price: 24,
     artSrc: 'photo:swirl-tee-lake', artIsPhoto: true,
     lifestylePhoto: 'swirl-tee-lake',
     variants: sizes(24), available: true,
@@ -50,7 +50,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'Fly Agaric Tee',
     description:
       'A fly agaric mushroom in scientific-illustration stipple — thousands of dots, zero shortcuts.',
-    type: 'apparel', era: 'og', price: 24,
+    type: 'apparel', category: 'tees', era: 'og', price: 24,
     artSrc: 'photo:mushroom-tee-sea', artIsPhoto: true,
     lifestylePhoto: 'mushroom-tee-sea',
     marginNote: 'dot by dot by dot',
@@ -61,7 +61,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'OG Rabbit Pink Hoodie',
     description:
       'The rabbit. The pink. The hoodie people kept asking about for four years. Back from 2020, exactly as weird as you remember.',
-    type: 'apparel', era: 'og', price: 42,
+    type: 'apparel', category: 'sweats', era: 'og', price: 42,
     artSrc: '/art/rabbit-cameo.webp', artIsPhoto: false,
     marginNote: 'the OG — back from 2020',
     variants: sizes(42), available: true,
@@ -71,7 +71,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'figure 2 — Poster Print',
     description:
       'Three melted figures in shades, standing on a field of pattern. Part of the figure series. True vector print, sharp at any size.',
-    type: 'poster', era: 'new', price: 24,
+    type: 'poster', category: 'prints', era: 'new', price: 24,
     artSrc: 'photo:figure-2-poster', artIsPhoto: true,
     marginNote: 'printed 10 min from my house',
     variants: posterSizes(24), available: true,
@@ -81,7 +81,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'The Nine Heads — Poster Print',
     description:
       'Nine ink heads, small to large, drawn in one sitting. The same lineup that draws itself on this site’s front door.',
-    type: 'poster', era: 'new', price: 26,
+    type: 'poster', category: 'prints', era: 'new', price: 26,
     artSrc: '/art/nine-heads.svg', artIsPhoto: false,
     marginNote: 'as seen on the homepage',
     variants: posterSizes(26), available: true,
@@ -91,7 +91,7 @@ export const MOCK_CATALOG: Product[] = [
     name: 'OG Rabbit — Stipple Poster',
     description:
       'The rabbit rendered in pure pointillist ink. Yellow goggle eyes, chartreuse teeth, several thousand dots of patience.',
-    type: 'poster', era: 'new', price: 22,
+    type: 'poster', category: 'prints', era: 'new', price: 22,
     artSrc: '/art/rabbit-stipple.png', artIsPhoto: false,
     marginNote: 'printed locally in California',
     variants: posterSizes(22), available: true,
@@ -100,7 +100,7 @@ export const MOCK_CATALOG: Product[] = [
     slug: 'alien-sticker',
     name: 'Alien Sticker',
     description: 'Die-cut vinyl alien for laptops, water bottles, and questionable surfaces.',
-    type: 'sticker', era: 'new', price: 4,
+    type: 'sticker', category: 'prints', era: 'new', price: 4,
     artSrc: '/art/alien.svg', artIsPhoto: false,
     variants: single(4), available: true,
   },
@@ -108,7 +108,7 @@ export const MOCK_CATALOG: Product[] = [
     slug: 'mandala-creature-sticker',
     name: 'Mandala Creature Sticker',
     description: 'Four birds in shades, spinning forever. Matches the loading spinner — yes, on purpose.',
-    type: 'sticker', era: 'new', price: 4,
+    type: 'sticker', category: 'prints', era: 'new', price: 4,
     artSrc: '/art/mandala.svg', artIsPhoto: false,
     marginNote: 'it spins (on the site)',
     variants: single(4), available: true,

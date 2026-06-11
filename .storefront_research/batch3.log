@@ -1,0 +1,19 @@
+=== lazyoaf (https://lazyoaf.com)
+  OK  product=https://www.lazyoaf.com/products/gift-card
+=== jonburgerman (https://shop.jonburgerman.com)
+  ERROR jonburgerman: Page.goto: net::ERR_NAME_NOT_RESOLVED at https://shop.jonburgerman.com/
+Call log:
+  - navigating to "https://shop.jonburgerman.com/", waiting until "domcontentloaded"
+
+[
+ {
+  "name": "lazyoaf",
+  "url": "https://lazyoaf.com",
+  "product_url": "https://www.lazyoaf.com/products/gift-card"
+ },
+ {
+  "name": "jonburgerman",
+  "url": "https://shop.jonburgerman.com",
+  "error": "Page.goto: net::ERR_NAME_NOT_RESOLVED at https://shop.jonburgerman.com/\nCall log:\n  - navigating to \"https://shop.jonburgerman.com/\", waiting until \"domcontentloaded\"\n"
+ }
+]

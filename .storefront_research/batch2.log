@@ -1,0 +1,40 @@
+=== leonkarssen (https://leonkarssen.com)
+  OK  product=https://leonkarssen.com/collections/tees/products/logo-tee-white
+=== kidsuper (https://kidsuper.com)
+  OK  product=https://kidsuper.com/products/puma-ultra-6-match-kidsuper-cp-tt
+=== carpetcompany (https://carpetcompany.com)
+  ERROR carpetcompany: Page.goto: net::ERR_CONNECTION_REFUSED at https://carpetcompany.com/
+Call log:
+  - navigating to "https://carpetcompany.com/", waiting until "domcontentloaded"
+
+=== polyplayground (https://polyplayground.com)
+  OK  product=None
+=== heybigman (https://heybigman.com)
+  OK  product=None
+[
+ {
+  "name": "leonkarssen",
+  "url": "https://leonkarssen.com",
+  "product_url": "https://leonkarssen.com/collections/tees/products/logo-tee-white"
+ },
+ {
+  "name": "kidsuper",
+  "url": "https://kidsuper.com",
+  "product_url": "https://kidsuper.com/products/puma-ultra-6-match-kidsuper-cp-tt"
+ },
+ {
+  "name": "carpetcompany",
+  "url": "https://carpetcompany.com",
+  "error": "Page.goto: net::ERR_CONNECTION_REFUSED at https://carpetcompany.com/\nCall log:\n  - navigating to \"https://carpetcompany.com/\", waiting until \"domcontentloaded\"\n"
+ },
+ {
+  "name": "polyplayground",
+  "url": "https://polyplayground.com",
+  "product_url": null
+ },
+ {
+  "name": "heybigman",
+  "url": "https://heybigman.com",
+  "product_url": null
+ }
+]
