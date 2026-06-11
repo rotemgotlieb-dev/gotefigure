@@ -129,9 +129,9 @@ const rulePathsFor = (label: string) => roughLinePaths(seedFrom(label));
   .strip-nav a:hover { color: var(--teal-text); }
 
   /* ---- the wall ---- */
-  .wall-wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 var(--s-6); }
+  .wall-wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 var(--s-6); overflow-x: clip; }
   .wall-ghost {
-    position: absolute; right: -3%; top: 220px; width: 360px; max-width: 42vw;
+    position: absolute; right: 4px; top: 220px; width: 360px; max-width: 40vw;
     opacity: 0.05; pointer-events: none; z-index: 0;
   }
   .cat { position: relative; z-index: 1; padding: var(--s-8) 0 var(--s-4); scroll-margin-top: 90px; }
@@ -180,6 +180,8 @@ const rulePathsFor = (label: string) => roughLinePaths(seedFrom(label));
     .strip { padding-inline: var(--s-4); }
     .wall-wrap { padding-inline: var(--s-4); }
     .maker-inner { gap: var(--s-6); }
-    .maker-thumb { width: min(126px, 28vw); }
+    .maker-words { min-width: 0; }
+    .maker-thumbs { max-width: 100%; }
+    .maker-thumb { width: min(126px, 26vw); min-width: 0; flex: none; }
   }
 </style>

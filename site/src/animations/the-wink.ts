@@ -30,8 +30,9 @@ defineModule('the-wink', ({ reduced }) => {
     .to(lid, { attr: LID_CLOSED, duration: 0.13, ease: 'power2.in' }, '<')
     .to(lash, { opacity: 1, duration: 0.06 }, '<+=0.09')
     .to(lash, { opacity: 0, duration: 0.08 }, '+=0.17')
-    .to(lid, { attr: LID_OPEN, duration: 0.18, ease: 'back.out(1.6)' }, '<')
-    .to(stage, { rotate: 0, duration: 0.2, ease: 'power1.inOut' }, '<')
+    // power2.out, NOT back.out: overshoot drives ry negative -> SVG attribute errors
+    .to(lid, { attr: LID_OPEN, duration: 0.18, ease: 'power2.out' }, '<')
+    .to(stage, { rotate: 0, duration: 0.22, ease: 'back.out(1.4)' }, '<')
     .to(overlay, { opacity: 0, duration: 0.3, ease: 'power1.in' }, '+=0.18')
     .to(stage, { scale: 0.92, y: -16, duration: 0.3, ease: 'power2.in' }, '<');
 
