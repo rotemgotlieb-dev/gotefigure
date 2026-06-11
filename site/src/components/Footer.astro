@@ -1,23 +1,40 @@
 ---
-// Footer (§6 Home): socials + minimum legal. X link added when handle confirmed (§10).
+// Footer (§6): socials, info links, glyph punctuation, sign-off. X link added when handle confirmed (§10).
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
-  <ul class="socials">
-    <li><a href="https://www.youtube.com/@gotefigure" rel="me noopener" target="_blank">YouTube</a></li>
-    <li><a href="https://www.instagram.com/gotefigure/" rel="me noopener" target="_blank">Instagram</a></li>
-  </ul>
-  <p class="legal">© {year} GoteFigure · unique wearable art, California</p>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <p class="foot-logo">GoteFigure</p>
+      <p class="foot-tag">unique wearable art · California · est. 2020, reborn {year}</p>
+      <p class="margin-note">drawn every day — really, every day</p>
+    </div>
+    <nav class="foot-nav" aria-label="Footer">
+      <a href="/shop/" class="squiggle">Shop</a>
+      <a href="/about/" class="squiggle">About</a>
+      <a href="/info/shipping/" class="squiggle">Shipping &amp; returns</a>
+      <a href="/info/contact/" class="squiggle">Contact</a>
+    </nav>
+    <div class="foot-social">
+      <a href="https://www.youtube.com/@gotefigure" rel="me noopener" target="_blank" class="squiggle">YouTube</a>
+      <a href="https://www.instagram.com/gotefigure/" rel="me noopener" target="_blank" class="squiggle">Instagram</a>
+    </div>
+  </div>
+  <div class="foot-glyphs" aria-hidden="true">
+    {['#g-plus', '#g-equal', '#g-hash', '#g-x', '#g-dot', '#g-plus', '#g-equal'].map((g) => (
+      <svg viewBox="0 0 24 24" width="14"><use href={`/art/glyphs.svg${g}`} /></svg>
+    ))}
+  </div>
+  <p class="legal">© {year} GoteFigure — the rabbit is watching your back button</p>
 </footer>
 
 <style>
-  .site-footer {
-    margin-top: var(--s-24);
-    padding: var(--s-8) var(--s-6);
-    border-top: 2px solid var(--ink);
-    display: flex; flex-wrap: wrap; gap: var(--s-4);
-    align-items: center; justify-content: space-between;
-  }
-  .socials { display: flex; gap: var(--s-6); list-style: none; padding: 0; }
-  .legal { font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 70%, var(--paper)); }
+  .site-footer { margin-top: var(--s-24); padding: var(--s-12) var(--s-6) var(--s-6); border-top: 2px solid var(--ink); }
+  .foot-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: var(--s-8); max-width: 1180px; margin: 0 auto; }
+  .foot-logo { font-weight: 700; font-size: var(--text-lg); }
+  .foot-tag { font-size: var(--text-sm); margin: var(--s-1) 0 var(--s-2); }
+  .foot-nav, .foot-social { display: grid; gap: var(--s-3); align-content: start; justify-items: start; }
+  .foot-glyphs { display: flex; gap: var(--s-6); justify-content: center; margin: var(--s-8) 0 var(--s-4); color: color-mix(in srgb, var(--ink) 45%, var(--paper)); }
+  .legal { text-align: center; font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 60%, var(--paper)); }
+  @media (max-width: 700px) { .foot-grid { grid-template-columns: 1fr 1fr; } .foot-brand { grid-column: 1 / -1; } }
 </style>

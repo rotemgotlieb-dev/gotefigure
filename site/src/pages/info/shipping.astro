@@ -1,0 +1,39 @@
+---
+// Shipping & returns (§6): honest, split by fulfillment path (POD vs packed-by-artist).
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Shipping & returns — GoteFigure" description="How GoteFigure orders ship: printed-to-order apparel and locally printed posters and stickers.">
+  <section class="info">
+    <h1>Shipping &amp; returns</h1>
+
+    <h2>Two kinds of packages</h2>
+    <p>
+      <strong>Tees &amp; hoods</strong> are printed to order — nothing sits in a warehouse.
+      They usually print in 2–5 business days, then ship. <strong>Posters and stickers</strong>
+      are printed locally in California and packed by the artist, typically out the door in 2–4 days.
+    </p>
+    <p>
+      Order both? They’ll arrive as <em>separate packages</em>, possibly days apart.
+      That’s not a mistake — that’s two different print shops doing their thing.
+    </p>
+
+    <h2>Returns</h2>
+    <p>
+      Wrong size or a misprint on apparel: tell us within 30 days and we’ll make it right.
+      Posters and stickers: if it arrives damaged, send a photo and a replacement ships free.
+      Changed your mind on a poster? Within 14 days, unopened, we’ll sort a return.
+    </p>
+
+    <h2>Where we ship</h2>
+    <p>United States at launch. Elsewhere — <a href="/info/contact/" class="squiggle">ask</a>; the rabbit is flexible.</p>
+
+    <p class="margin-note">questions? a human (the only human here) answers every email</p>
+  </section>
+</Layout>
+
+<style>
+  .info { max-width: 680px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24); }
+  .info h1 { margin-bottom: var(--s-6); }
+  .info h2 { margin: var(--s-8) 0 var(--s-2); font-size: var(--text-lg); }
+  .info p { margin-bottom: var(--s-3); }
+</style>

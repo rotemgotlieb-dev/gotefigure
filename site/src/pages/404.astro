@@ -1,15 +1,51 @@
 ---
-// Placeholder until Phase 4 brings the full googly-eyed OG Rabbit (§6.6).
+// 404 (§6.6): the shareable easter egg. Full rabbit, live googly eyes, brand-voice copy.
 import Layout from '../layouts/Layout.astro';
+import GlyphDust from '../components/GlyphDust.astro';
 ---
 <Layout title="404 — GoteFigure" description="Nothing here, man.">
-  <section class="placeholder">
-    <h1>Nothing here, man</h1>
-    <p><a href="/">Back to the art →</a></p>
+  <section class="lost">
+    <GlyphDust seed={44} count={18} />
+    <div class="lost-stage">
+      <img src="/art/rabbit-stipple.png" alt="" class="lost-rabbit" data-draw />
+      <svg data-pupils viewBox="0 0 200 110" class="lost-eyes" aria-hidden="true">
+        <g id="eye-l"><ellipse cx="62" cy="56" rx="44" ry="48" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-l" class="pupil" cx="74" cy="62" r="15" fill="#111"/></g>
+        <g id="eye-r"><ellipse cx="150" cy="52" rx="36" ry="42" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-r" class="pupil" cx="142" cy="44" r="11" fill="#111"/></g>
+      </svg>
+    </div>
+    <div class="lost-words">
+      <h1>Nothing here, man</h1>
+      <p>The rabbit looked everywhere. Twice. This page either never existed or hopped away.</p>
+      <p class="margin-note">error 404 — drawn, not found</p>
+      <div class="lost-links">
+        <a href="/" class="lost-home" data-magnetic>Back to the art</a>
+        <a href="/shop/" class="squiggle">or straight to the shop</a>
+      </div>
+    </div>
   </section>
 </Layout>
 
 <style>
-  .placeholder { padding: var(--s-16) var(--s-6); max-width: 60ch; }
-  .placeholder p { margin-top: var(--s-4); }
+  .lost {
+    position: relative; min-height: calc(100svh - 200px);
+    display: grid; grid-template-columns: 1fr 1.2fr; align-items: center;
+    gap: var(--s-8); max-width: 1000px; margin: 0 auto; padding: var(--s-8) var(--s-6);
+  }
+  .lost-stage { position: relative; }
+  .lost-rabbit { max-height: 56svh; width: auto; margin: 0 auto; }
+  .lost-eyes { position: absolute; width: 42%; left: 8%; top: 38%; }
+  .lost-words h1 { margin-bottom: var(--s-3); }
+  .lost-words p { max-width: 42ch; margin-bottom: var(--s-2); }
+  .lost-links { display: flex; align-items: center; gap: var(--s-6); margin-top: var(--s-6); flex-wrap: wrap; }
+  .lost-home {
+    display: inline-block; padding: var(--s-3) var(--s-8); background: var(--ink); color: var(--paper);
+    text-decoration: none; font-weight: 700; border-radius: 999px; border: 2px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--og-pink);
+  }
+  .lost-home:hover { background: var(--og-pink); color: var(--ink); }
+  @media (max-width: 760px) {
+    .lost { grid-template-columns: 1fr; text-align: center; padding-top: var(--s-4); }
+    .lost-rabbit { max-height: 38svh; }
+    .lost-words p, .lost-links { margin-inline: auto; justify-content: center; }
+  }
 </style>
