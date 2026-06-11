@@ -11,13 +11,15 @@
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "verify": "astro build && vitest run"
+    "verify": "astro build && vitest run",
+    "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "astro": "^6.4.6"
   },
   "devDependencies": {
-    "vitest": "^4.1.8"
+    "vitest": "^4.1.8",
+    "wrangler": "^4.99.0"
   }
 }
