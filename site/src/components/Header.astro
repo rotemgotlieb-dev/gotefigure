@@ -1,0 +1,29 @@
+---
+// Site nav (§6): logo → home, Shop, About, cart placeholder (functional in Phase 3).
+const { pathname } = Astro.url;
+const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
+---
+<header class="site-header">
+  <nav aria-label="Main">
+    <a href="/" class="logo" aria-label="GoteFigure home">GoteFigure</a>
+    <div class="links">
+      <a href="/shop" aria-current={isActive('/shop') ? 'page' : undefined}>Shop</a>
+      <a href="/about" aria-current={isActive('/about') ? 'page' : undefined}>About</a>
+      <button type="button" class="cart-btn" aria-label="Cart, 0 items" disabled>
+        Cart <span class="cart-count" aria-hidden="true">0</span>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<style>
+  .site-header { padding: var(--s-4) var(--s-6); border-bottom: 2px solid var(--ink); }
+  nav { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
+  .logo { font-weight: 700; font-size: var(--text-lg); text-decoration: none; }
+  .links { display: flex; align-items: center; gap: var(--s-6); }
+  .links a { text-decoration: none; }
+  .links a[aria-current='page'] { text-decoration: underline 2px var(--amber); text-underline-offset: 6px; }
+  .cart-btn { background: none; border: 2px solid var(--ink); padding: var(--s-1) var(--s-3); border-radius: 999px; }
+  .cart-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .cart-count { font-variant-numeric: tabular-nums; }
+</style>

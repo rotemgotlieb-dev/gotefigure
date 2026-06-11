@@ -1,17 +1,17 @@
 ---
-
+import Layout from '../layouts/Layout.astro';
 ---
+<Layout
+  title="GoteFigure — unique wearable art"
+  description="Hand-drawn art on tees, hoodies, posters and stickers. An art-based clothing brand from California, founded 2020, reborn 2026."
+>
+  <section class="hero">
+    <h1>GoteFigure</h1>
+    <p>Unique wearable art. Hand-drawn in California.</p>
+  </section>
+</Layout>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<style>
+  .hero { padding: var(--s-24) var(--s-6); max-width: 60ch; }
+  .hero p { font-size: var(--text-lg); margin-top: var(--s-4); }
+</style>

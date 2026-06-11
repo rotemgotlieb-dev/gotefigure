@@ -1,0 +1,23 @@
+---
+// Footer (§6 Home): socials + minimum legal. X link added when handle confirmed (§10).
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <ul class="socials">
+    <li><a href="https://www.youtube.com/@gotefigure" rel="me noopener" target="_blank">YouTube</a></li>
+    <li><a href="https://www.instagram.com/gotefigure/" rel="me noopener" target="_blank">Instagram</a></li>
+  </ul>
+  <p class="legal">© {year} GoteFigure · unique wearable art, California</p>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--s-24);
+    padding: var(--s-8) var(--s-6);
+    border-top: 2px solid var(--ink);
+    display: flex; flex-wrap: wrap; gap: var(--s-4);
+    align-items: center; justify-content: space-between;
+  }
+  .socials { display: flex; gap: var(--s-6); list-style: none; padding: 0; }
+  .legal { font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 70%, var(--paper)); }
+</style>
