@@ -9,10 +9,15 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest run",
+    "verify": "astro build && vitest run"
   },
   "dependencies": {
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "astro": "^6.4.6"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.8"
   }
 }
