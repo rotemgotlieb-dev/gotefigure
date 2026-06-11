@@ -22,9 +22,19 @@
   --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
   --s-6: 1.5rem; --s-8: 2rem; --s-12: 3rem; --s-16: 4rem; --s-24: 6rem;
 
-  /* shape & motion */
+  /* shape & motion (easing canon: traversal/arrival from validated portfolio spec) */
   --oval: 50% / 42%;           /* cameo mask ratio (§3.3) */
   --ease-ink: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-traverse: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-arrive: cubic-bezier(0.23, 1, 0.32, 1);
   --dur-quick: 180ms;
   --dur-moment: 420ms;
+  --dur-scene: 900ms;
+
+  /* layers */
+  --z-dust: 0;
+  --z-content: 1;
+  --z-nav: 50;
+  --z-drawer: 80;
+  --z-intro: 100;
 }

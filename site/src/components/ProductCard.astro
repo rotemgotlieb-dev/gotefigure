@@ -1,0 +1,95 @@
+---
+// Art-first product card (§6.2): the artwork is the face; photo appears on hover.
+// Salon-wall sizing via type classes; era badges; view-transition morph into the PDP.
+import { Image } from 'astro:assets';
+import type { Product } from '../lib/commerce';
+import { getPhoto } from '../lib/photos';
+
+interface Props { product: Product; eager?: boolean }
+const { product: p, eager = false } = Astro.props;
+
+const photoName = p.artSrc.startsWith('photo:') ? p.artSrc.slice(6) : undefined;
+const facePhoto = photoName ? getPhoto(photoName) : undefined;
+const hoverPhoto = !photoName && p.lifestylePhoto ? getPhoto(p.lifestylePhoto) : undefined;
+const eraLabel = p.era === 'og' ? 'back from 2020' : 'new era';
+const fromPrice = p.variants.length > 1 ? `from $${p.price}` : `$${p.price}`;
+---
+<a
+  href={`/shop/${p.slug}/`}
+  class:list={['card', `card--${p.type}`, { 'card--og': p.era === 'og' }]}
+  data-type={p.type}
+  data-era={p.era}
+  aria-label={`${p.name}, ${fromPrice}`}
+>
+  <div class="card-window" style={`view-transition-name: art-${p.slug}`}>
+    {facePhoto ? (
+      <Image src={facePhoto} alt="" widths={[400, 700]} sizes="(max-width: 640px) 90vw, 400px" loading={eager ? 'eager' : 'lazy'} class="face face--photo" />
+    ) : (
+      <img src={p.artSrc} alt="" loading={eager ? 'eager' : 'lazy'} class="face face--art" />
+    )}
+    {hoverPhoto && (
+      <Image src={hoverPhoto} alt="" widths={[400, 700]} sizes="(max-width: 640px) 90vw, 400px" loading="lazy" class="face face--hover" />
+    )}
+    {p.type === 'sticker' && <span class="peel" aria-hidden="true"></span>}
+  </div>
+  <div class="card-meta">
+    <span class="card-era">{eraLabel}</span>
+    <h3 class="card-name">{p.name}</h3>
+    <p class="card-price">{p.available ? fromPrice : 'gone — for now'}</p>
+  </div>
+</a>
+
+<style>
+  .card {
+    display: block;
+    text-decoration: none;
+    outline-offset: 6px;
+  }
+  .card-window {
+    position: relative;
+    border-radius: var(--oval);
+    background: var(--paper-dim);
+    border: 2px solid var(--ink);
+    overflow: hidden;
+    aspect-ratio: 3 / 4;
+    transition: transform var(--dur-quick) var(--ease-arrive);
+  }
+  .card--og .card-window { background: color-mix(in srgb, var(--og-pink) 26%, var(--paper)); }
+  .card--poster .card-window { border-radius: 6px; aspect-ratio: 3 / 4.2; }
+  .card--sticker .card-window { border-radius: 24px; aspect-ratio: 1; }
+  .card:hover .card-window, .card:focus-visible .card-window { transform: rotate(-1.1deg) scale(1.015); }
+
+  .face { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .face--art { object-fit: contain; padding: 12%; }
+  .card--sticker .face--art { padding: 16%; }
+  .face--hover { opacity: 0; transition: opacity var(--dur-moment) var(--ease-arrive); }
+  .card:hover .face--hover, .card:focus-visible .face--hover { opacity: 1; }
+
+  /* sticker peel corner */
+  .peel {
+    position: absolute; right: 0; bottom: 0;
+    width: 0; height: 0;
+    border-style: solid;
+    border-width: 0 0 34px 34px;
+    border-color: transparent transparent var(--paper) transparent;
+    filter: drop-shadow(-2px -2px 2px rgb(0 0 0 / 0.18));
+    transition: border-width var(--dur-quick) var(--ease-arrive);
+  }
+  .card:hover .peel { border-width: 0 0 52px 52px; }
+
+  .card-meta { padding: var(--s-3) var(--s-1) 0; }
+  .card-era {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border: 1.5px solid var(--teal);
+    color: var(--teal);
+    border-radius: 999px;
+    padding: 1px 8px;
+    margin-bottom: var(--s-1);
+  }
+  .card--og .card-era { border-color: var(--og-pink); color: color-mix(in srgb, var(--og-pink) 75%, var(--ink)); }
+  .card-name { font-size: var(--text-base); font-weight: 600; line-height: 1.25; }
+  .card-price { font-size: var(--text-sm); margin-top: 2px; font-variant-numeric: tabular-nums; }
+</style>

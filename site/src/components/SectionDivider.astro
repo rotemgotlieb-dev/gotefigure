@@ -1,0 +1,40 @@
+---
+// Marquee divider (§3.3): the mirrored rabbit silhouette repeating, recolored per section.
+// Scroll-velocity reactivity is layered on by animations/scroll-life.ts (data-marquee hook).
+interface Props { color?: string }
+const { color = 'var(--og-pink)' } = Astro.props;
+const COUNT = 10;
+---
+<div class="divider" aria-hidden="true" data-marquee style={`color: ${color}`}>
+  <div class="track">
+    {Array.from({ length: COUNT }).map(() => (
+      <img src="/art/silhouette.svg" alt="" loading="lazy" class="sil" />
+    ))}
+    {Array.from({ length: COUNT }).map(() => (
+      <img src="/art/silhouette.svg" alt="" loading="lazy" class="sil" />
+    ))}
+  </div>
+</div>
+
+<style>
+  .divider {
+    overflow: hidden;
+    padding: var(--s-6) 0;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+  .track {
+    display: flex;
+    gap: var(--s-12);
+    width: max-content;
+    animation: slide 36s linear infinite;
+  }
+  .sil { height: 44px; width: auto; opacity: 0.85; }
+  @keyframes slide {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); } /* track = 2 identical halves -> seamless by geometry */
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track { animation: none; }
+  }
+</style>

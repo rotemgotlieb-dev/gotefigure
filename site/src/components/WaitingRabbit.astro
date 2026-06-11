@@ -1,0 +1,19 @@
+---
+// The waiting rabbit (§7.4): system-wide loading language — compact rabbit, spinning googly eyes.
+interface Props { size?: number; label?: string }
+const { size = 56, label = 'working on it…' } = Astro.props;
+---
+<span class="rabbit" role="status" aria-label={label} style={`--size:${size}px`}>
+  <svg viewBox="0 0 200 110" width={size} aria-hidden="true">
+    <g><ellipse cx="62" cy="56" rx="44" ry="48" fill="#fff" stroke="#111" stroke-width="5"/><g class="spin"><circle cx="74" cy="62" r="15" fill="#111"/><circle cx="70" cy="55" r="4.5" fill="#fff"/></g></g>
+    <g><ellipse cx="150" cy="52" rx="36" ry="42" fill="#fff" stroke="#111" stroke-width="5"/><g class="spin spin--rev"><circle cx="142" cy="44" r="11" fill="#111"/><circle cx="146" cy="50" r="3.5" fill="#fff"/></g></g>
+  </svg>
+</span>
+
+<style>
+  .rabbit { display: inline-grid; place-items: center; }
+  .spin { transform-origin: 62px 56px; animation: eyespin 0.9s var(--ease-traverse) infinite; }
+  .spin--rev { transform-origin: 150px 52px; animation-direction: reverse; animation-duration: 1.15s; }
+  @keyframes eyespin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none; } }
+</style>

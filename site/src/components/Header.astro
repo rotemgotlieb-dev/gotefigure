@@ -1,29 +1,65 @@
 ---
-// Site nav (§6): logo → home, Shop, About, cart placeholder (functional in Phase 3).
+// Site nav (§6): alien mark + wordmark → home, Shop, About, live cart button (opens drawer).
 const { pathname } = Astro.url;
 const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
 ---
 <header class="site-header">
   <nav aria-label="Main">
-    <a href="/" class="logo" aria-label="GoteFigure home">GoteFigure</a>
+    <a href="/" class="logo" aria-label="GoteFigure home" id="logo-mark">
+      <img src="/favicon.svg" alt="" width="34" height="28" class="logo-alien" />
+      <span class="logo-word">GoteFigure</span>
+    </a>
     <div class="links">
-      <a href="/shop" aria-current={isActive('/shop') ? 'page' : undefined}>Shop</a>
-      <a href="/about" aria-current={isActive('/about') ? 'page' : undefined}>About</a>
-      <button type="button" class="cart-btn" aria-label="Cart, 0 items" disabled>
-        Cart <span class="cart-count" aria-hidden="true">0</span>
+      <a href="/shop" class="squiggle" aria-current={isActive('/shop') ? 'page' : undefined}>Shop</a>
+      <a href="/about" class="squiggle" aria-current={isActive('/about') ? 'page' : undefined}>About</a>
+      <button type="button" class="cart-btn" aria-label="Cart, 0 items" id="cart-open">
+        Cart <span class="cart-count" data-cart-count aria-hidden="true">0</span>
       </button>
     </div>
   </nav>
 </header>
 
+<script>
+  function wire() {
+    const btn = document.getElementById('cart-open');
+    if (btn && !btn.dataset.wired) {
+      btn.dataset.wired = 'true';
+      btn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('gf:open-cart')));
+    }
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
 <style>
-  .site-header { padding: var(--s-4) var(--s-6); border-bottom: 2px solid var(--ink); }
+  .site-header {
+    padding: var(--s-3) var(--s-6);
+    border-bottom: 2px solid var(--ink);
+    position: sticky; top: 0; z-index: var(--z-nav);
+    background: color-mix(in srgb, var(--paper) 92%, transparent);
+    backdrop-filter: blur(6px);
+  }
   nav { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
-  .logo { font-weight: 700; font-size: var(--text-lg); text-decoration: none; }
+  .logo { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; font-size: var(--text-lg); text-decoration: none; }
+  .logo-alien { transition: transform var(--dur-quick) var(--ease-arrive); }
+  .logo:hover .logo-alien { transform: rotate(-8deg) translateY(-1px); }
+  .logo-word { letter-spacing: -0.02em; }
   .links { display: flex; align-items: center; gap: var(--s-6); }
-  .links a { text-decoration: none; }
-  .links a[aria-current='page'] { text-decoration: underline 2px var(--amber); text-underline-offset: 6px; }
-  .cart-btn { background: none; border: 2px solid var(--ink); padding: var(--s-1) var(--s-3); border-radius: 999px; }
-  .cart-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .cart-count { font-variant-numeric: tabular-nums; }
+  .links a[aria-current='page'] { font-weight: 600; }
+  .cart-btn {
+    background: none; border: 2px solid var(--ink); padding: var(--s-1) var(--s-3);
+    border-radius: 999px; display: flex; gap: var(--s-2); align-items: center;
+    transition: transform var(--dur-quick) var(--ease-arrive), background var(--dur-quick) var(--ease-arrive);
+  }
+  .cart-btn:hover { transform: scale(1.04); background: var(--amber); }
+  .cart-count {
+    font-variant-numeric: tabular-nums; background: var(--ink); color: var(--paper);
+    border-radius: 999px; min-width: 20px; height: 20px; display: grid; place-items: center;
+    font-size: 0.72rem; padding: 0 5px;
+  }
+  @media (max-width: 480px) {
+    .site-header { padding-inline: var(--s-4); }
+    .links { gap: var(--s-4); }
+    .logo-word { font-size: var(--text-base); }
+  }
 </style>

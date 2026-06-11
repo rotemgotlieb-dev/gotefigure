@@ -1,0 +1,185 @@
+---
+// PDP (§6.3): the art front and center, one unmissable add-to-cart, honest details.
+// The card's oval window morphs into the art panel here (Ink Bloom, §7.3) via view-transition-name.
+import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import GlyphDust from '../../components/GlyphDust.astro';
+import { Image } from 'astro:assets';
+import { commerce, isMockMode } from '../../lib/commerce';
+import { getPhoto } from '../../lib/photos';
+
+export async function getStaticPaths() {
+  const products = await commerce.getProducts();
+  return products.map((p) => ({ params: { slug: p.slug }, props: { product: p } }));
+}
+
+const { product: p } = Astro.props;
+const all = await commerce.getProducts();
+const related = all.filter((x) => x.slug !== p.slug && (x.type === p.type || x.era === p.era)).slice(0, 3);
+
+const photoName = p.artSrc.startsWith('photo:') ? p.artSrc.slice(6) : undefined;
+const facePhoto = photoName ? getPhoto(photoName) : undefined;
+const lifestyle = p.lifestylePhoto && p.lifestylePhoto !== photoName ? getPhoto(p.lifestylePhoto) : undefined;
+const eraLabel = p.era === 'og' ? 'back from 2020' : 'new era';
+const typeLabel = p.type === 'apparel' ? 'wearable art' : p.type === 'poster' ? 'poster print' : 'sticker';
+---
+<Layout title={`${p.name} — GoteFigure`} description={p.description}>
+  <article class="pdp">
+    <GlyphDust seed={p.slug.length * 3 + 5} count={10} />
+
+    <div class="art-panel" style={`view-transition-name: art-${p.slug}`} data-art-panel>
+      {facePhoto
+        ? <Image src={facePhoto} alt={`${p.name} — product photo`} widths={[700, 1200]} sizes="(max-width: 900px) 94vw, 56vw" loading="eager" class="art-img art-img--photo" />
+        : <img src={p.artSrc} alt={`${p.name} — artwork`} loading="eager" class="art-img" />}
+    </div>
+
+    <div class="info-panel">
+      <p class="kicker"><span class:list={['era-chip', { 'era-chip--og': p.era === 'og' }]}>{eraLabel}</span> · {typeLabel}</p>
+      <h1>{p.name}</h1>
+      <p class="price" data-price>${p.price}</p>
+      <p class="desc">{p.description}</p>
+      {p.marginNote && <p class="margin-note">{p.marginNote}</p>}
+      {p.type === 'poster' && <p class="provenance">printed locally in California, packed by the artist</p>}
+
+      <form class="buy" data-buy data-slug={p.slug} data-mock={isMockMode ? 'true' : 'false'}>
+        {p.variants.length > 1 && (
+          <fieldset class="variants">
+            <legend>{p.type === 'apparel' ? 'Size' : 'Size'}</legend>
+            <div class="variant-row">
+              {p.variants.map((v, i) => (
+                <label class:list={['variant', { 'variant--off': !v.available }]}>
+                  <input type="radio" name="variant" value={v.id} data-price={v.price} checked={i === 0} disabled={!v.available} />
+                  <span>{v.label}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
+        {p.variants.length === 1 && <input type="hidden" name="variant" value={p.variants[0].id} data-price={p.variants[0].price} />}
+        <button type="submit" class="add-btn" data-add-btn disabled={!p.available}>
+          {p.available ? 'Add to cart' : 'gone — for now'}
+        </button>
+        <p class="ship-note">
+          {p.type === 'apparel'
+            ? 'printed to order — ships separately from posters & stickers, usually within a week'
+            : 'ships from California in 2–4 days'}
+        </p>
+      </form>
+
+      {lifestyle && (
+        <figure class="lifestyle">
+          <Image src={lifestyle} alt={`${p.name} worn in the wild`} widths={[600, 1000]} sizes="(max-width: 900px) 94vw, 40vw" loading="lazy" class="lifestyle-img" />
+          <figcaption class="margin-note">in the wild</figcaption>
+        </figure>
+      )}
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <aside class="related" aria-label="Related pieces">
+      <h2>Goes with</h2>
+      <div class="related-row">
+        {related.map((r) => <ProductCard product={r} />)}
+      </div>
+    </aside>
+  )}
+</Layout>
+
+<script>
+  import { add } from '../../lib/cart-store';
+
+  function wireBuy() {
+    const form = document.querySelector<HTMLFormElement>('[data-buy]');
+    if (!form || form.dataset.wired) return;
+    form.dataset.wired = 'true';
+
+    // live price per selected variant
+    form.addEventListener('change', () => {
+      const sel = form.querySelector<HTMLInputElement>('input[name="variant"]:checked, input[name="variant"][type="hidden"]');
+      const price = sel?.dataset.price;
+      if (price) document.querySelector('[data-price]')!.textContent = `$${price}`;
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sel = form.querySelector<HTMLInputElement>('input[name="variant"]:checked, input[name="variant"][type="hidden"]');
+      if (!sel) return;
+      const variantId = form.dataset.mock === 'true' ? `${form.dataset.slug}::${sel.value}` : sel.value;
+      const btn = form.querySelector<HTMLButtonElement>('[data-add-btn]')!;
+      btn.disabled = true;
+      await add(variantId, 1);
+      btn.disabled = false;
+      document.dispatchEvent(new CustomEvent('gf:added', { detail: { from: btn } }));
+      document.dispatchEvent(new CustomEvent('gf:open-cart'));
+    });
+  }
+  wireBuy();
+  document.addEventListener('astro:page-load', wireBuy);
+</script>
+
+<style>
+  .pdp {
+    position: relative;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-12);
+    padding: var(--s-12) var(--s-6); max-width: 1180px; margin: 0 auto;
+  }
+  .art-panel {
+    border: 2px solid var(--ink); border-radius: var(--oval);
+    background: var(--paper-dim); overflow: hidden;
+    aspect-ratio: 3 / 4; align-self: start;
+    display: grid; place-items: center;
+  }
+  .art-img { width: 100%; height: 100%; object-fit: contain; padding: 8%; }
+  .art-img--photo { object-fit: cover; padding: 0; }
+
+  .kicker { font-size: var(--text-sm); margin-bottom: var(--s-2); }
+  .era-chip {
+    display: inline-block; border: 1.5px solid var(--teal); color: var(--teal);
+    border-radius: 999px; padding: 1px 10px; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .era-chip--og { border-color: var(--og-pink); color: color-mix(in srgb, var(--og-pink) 75%, var(--ink)); }
+  .info-panel h1 { font-size: var(--text-xl); margin-bottom: var(--s-2); }
+  .price { font-size: var(--text-lg); font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: var(--s-4); }
+  .desc { max-width: 46ch; margin-bottom: var(--s-3); }
+  .provenance { font-size: var(--text-sm); color: var(--teal); font-weight: 600; margin-top: var(--s-2); }
+
+  .buy { margin-top: var(--s-6); }
+  .variants { border: none; padding: 0; margin: 0 0 var(--s-4); }
+  .variants legend { font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--s-2); }
+  .variant-row { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+  .variant input { position: absolute; opacity: 0; pointer-events: none; }
+  .variant span {
+    display: inline-block; border: 2px solid var(--ink); border-radius: 12px;
+    padding: var(--s-2) var(--s-4); cursor: pointer; font-variant-numeric: tabular-nums;
+    transition: background var(--dur-quick) var(--ease-arrive);
+  }
+  .variant input:checked + span { background: var(--ink); color: var(--paper); }
+  .variant input:focus-visible + span { outline: 3px solid var(--amber); outline-offset: 3px; }
+  .variant--off span { opacity: 0.4; text-decoration: line-through; cursor: not-allowed; }
+
+  .add-btn {
+    width: 100%; max-width: 380px; padding: var(--s-4); font-size: var(--text-base); font-weight: 700;
+    background: var(--amber); border: 2px solid var(--ink); border-radius: 999px;
+    box-shadow: 4px 4px 0 var(--ink);
+    transition: transform var(--dur-quick) var(--ease-arrive), box-shadow var(--dur-quick) var(--ease-arrive);
+  }
+  .add-btn:not(:disabled):hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .add-btn:not(:disabled):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+  .add-btn:disabled { background: var(--paper-dim); font-style: italic; box-shadow: none; }
+  .ship-note { font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 65%, var(--paper)); margin-top: var(--s-3); }
+
+  .lifestyle { margin-top: var(--s-8); }
+  .lifestyle-img { border-radius: 18px; border: 2px solid var(--ink); }
+  .lifestyle figcaption { margin-top: var(--s-1); }
+
+  .related { max-width: 1180px; margin: 0 auto; padding: 0 var(--s-6) var(--s-16); }
+  .related h2 { margin-bottom: var(--s-4); }
+  .related-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6); }
+
+  @media (max-width: 900px) {
+    .pdp { grid-template-columns: 1fr; gap: var(--s-6); padding-top: var(--s-6); }
+    .related-row { grid-template-columns: 1fr 1fr; }
+    .related-row > :global(*:nth-child(3)) { display: none; }
+  }
+</style>

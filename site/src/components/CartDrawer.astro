@@ -1,0 +1,207 @@
+---
+// Cart drawer (§6.5): slide-out, focus-trapped, ESC-closable. Honest mock-mode checkout state.
+// Sticker impulse row built from the catalog at render time.
+import { commerce, isMockMode } from '../lib/commerce';
+import WaitingRabbit from './WaitingRabbit.astro';
+
+const products = await commerce.getProducts();
+const stickers = products.filter((p) => p.type === 'sticker' && p.available).slice(0, 3);
+---
+<div id="cart-root" data-mock={isMockMode ? 'true' : 'false'}>
+  <div id="cart-backdrop" hidden></div>
+  <aside id="cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" hidden>
+    <header class="drawer-head">
+      <h2>Your cart</h2>
+      <button type="button" id="cart-close" aria-label="Close cart">×</button>
+    </header>
+
+    <div id="cart-busy" class="drawer-busy" hidden>
+      <WaitingRabbit label="updating your cart…" />
+    </div>
+    <p id="cart-error" class="drawer-error" hidden></p>
+
+    <ul id="cart-lines" class="lines"></ul>
+    <p id="cart-empty" class="empty">
+      Nothing in here yet — the rabbit checked twice.
+    </p>
+
+    {stickers.length > 0 && (
+      <div class="impulse" id="cart-impulse">
+        <p class="impulse-title">stickers ride along for cheap →</p>
+        <div class="impulse-row">
+          {stickers.map((s) => (
+            <button type="button" class="impulse-add" data-variant={`${s.slug}::${s.variants[0].id}`}>
+              <img src={s.artSrc} alt="" loading="lazy" />
+              <span>{s.name.replace(' Sticker', '')} · ${s.price}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <footer class="drawer-foot">
+      <p class="subtotal"><span>Subtotal</span> <strong id="cart-subtotal">$0</strong></p>
+      <button type="button" id="cart-checkout" class="checkout" disabled>Checkout</button>
+      <p id="mock-note" class="mock-note" hidden>
+        checkout opens when the real store connects — the art is ready, the register isn’t ☺
+      </p>
+    </footer>
+  </aside>
+</div>
+
+<script>
+  import { initCart, add, update, checkout, mockMode } from '../lib/cart-store';
+  import type { Cart } from '../lib/commerce';
+
+  const $ = (id: string) => document.getElementById(id)!;
+  const drawer = $('cart-drawer');
+  const backdrop = $('cart-backdrop');
+  let lastFocus: HTMLElement | null = null;
+
+  function money(n: number) { return `$${n % 1 === 0 ? n : n.toFixed(2)}`; }
+
+  function render(cart: Cart | null) {
+    const lines = $('cart-lines');
+    const items = cart?.items ?? [];
+    lines.innerHTML = items.map((i) => `
+      <li class="line" data-line="${i.lineId}">
+        <img src="${i.artSrc.startsWith('photo:') ? '/favicon.svg' : i.artSrc}" alt="" class="line-art">
+        <div class="line-info">
+          <p class="line-name">${i.name}</p>
+          <p class="line-variant">${i.variantLabel} · ${money(i.unitPrice)}</p>
+          <div class="line-qty" role="group" aria-label="Quantity">
+            <button type="button" class="qty-btn" data-dq="-1" aria-label="One less">−</button>
+            <span aria-live="polite">${i.quantity}</span>
+            <button type="button" class="qty-btn" data-dq="1" aria-label="One more">+</button>
+            <button type="button" class="line-remove" data-remove aria-label="Remove ${i.name}">remove</button>
+          </div>
+        </div>
+      </li>`).join('');
+    $('cart-empty').hidden = items.length > 0;
+    ($('cart-impulse') ?? { hidden: false }).hidden = items.length === 0;
+    $('cart-subtotal').textContent = money(cart?.subtotal ?? 0);
+    const count = items.reduce((s, i) => s + i.quantity, 0);
+    document.querySelectorAll('[data-cart-count]').forEach((el) => {
+      el.textContent = String(count);
+      (el.closest('button') as HTMLButtonElement | null)?.setAttribute('aria-label', `Cart, ${count} items`);
+    });
+    const checkoutBtn = $('cart-checkout') as HTMLButtonElement;
+    if (mockMode) {
+      checkoutBtn.disabled = true;
+      $('mock-note').hidden = items.length === 0;
+    } else {
+      checkoutBtn.disabled = items.length === 0;
+    }
+  }
+
+  function open() {
+    lastFocus = document.activeElement as HTMLElement;
+    drawer.hidden = false; backdrop.hidden = false;
+    requestAnimationFrame(() => { drawer.classList.add('open'); backdrop.classList.add('open'); });
+    ($('cart-close') as HTMLElement).focus();
+    document.addEventListener('keydown', onKey);
+  }
+  function close() {
+    drawer.classList.remove('open'); backdrop.classList.remove('open');
+    document.removeEventListener('keydown', onKey);
+    setTimeout(() => { drawer.hidden = true; backdrop.hidden = true; lastFocus?.focus(); }, 260);
+  }
+  function onKey(e: KeyboardEvent) {
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key !== 'Tab') return;
+    const focusables = drawer.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]');
+    if (focusables.length === 0) return;
+    const first = focusables[0], last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+    else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+  }
+
+  // wiring — drawer survives view transitions because it lives in the persistent layout;
+  // listeners are idempotent via the data-wired guard.
+  function wire() {
+    const root = document.getElementById('cart-root');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = 'true';
+
+    document.addEventListener('gf:cart', ((e: CustomEvent<Cart | null>) => render(e.detail)) as EventListener);
+    document.addEventListener('gf:busy', ((e: CustomEvent<boolean>) => { $('cart-busy').hidden = !e.detail; }) as EventListener);
+    document.addEventListener('gf:error', ((e: CustomEvent<string>) => {
+      const el = $('cart-error');
+      el.textContent = `${e.detail} — try that again?`;
+      el.hidden = false;
+      setTimeout(() => { el.hidden = true; }, 5000);
+    }) as EventListener);
+    document.addEventListener('gf:open-cart', open);
+
+    $('cart-close').addEventListener('click', close);
+    backdrop.addEventListener('click', close);
+    $('cart-checkout').addEventListener('click', () => checkout());
+
+    drawer.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const impulse = t.closest<HTMLElement>('.impulse-add');
+      if (impulse) { add(impulse.dataset.variant!, 1); return; }
+      const line = t.closest<HTMLElement>('.line');
+      if (!line) return;
+      const qtyBtn = t.closest<HTMLElement>('.qty-btn');
+      const current = Number(line.querySelector('.line-qty span')!.textContent);
+      if (qtyBtn) update(line.dataset.line!, current + Number(qtyBtn.dataset.dq));
+      if (t.closest('[data-remove]')) update(line.dataset.line!, 0);
+    });
+
+    initCart();
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style>
+  #cart-backdrop {
+    position: fixed; inset: 0; z-index: calc(var(--z-drawer) - 1);
+    background: rgb(17 17 17 / 0.42);
+    opacity: 0; transition: opacity 240ms var(--ease-arrive);
+  }
+  #cart-backdrop.open { opacity: 1; }
+  #cart-drawer {
+    position: fixed; top: 0; right: 0; bottom: 0; z-index: var(--z-drawer);
+    width: min(420px, 92vw);
+    background: var(--paper);
+    border-left: 2px solid var(--ink);
+    display: flex; flex-direction: column;
+    padding: var(--s-4) var(--s-6);
+    transform: translateX(102%);
+    transition: transform 260ms var(--ease-traverse);
+    overflow-y: auto;
+  }
+  #cart-drawer.open { transform: translateX(0); }
+  .drawer-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--s-3); border-bottom: 2px solid var(--ink); }
+  .drawer-head h2 { font-size: var(--text-lg); }
+  #cart-close { background: none; border: 2px solid var(--ink); border-radius: 999px; width: 38px; height: 38px; font-size: 20px; line-height: 1; }
+  .drawer-busy { display: grid; place-items: center; padding: var(--s-4); }
+  .drawer-error { color: #8e1b14; font-size: var(--text-sm); padding: var(--s-2) 0; }
+  .lines { list-style: none; padding: 0; margin: 0; flex: 1; }
+  .lines :global(.line) { display: flex; gap: var(--s-3); padding: var(--s-4) 0; border-bottom: 1px dashed color-mix(in srgb, var(--ink) 30%, var(--paper)); }
+  .lines :global(.line-art) { width: 56px; height: 56px; object-fit: contain; background: var(--paper-dim); border-radius: 12px; border: 1.5px solid var(--ink); flex: none; }
+  .lines :global(.line-info) { min-width: 0; flex: 1; }
+  .lines :global(.line-name) { font-weight: 600; font-size: var(--text-sm); }
+  .lines :global(.line-variant) { font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 65%, var(--paper)); }
+  .lines :global(.line-qty) { display: flex; align-items: center; gap: var(--s-2); margin-top: var(--s-1); }
+  .lines :global(.qty-btn) { width: 26px; height: 26px; border: 1.5px solid var(--ink); background: none; border-radius: 8px; }
+  .lines :global(.line-remove) { background: none; border: none; font-size: 0.75rem; font-style: italic; margin-left: auto; text-decoration: underline; }
+  .empty { padding: var(--s-8) 0; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, var(--paper)); }
+  .impulse { border-top: 2px solid var(--ink); padding-top: var(--s-3); }
+  .impulse-title { font-size: var(--text-sm); font-style: italic; margin-bottom: var(--s-2); }
+  .impulse-row { display: flex; gap: var(--s-2); }
+  .impulse-add { flex: 1; min-width: 0; display: grid; gap: 4px; justify-items: center; background: var(--paper-dim); border: 1.5px solid var(--ink); border-radius: 12px; padding: var(--s-2); font-size: 0.72rem; }
+  .impulse-add img { width: 34px; height: 34px; object-fit: contain; }
+  .drawer-foot { border-top: 2px solid var(--ink); padding-top: var(--s-3); margin-top: var(--s-3); }
+  .subtotal { display: flex; justify-content: space-between; font-size: var(--text-base); margin-bottom: var(--s-3); }
+  .checkout {
+    width: 100%; padding: var(--s-3); font-weight: 700; font-size: var(--text-base);
+    background: var(--ink); color: var(--paper); border: 2px solid var(--ink); border-radius: 999px;
+    transition: transform var(--dur-quick) var(--ease-arrive);
+  }
+  .checkout:not(:disabled):hover { transform: scale(1.02); background: var(--amber); color: var(--ink); }
+  .checkout:disabled { opacity: 0.45; cursor: not-allowed; }
+  .mock-note { font-size: var(--text-sm); font-style: italic; margin-top: var(--s-2); text-align: center; }
+</style>

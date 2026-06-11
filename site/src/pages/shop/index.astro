@@ -1,14 +1,113 @@
 ---
+// The shop (§6.2): salon wall, not warehouse grid. Art-first cards, type/era filters.
 import Layout from '../../layouts/Layout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import GlyphDust from '../../components/GlyphDust.astro';
+import { commerce } from '../../lib/commerce';
+
+const products = await commerce.getProducts();
+const counts = {
+  all: products.length,
+  apparel: products.filter((p) => p.type === 'apparel').length,
+  poster: products.filter((p) => p.type === 'poster').length,
+  sticker: products.filter((p) => p.type === 'sticker').length,
+};
 ---
-<Layout title="Shop — GoteFigure" description="Tees, hoodies, posters and stickers — hand-drawn GoteFigure art.">
-  <section class="placeholder">
-    <h1>Shop</h1>
-    <p>The grid lands in Phase 3 — apparel, posters, stickers.</p>
+<Layout title="Shop — GoteFigure" description="Hand-drawn art on tees, hoodies, posters and stickers. Wearable art from California.">
+  <section class="shop">
+    <GlyphDust seed={13} count={16} />
+    <header class="shop-head">
+      <h1>Shop</h1>
+      <p class="margin-note">everything here started as a pen on paper</p>
+    </header>
+
+    <div class="filters" role="group" aria-label="Filter products">
+      <div class="filter-row" data-filter-group="type">
+        <button type="button" class="pill is-on" data-filter="all">everything · {counts.all}</button>
+        <button type="button" class="pill" data-filter="apparel">tees &amp; hoods · {counts.apparel}</button>
+        <button type="button" class="pill" data-filter="poster">posters · {counts.poster}</button>
+        <button type="button" class="pill" data-filter="sticker">stickers · {counts.sticker}</button>
+      </div>
+      <div class="filter-row" data-filter-group="era">
+        <button type="button" class="pill pill--era is-on" data-filter="all">both eras</button>
+        <button type="button" class="pill pill--era pill--og" data-filter="og">OG ’20</button>
+        <button type="button" class="pill pill--era" data-filter="new">new ’26</button>
+      </div>
+    </div>
+
+    <div class="wall" id="product-wall">
+      {products.map((p, i) => (
+        <div class:list={['slot', `slot--${p.type}`]} data-type={p.type} data-era={p.era}>
+          <ProductCard product={p} eager={i < 4} />
+        </div>
+      ))}
+    </div>
+    <p class="none-msg" id="none-msg" hidden>nothing in this corner (yet) — try another filter</p>
   </section>
 </Layout>
 
+<script>
+  function wireFilters() {
+    const wall = document.getElementById('product-wall');
+    if (!wall || wall.dataset.wired) return;
+    wall.dataset.wired = 'true';
+    const state = { type: 'all', era: 'all' };
+
+    function apply() {
+      let visible = 0;
+      wall!.querySelectorAll<HTMLElement>('.slot').forEach((s) => {
+        const show = (state.type === 'all' || s.dataset.type === state.type)
+          && (state.era === 'all' || s.dataset.era === state.era);
+        s.hidden = !show;
+        if (show) visible++;
+      });
+      document.getElementById('none-msg')!.hidden = visible > 0;
+    }
+
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.dataset.filterGroup as 'type' | 'era';
+      group.addEventListener('click', (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLElement>('.pill');
+        if (!btn) return;
+        state[key] = btn.dataset.filter!;
+        group.querySelectorAll('.pill').forEach((p) => p.classList.toggle('is-on', p === btn));
+        apply();
+      });
+    });
+  }
+  wireFilters();
+  document.addEventListener('astro:page-load', wireFilters);
+</script>
+
 <style>
-  .placeholder { padding: var(--s-16) var(--s-6); max-width: 60ch; }
-  .placeholder p { margin-top: var(--s-4); }
+  .shop { position: relative; padding: var(--s-12) var(--s-6) var(--s-16); max-width: 1180px; margin: 0 auto; }
+  .shop-head { display: flex; align-items: baseline; gap: var(--s-6); flex-wrap: wrap; margin-bottom: var(--s-6); }
+  .filters { display: grid; gap: var(--s-2); margin-bottom: var(--s-8); }
+  .filter-row { display: flex; gap: var(--s-2); flex-wrap: wrap; }
+  .pill {
+    background: none; border: 2px solid var(--ink); border-radius: 999px;
+    padding: var(--s-1) var(--s-4); font-size: var(--text-sm);
+    transition: background var(--dur-quick) var(--ease-arrive), transform var(--dur-quick) var(--ease-arrive);
+  }
+  .pill:hover { transform: translateY(-1px); }
+  .pill.is-on { background: var(--ink); color: var(--paper); }
+  .pill--era.is-on { background: var(--teal); border-color: var(--teal); }
+  .pill--og.is-on { background: var(--og-pink); border-color: var(--og-pink); color: var(--ink); }
+
+  .wall {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--s-6);
+    grid-auto-flow: dense;
+  }
+  .slot--apparel { grid-column: span 2; }
+  .slot--poster { grid-column: span 2; }
+  .slot--sticker { grid-column: span 1; align-self: end; }
+  .none-msg { padding: var(--s-12) 0; font-style: italic; text-align: center; }
+
+  @media (max-width: 760px) {
+    .wall { grid-template-columns: repeat(2, 1fr); gap: var(--s-4); }
+    .slot--apparel, .slot--poster { grid-column: span 2; }
+    .slot--sticker { grid-column: span 1; }
+  }
 </style>

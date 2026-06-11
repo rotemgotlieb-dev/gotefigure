@@ -13,6 +13,20 @@ body {
   min-height: 100svh;
 }
 
+/* paper grain — one tiny inline SVG noise tile, fixed, never repaints */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+body > * { position: relative; z-index: var(--z-content); }
+
+::selection { background: var(--amber); color: var(--ink); }
+
 img, picture, svg, video { display: block; max-width: 100%; }
 button { font: inherit; cursor: pointer; }
 a { color: inherit; }
@@ -34,6 +48,28 @@ h2 { font-size: var(--text-xl); }
   transform: translateY(-200%);
 }
 .skip-link:focus { transform: none; z-index: 100; }
+
+/* hand-drawn squiggle underline — the site's link voice (§3.3) */
+.squiggle {
+  text-decoration: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='6' viewBox='0 0 44 6'%3E%3Cpath d='M1 4 Q6 1 11 3.5 T22 3 T33 3.5 T43 2.5' fill='none' stroke='%23111111' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 44px 6px;
+  background-position: 0 100%;
+  padding-bottom: 5px;
+}
+.squiggle:hover, .squiggle:focus-visible {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='6' viewBox='0 0 44 6'%3E%3Cpath d='M1 4 Q6 1 11 3.5 T22 3 T33 3.5 T43 2.5' fill='none' stroke='%23F0A028' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+
+/* margin note — the handwritten-voice annotation (§3.2); grotesque italic until owner lettering lands */
+.margin-note {
+  font-size: var(--text-sm);
+  font-style: italic;
+  letter-spacing: 0.01em;
+  color: color-mix(in srgb, var(--ink) 72%, var(--paper));
+}
+.margin-note::before { content: '↜ '; font-style: normal; color: var(--amber); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
