@@ -19,6 +19,7 @@
     "astro": "^6.4.6"
   },
   "devDependencies": {
+    "svgo": "^4.0.1",
     "vitest": "^4.1.8",
     "wrangler": "^4.99.0"
   }

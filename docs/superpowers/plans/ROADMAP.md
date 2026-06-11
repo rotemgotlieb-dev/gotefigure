@@ -33,10 +33,10 @@
 
 ## Phase 2 — Asset pipeline (~2 days)
 
-- [ ] Trace/clean priority art per §4.1 techniques: nine-head lineup (centerline/stroke), silhouette + alien + mandala (filled trace), rabbit eyes (interactive SVG), stitch glyphs set
-- [ ] Cleanups: OG Rabbit 02 (gold scribble, bottom bar), Web Hero 3 rotation, alien shadow variant
-- [ ] Optimize: SVGO pass, AVIF/WebP photo derivatives, `public/art/` populated
-- [ ] Verify each asset animates as §7 specifies (the §4.1 contract — stroke-draw vs mask-wipe)
+- [x] Trace/clean priority art per §4.1: nine-head lineup (filled trace + mask-wipe; centerline stretch), silhouette + alien + mandala (filled trace), rabbit eyes (interactive SVG), stitch glyphs set
+- [x] Cleanups: OG Rabbit 02 (gold fill removed; residual curl awaits .ai), Web Hero 3 rotation; alien dark-bg shadow variant deferred (site is light)
+- [x] Optimize: SVGO pass (per-file, hand-authored minis excluded), WebP photo set, `public/art/` populated
+- [x] Verify: 14 asset-contract tests + flagship browser eyeballs (stroke-draw vs mask-wipe classes verified)
 - **Exit:** production art set, animation-ready, documented in `.claude/rules/assets.md`
 
 ## Phase 3 — Commerce spine (~2.5 days)
