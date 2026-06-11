@@ -4,5 +4,7 @@ import { startMotion } from './core';
 import './the-wink';
 import './scroll-life';
 import './micro';
+import './ink-trail';
+import './boil';
 
 startMotion();

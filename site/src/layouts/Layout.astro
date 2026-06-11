@@ -2,6 +2,7 @@
 // HTML shell for every page. Head/meta, ClientRouter (view transitions, §7.3), header/footer.
 import { ClientRouter } from 'astro:transitions';
 import '@fontsource-variable/space-grotesk';
+import '@fontsource-variable/shantell-sans/full.css'; // full = INFM/BNCE axes (the hand voice's informality dial)
 import '../styles/tokens.css';
 import '../styles/base.css';
 import Header from '../components/Header.astro';
@@ -31,6 +32,7 @@ const { title, description } = Astro.props;
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
+    <p class="announce mono caps">hand-drawn in California <span aria-hidden="true">✶</span> tees print to order <span aria-hidden="true">✶</span> posters &amp; stickers ship in 2–4 days</p>
     <Header />
     <main id="main">
       <slot />
@@ -42,5 +44,16 @@ const { title, description } = Astro.props;
     <script>
       import '../animations/index';
     </script>
+    <style>
+      .announce {
+        text-align: center;
+        font-size: 0.72rem;
+        padding: 9px var(--s-4);
+        background: var(--ink);
+        color: var(--paper);
+        margin: 0;
+      }
+      .announce span { color: var(--amber); }
+    </style>
   </body>
 </html>

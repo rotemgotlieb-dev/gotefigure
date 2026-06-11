@@ -6,8 +6,9 @@ import WaitingRabbit from './WaitingRabbit.astro';
 
 const products = await commerce.getProducts();
 const stickers = products.filter((p) => p.type === 'sticker' && p.available).slice(0, 3);
+const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
 ---
-<div id="cart-root" data-mock={isMockMode ? 'true' : 'false'}>
+<div id="cart-root" data-mock={isMockMode ? 'true' : 'false'} data-types={JSON.stringify(typeBySlug)}>
   <div id="cart-backdrop" hidden></div>
   <aside id="cart-drawer" role="dialog" aria-modal="true" aria-label="Your cart" hidden>
     <header class="drawer-head">
@@ -21,9 +22,10 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
     <p id="cart-error" class="drawer-error" hidden></p>
 
     <ul id="cart-lines" class="lines"></ul>
-    <p id="cart-empty" class="empty">
-      Nothing in here yet — the rabbit checked twice.
-    </p>
+    <div id="cart-empty" class="empty">
+      <p>Nothing in here yet — the rabbit checked twice.</p>
+      <a href="/" class="empty-cta mono caps" id="cart-empty-cta">go find something weird →</a>
+    </div>
 
     {stickers.length > 0 && (
       <div class="impulse" id="cart-impulse">
@@ -39,9 +41,10 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
       </div>
     )}
 
-    <footer class="drawer-foot">
-      <p class="subtotal"><span>Subtotal</span> <strong id="cart-subtotal">$0</strong></p>
-      <button type="button" id="cart-checkout" class="checkout" disabled>Checkout</button>
+    <footer class="drawer-foot" id="cart-foot">
+      <p id="cart-shipline" class="shipline" hidden></p>
+      <p class="subtotal"><span>Subtotal</span> <strong id="cart-subtotal" class="mono">$0</strong></p>
+      <button type="button" id="cart-checkout" class="checkout mono" disabled>Checkout</button>
       <p id="mock-note" class="mock-note" hidden>
         checkout opens when the real store connects — the art is ready, the register isn’t ☺
       </p>
@@ -60,6 +63,8 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
 
   function money(n: number) { return `$${n % 1 === 0 ? n : n.toFixed(2)}`; }
 
+  const typeBySlug: Record<string, string> = JSON.parse(document.getElementById('cart-root')?.dataset.types ?? '{}');
+
   function render(cart: Cart | null) {
     const lines = $('cart-lines');
     const items = cart?.items ?? [];
@@ -68,22 +73,49 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
         <img src="${i.artSrc.startsWith('photo:') ? '/favicon.svg' : i.artSrc}" alt="" class="line-art">
         <div class="line-info">
           <p class="line-name">${i.name}</p>
-          <p class="line-variant">${i.variantLabel} · ${money(i.unitPrice)}</p>
-          <div class="line-qty" role="group" aria-label="Quantity">
-            <button type="button" class="qty-btn" data-dq="-1" aria-label="One less">−</button>
+          <p class="line-variant mono">${i.variantLabel} · ${money(i.unitPrice)}</p>
+          <div class="line-qty" role="group" aria-label="Quantity — ${i.name}">
+            <button type="button" class="qty-btn mono" data-dq="-1" aria-label="One less — ${i.name}">−</button>
             <span aria-live="polite">${i.quantity}</span>
-            <button type="button" class="qty-btn" data-dq="1" aria-label="One more">+</button>
+            <button type="button" class="qty-btn mono" data-dq="1" aria-label="One more — ${i.name}">+</button>
             <button type="button" class="line-remove" data-remove aria-label="Remove ${i.name}">remove</button>
           </div>
         </div>
       </li>`).join('');
     $('cart-empty').hidden = items.length > 0;
-    ($('cart-impulse') ?? { hidden: false }).hidden = items.length === 0;
+    $('cart-foot').hidden = items.length === 0; // $0 subtotal + dead checkout are noise when empty
+    // impulse row: visible even when empty (zero-to-one nudge), but never offer what's already in the cart
+    const impulse = document.getElementById('cart-impulse');
+    if (impulse) {
+      const inCart = new Set(items.map((i) => i.variantId));
+      let visible = 0;
+      impulse.querySelectorAll<HTMLElement>('.impulse-add').forEach((b) => {
+        const dup = inCart.has(b.dataset.variant!);
+        b.hidden = dup;
+        if (!dup) visible++;
+      });
+      impulse.hidden = visible === 0;
+    }
+    // honest shipping expectations for mixed carts (§6 CART)
+    const types = new Set(items.map((i) => typeBySlug[i.slug] ?? 'apparel'));
+    const shipline = $('cart-shipline');
+    if (items.length && types.has('apparel') && (types.has('poster') || types.has('sticker'))) {
+      shipline.textContent = 'heads up — tees print to order and ship separately from posters & stickers';
+      shipline.hidden = false;
+    } else if (items.length && !types.has('apparel')) {
+      shipline.textContent = 'ships from California in 2–4 days';
+      shipline.hidden = false;
+    } else if (items.length) {
+      shipline.textContent = 'printed to order — usually ships within a week';
+      shipline.hidden = false;
+    } else {
+      shipline.hidden = true;
+    }
     $('cart-subtotal').textContent = money(cart?.subtotal ?? 0);
     const count = items.reduce((s, i) => s + i.quantity, 0);
     document.querySelectorAll('[data-cart-count]').forEach((el) => {
       el.textContent = String(count);
-      (el.closest('button') as HTMLButtonElement | null)?.setAttribute('aria-label', `Cart, ${count} items`);
+      (el.closest('button') as HTMLButtonElement | null)?.setAttribute('aria-label', `Cart, ${count} ${count === 1 ? 'item' : 'items'}`);
     });
     const checkoutBtn = $('cart-checkout') as HTMLButtonElement;
     if (mockMode) {
@@ -110,7 +142,8 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
   function onKey(e: KeyboardEvent) {
     if (e.key === 'Escape') { close(); return; }
     if (e.key !== 'Tab') return;
-    const focusables = drawer.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]');
+    const focusables = [...drawer.querySelectorAll<HTMLElement>('button:not([disabled]), a[href]')]
+      .filter((el) => el.offsetParent !== null); // skip display:none (hidden impulse/foot)
     if (focusables.length === 0) return;
     const first = focusables[0], last = focusables[focusables.length - 1];
     if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
@@ -137,6 +170,9 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
     $('cart-close').addEventListener('click', close);
     backdrop.addEventListener('click', close);
     $('cart-checkout').addEventListener('click', () => checkout());
+    $('cart-empty-cta')?.addEventListener('click', (e) => {
+      if (location.pathname === '/') { e.preventDefault(); close(); } // already in the shop — just close
+    });
 
     drawer.addEventListener('click', (e) => {
       const t = e.target as HTMLElement;
@@ -177,7 +213,7 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
   #cart-drawer.open { transform: translateX(0); }
   .drawer-head { display: flex; justify-content: space-between; align-items: center; padding-bottom: var(--s-3); border-bottom: 2px solid var(--ink); }
   .drawer-head h2 { font-size: var(--text-lg); }
-  #cart-close { background: none; border: 2px solid var(--ink); border-radius: 999px; width: 38px; height: 38px; font-size: 20px; line-height: 1; }
+  #cart-close { background: none; border: 2px solid var(--ink); border-radius: 2px; width: 44px; height: 44px; font-size: 20px; line-height: 1; }
   .drawer-busy { display: grid; place-items: center; padding: var(--s-4); }
   .drawer-error { color: #8e1b14; font-size: var(--text-sm); padding: var(--s-2) 0; }
   .lines { list-style: none; padding: 0; margin: 0; flex: 1; }
@@ -186,10 +222,25 @@ const stickers = products.filter((p) => p.type === 'sticker' && p.available).sli
   .lines :global(.line-info) { min-width: 0; flex: 1; }
   .lines :global(.line-name) { font-weight: 600; font-size: var(--text-sm); }
   .lines :global(.line-variant) { font-size: var(--text-sm); color: color-mix(in srgb, var(--ink) 65%, var(--paper)); }
-  .lines :global(.line-qty) { display: flex; align-items: center; gap: var(--s-2); margin-top: var(--s-1); }
-  .lines :global(.qty-btn) { width: 26px; height: 26px; border: 1.5px solid var(--ink); background: none; border-radius: 8px; }
-  .lines :global(.line-remove) { background: none; border: none; font-size: 0.75rem; font-style: italic; margin-left: auto; text-decoration: underline; }
-  .empty { padding: var(--s-8) 0; font-style: italic; color: color-mix(in srgb, var(--ink) 60%, var(--paper)); }
+  .lines :global(.line-qty) { display: flex; align-items: center; gap: var(--s-1); margin-top: var(--s-1); }
+  /* 44px hit areas (WCAG 2.5.8 + mobile best practice) with compact visuals */
+  .lines :global(.qty-btn) {
+    width: 44px; height: 44px; display: grid; place-items: center;
+    border: 1.5px solid var(--ink); background: none; border-radius: 2px;
+  }
+  .lines :global(.line-remove) {
+    background: none; border: none; font-size: 0.75rem; font-style: italic;
+    margin-left: auto; text-decoration: underline;
+    min-height: 44px; padding: 0 var(--s-3);
+  }
+  .empty { padding: var(--s-8) 0; color: color-mix(in srgb, var(--ink) 70%, var(--paper)); }
+  .empty p { font-family: var(--font-hand); margin-bottom: var(--s-4); }
+  .empty-cta {
+    display: inline-block; font-size: 0.78rem; color: var(--ink);
+    border: 1.5px solid var(--ink); padding: var(--s-3) var(--s-4); text-decoration: none;
+  }
+  .empty-cta:hover { background: var(--amber); }
+  .shipline { font-size: var(--text-sm); font-family: var(--font-hand); margin-bottom: var(--s-2); color: var(--teal-text); }
   .impulse { border-top: 2px solid var(--ink); padding-top: var(--s-3); }
   .impulse-title { font-size: var(--text-sm); font-style: italic; margin-bottom: var(--s-2); }
   .impulse-row { display: flex; gap: var(--s-2); }

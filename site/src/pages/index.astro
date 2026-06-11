@@ -1,108 +1,103 @@
 ---
-// The gallery door (§6.1): the brand sketches itself into existence, then sells.
-import { readFileSync } from 'node:fs';
+// V2 home (owner mandate): gotefigure.com IS the shop. No hero, no era split, no
+// carousels — announcement, one identity line, THE WALL grouped by category in
+// hand-drawn boiling frames, slim maker band, newsletter, done. Calm beats clever.
 import Layout from '../layouts/Layout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import SectionDivider from '../components/SectionDivider.astro';
-import GlyphDust from '../components/GlyphDust.astro';
-import YouTubeStrip from '../components/YouTubeStrip.astro';
+import RoughFrame from '../components/RoughFrame.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
-import { commerce } from '../lib/commerce';
-import drops from '../content/drops.json';
-
-const nineHeadsSvg = readFileSync('public/art/nine-heads.svg', 'utf8')
-  .replace('<svg', '<svg class="nine-heads" aria-hidden="true" focusable="false"');
+import { commerce, type Category } from '../lib/commerce';
+import { CATEGORY_LABELS } from '../lib/commerce/types';
+import { roughLinePaths, seedFrom } from '../lib/rough-frame';
+import { getVideos, thumb, watchUrl, CHANNEL_URL } from '../lib/youtube';
 
 const products = await commerce.getProducts();
-const featured = ['alien-logo-tee', 'figure-2-poster', 'nine-eyes-tee', 'mandala-creature-sticker']
-  .map((s) => products.find((p) => p.slug === s))
-  .filter((p) => p != null);
-const ogCount = products.filter((p) => p.era === 'og').length;
-const newCount = products.filter((p) => p.era === 'new').length;
+const ORDER: Category[] = ['tees', 'sweats', 'hats', 'prints'];
+const groups = ORDER
+  .map((cat) => ({ cat, label: CATEGORY_LABELS[cat], items: products.filter((p) => p.category === cat) }))
+  .filter((g) => g.items.length > 0);
+
+const videos = (await getVideos()).filter((v) => v.short).slice(0, 3);
+const dayMatch = videos.flatMap((v) => v.title.match(/Day (\d+)/) ?? []);
+const latestDay = dayMatch.length ? dayMatch[1] : null;
+
+const rulePathsFor = (label: string) => roughLinePaths(seedFrom(label));
 ---
 <Layout
-  title="GoteFigure — unique wearable art"
-  description="Hand-drawn art on tees, hoodies, posters and stickers. An art-based clothing brand from California, founded 2020, reborn 2026."
+  title="GoteFigure — hand-drawn wearable art, California"
+  description="The GoteFigure shop: hand-drawn tees, sweatshirts, posters and stickers. Every piece starts as a pen on paper. Drawn in California."
 >
-  <!-- The Sketch (§7.1): shown pre-paint only on first motion-OK visit; module animates + removes -->
+  <!-- The Wink (§7.1 V2): first-visit only, pre-paint gated, skippable -->
   <div id="intro-overlay" aria-hidden="true">
-    <div class="intro-art" set:html={nineHeadsSvg} />
-    <p class="intro-skip">tap anywhere to skip</p>
+    <div class="wink-stage">
+      <img src="/art/rabbit-cameo.webp" alt="" width="800" height="1600" fetchpriority="high" />
+      <svg viewBox="0 0 800 1600" class="wink-svg">
+        <clipPath id="wink-clip"><ellipse cx="450" cy="947" rx="47" ry="66"/></clipPath>
+        <g clip-path="url(#wink-clip)">
+          <ellipse id="wink-lid" cx="450" cy="875" rx="47" ry="4" fill="#52767A"/>
+        </g>
+        <path id="wink-lash" d="M408 1000 Q450 1015 490 997" fill="none" stroke="#111" stroke-width="7" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <p class="intro-skip mono caps">tap to skip</p>
   </div>
 
-  {drops.active && (
-    <a href={drops.href} class="drops-banner">
-      <span class="drops-flame" aria-hidden="true">🔥</span> {drops.headline}
-    </a>
-  )}
+  <header class="strip">
+    <h1 class="strip-line">every piece starts as a pen on paper<span class="strip-dot" aria-hidden="true">.</span></h1>
+    <nav class="strip-nav mono caps" aria-label="Categories">
+      {groups.map((g) => <a href={`#${g.cat}`}>{g.label}</a>)}
+    </nav>
+  </header>
 
-  <section class="hero">
-    <GlyphDust seed={3} count={12} />
-    <div class="hero-inner">
-      <h1>
-        <span class="hero-line">Unique</span>
-        <span class="hero-line">wearable</span>
-        <span class="hero-line hero-line--accent">art.</span>
-      </h1>
-      <div class="hero-art" data-draw set:html={nineHeadsSvg} />
-      <p class="hero-sub">
-        Hand-drawn in California. Every piece starts as a pen on paper —
-        tees, hoodies, posters, and stickers for people who love the niche.
-      </p>
-      <div class="hero-cta-row">
-        <a href="/shop/" class="hero-cta" data-magnetic>Enter the shop</a>
-        <p class="margin-note">drawn every day since 2020</p>
+  <div class="wall-wrap">
+    <img src="/art/rabbit-stipple.png" alt="" loading="lazy" class="wall-ghost" aria-hidden="true" />
+
+    {groups.map((g, gi) => (
+      <section class="cat" id={g.cat} aria-labelledby={`cat-h-${g.cat}`}>
+        <div class="cat-head">
+          <h2 id={`cat-h-${g.cat}`}>{g.label}</h2>
+          <svg class="cat-rule" viewBox="0 0 600 16" preserveAspectRatio="none" aria-hidden="true">
+            {rulePathsFor(g.label).map((paths, i) => (
+              <g class={`boil-v boil-v${i}`}>
+                {paths.map((d) => <path d={d} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />)}
+              </g>
+            ))}
+          </svg>
+          <span class="cat-count mono">{g.items.length}</span>
+        </div>
+        <div class="grid">
+          {g.items.map((p, i) => <ProductCard product={p} eager={gi === 0 && i < 3} />)}
+        </div>
+      </section>
+    ))}
+  </div>
+
+  <section class="maker" aria-labelledby="maker-h">
+    <div class="maker-inner">
+      <div class="maker-words">
+        <h2 id="maker-h">Drawn every day</h2>
+        <p>{latestDay ? `Day ${latestDay} of drawing every single day.` : 'A drawing a day, no skips.'} The art in this shop comes straight out of that practice.</p>
+        <a class="squiggle" href={`${CHANNEL_URL}?sub_confirmation=1`} target="_blank" rel="noopener">watch on YouTube →</a>
+      </div>
+      <div class="maker-thumbs">
+        {videos.map((v, i) => (
+          <a href={watchUrl(v)} target="_blank" rel="noopener" class="maker-thumb" aria-label={v.title}>
+            <img src={thumb(v.id)} alt="" loading="lazy" width="480" height="360"
+              onerror={`this.src='https://i.ytimg.com/vi/${v.id}/mqdefault.jpg';this.onerror=null;`} />
+            <RoughFrame seed={`yt-${v.id}`} w={160} h={200} strokeWidth={1.6} />
+          </a>
+        ))}
       </div>
     </div>
   </section>
 
-  <SectionDivider color="var(--og-pink)" />
-
-  <section class="featured" aria-labelledby="featured-title">
-    <header class="featured-head">
-      <h2 id="featured-title">Fresh off the table</h2>
-      <a href="/shop/" class="squiggle">see everything</a>
-    </header>
-    <div class="featured-row">
-      {featured.map((p, i) => <ProductCard product={p} eager={i < 2} />)}
-    </div>
-  </section>
-
-  <section class="eras" aria-label="Two eras of GoteFigure">
-    <a href="/shop/?era=og" class="era-panel era-panel--og">
-      <p class="era-year">2020</p>
-      <h2>The OG era</h2>
-      <p>Born in lockdown, hyped on a boat, sold out by winter. The rabbit, the alien, the nine eyes — {ogCount} pieces back from the archive.</p>
-      <img src="/art/rabbit-cameo.webp" alt="" loading="lazy" class="era-art era-art--rabbit" />
-      <span class="era-go squiggle">shop the OG era</span>
-    </a>
-    <a href="/shop/?era=new" class="era-panel era-panel--new">
-      <p class="era-year">2026</p>
-      <h2>The new era</h2>
-      <p>The figure series, stipple ink, posters printed down the street. {newCount} new pieces — same hand, sharper pen.</p>
-      <img src="/art/silhouette.svg" alt="" loading="lazy" class="era-art era-art--sil" />
-      <span class="era-go squiggle">shop the new era</span>
-    </a>
-  </section>
-
-  <SectionDivider color="var(--teal)" />
-
-  <YouTubeStrip />
-
   <section class="signup">
-    <GlyphDust seed={23} count={8} />
-    <div class="signup-inner">
-      <svg data-pupils viewBox="0 0 200 110" width="120" aria-hidden="true" class="signup-eyes">
-        <g id="eye-l"><ellipse cx="62" cy="56" rx="44" ry="48" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-l" class="pupil" cx="74" cy="62" r="15" fill="#111"/></g>
-        <g id="eye-r"><ellipse cx="150" cy="52" rx="36" ry="42" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-r" class="pupil" cx="142" cy="44" r="11" fill="#111"/></g>
-      </svg>
-      <NewsletterForm context="home" />
-    </div>
+    <NewsletterForm context="home" />
   </section>
 </Layout>
 
 <style>
-  /* intro overlay — visible pre-paint only when html[data-intro] (inline head script) */
+  /* ---- The Wink overlay ---- */
   #intro-overlay {
     display: none;
     position: fixed; inset: 0; z-index: var(--z-intro);
@@ -110,73 +105,70 @@ const newCount = products.filter((p) => p.era === 'new').length;
     place-items: center;
   }
   :global(html[data-intro]) #intro-overlay { display: grid; }
-  .intro-art { width: min(86vw, 980px); }
-  .intro-art :global(svg) { width: 100%; height: auto; }
-  .intro-skip {
-    position: absolute; bottom: var(--s-6); left: 50%; transform: translateX(-50%);
-    font-size: var(--text-sm); font-style: italic; opacity: 0.55;
+  .wink-stage { position: relative; height: min(72svh, 640px); aspect-ratio: 1 / 2; }
+  .wink-stage img { height: 100%; width: 100%; object-fit: contain; }
+  .wink-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  #wink-lash { opacity: 0; }
+  .intro-skip { position: absolute; bottom: var(--s-6); left: 50%; transform: translateX(-50%); font-size: 0.7rem; opacity: 0.5; }
+
+  /* ---- identity strip ---- */
+  .strip {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+    gap: var(--s-3); max-width: 1180px; margin: 0 auto;
+    padding: var(--s-6) var(--s-6) var(--s-4);
+  }
+  .strip-line { font-size: var(--text-lg); font-weight: 500; font-variation-settings: 'INFM' 70, 'BNCE' 22; }
+  .strip-dot { color: var(--amber); }
+  .strip-nav { display: flex; gap: var(--s-6); font-size: 0.75rem; flex-wrap: wrap; }
+  .strip-nav a { text-decoration: none; padding: var(--s-2) 0; }
+  .strip-nav a:hover { color: var(--teal-text); }
+
+  /* ---- the wall ---- */
+  .wall-wrap { position: relative; max-width: 1180px; margin: 0 auto; padding: 0 var(--s-6); }
+  .wall-ghost {
+    position: absolute; right: -3%; top: 220px; width: 360px; max-width: 42vw;
+    opacity: 0.05; pointer-events: none; z-index: 0;
+  }
+  .cat { position: relative; z-index: 1; padding: var(--s-8) 0 var(--s-4); scroll-margin-top: 90px; }
+  .cat-head { display: flex; align-items: center; gap: var(--s-4); margin-bottom: var(--s-6); }
+  .cat-head h2 { font-size: var(--text-xl); flex: none; }
+  .cat-rule { flex: 1; height: 14px; color: var(--ink); min-width: 40px; }
+  .cat-rule .boil-v { display: none; }
+  .cat-rule .boil-v0 { display: block; }
+  :global(html[data-boil='1']) .cat-rule .boil-v0, :global(html[data-boil='2']) .cat-rule .boil-v0 { display: none; }
+  :global(html[data-boil='1']) .cat-rule .boil-v1 { display: block; }
+  :global(html[data-boil='2']) .cat-rule .boil-v2 { display: block; }
+  .cat-count { font-size: 0.72rem; border: 1.5px solid var(--ink); padding: 1px 9px; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--s-8) var(--s-6);
   }
 
-  .drops-banner {
-    display: block; text-align: center; padding: var(--s-2) var(--s-4);
-    background: var(--ink); color: var(--paper); font-weight: 700;
-    letter-spacing: 0.06em; text-decoration: none; font-size: var(--text-sm);
+  /* ---- maker band (slim, one row) ---- */
+  .maker { border-top: 2px solid var(--ink); margin-top: var(--s-12); background: color-mix(in srgb, var(--paper-dim) 55%, var(--paper)); }
+  .maker-inner {
+    max-width: 1180px; margin: 0 auto; padding: var(--s-8) var(--s-6);
+    display: flex; gap: var(--s-12); align-items: center; justify-content: space-between; flex-wrap: wrap;
   }
+  .maker-words { max-width: 40ch; }
+  .maker-words h2 { font-size: var(--text-lg); margin-bottom: var(--s-2); }
+  .maker-words p { font-size: var(--text-sm); margin-bottom: var(--s-2); }
+  .maker-thumbs { display: flex; gap: var(--s-4); }
+  .maker-thumb { position: relative; width: 132px; }
+  .maker-thumb img { aspect-ratio: 4 / 5; object-fit: cover; padding: 6px; }
 
-  .hero { position: relative; padding: var(--s-16) var(--s-6) var(--s-12); overflow: hidden; }
-  .hero-inner { max-width: 1180px; margin: 0 auto; }
-  .hero h1 { display: grid; line-height: 0.96; letter-spacing: -0.03em; margin-bottom: var(--s-6); }
-  .hero-line { display: block; }
-  .hero-line--accent {
-    color: var(--amber);
-    -webkit-text-stroke: 2px var(--ink);
-    paint-order: stroke fill;
+  .signup { max-width: 1180px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-8); }
+
+  @media (max-width: 860px) {
+    .grid { grid-template-columns: repeat(2, 1fr); gap: var(--s-6) var(--s-4); }
+    .maker-thumb:nth-child(3) { display: none; }
   }
-  .hero-art { margin: var(--s-4) 0 var(--s-6); }
-  .hero-art :global(svg) { width: 100%; height: auto; display: block; }
-  .hero-sub { max-width: 48ch; font-size: var(--text-lg); margin-bottom: var(--s-8); }
-  .hero-cta-row { display: flex; align-items: center; gap: var(--s-6); flex-wrap: wrap; }
-  .hero-cta {
-    display: inline-block; padding: var(--s-4) var(--s-12);
-    background: var(--ink); color: var(--paper); text-decoration: none;
-    font-weight: 700; font-size: var(--text-lg); border-radius: 999px;
-    border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--amber);
-    transition: box-shadow var(--dur-quick) var(--ease-arrive), background var(--dur-quick) var(--ease-arrive);
-  }
-  .hero-cta:hover { background: var(--amber); color: var(--ink); box-shadow: 7px 7px 0 var(--ink); }
-
-  .featured { padding: var(--s-16) var(--s-6); max-width: 1180px; margin: 0 auto; }
-  .featured-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--s-6); flex-wrap: wrap; gap: var(--s-3); }
-  .featured-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); align-items: end; }
-
-  .eras { display: grid; grid-template-columns: 1fr 1fr; }
-  .era-panel {
-    position: relative; padding: var(--s-16) var(--s-8); text-decoration: none;
-    overflow: hidden; min-height: 380px; display: flex; flex-direction: column; gap: var(--s-3);
-    transition: filter var(--dur-quick) var(--ease-arrive);
-  }
-  .era-panel:hover { filter: saturate(1.15); }
-  .era-panel--og { background: color-mix(in srgb, var(--og-pink) 34%, var(--paper)); border-right: 2px solid var(--ink); }
-  .era-panel--new { background: color-mix(in srgb, var(--teal) 16%, var(--paper)); }
-  .era-year { font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.2em; }
-  .era-panel h2 { font-size: var(--text-xl); }
-  .era-panel p:not(.era-year) { max-width: 38ch; }
-  .era-art { position: absolute; right: -4%; bottom: -6%; opacity: 0.5; pointer-events: none; }
-  .era-art--rabbit { width: 38%; transform: rotate(6deg); }
-  .era-art--sil { width: 44%; }
-  .era-go { margin-top: auto; font-weight: 700; align-self: flex-start; }
-
-  .signup { position: relative; padding: var(--s-16) var(--s-6) var(--s-24); }
-  .signup-inner { max-width: 1180px; margin: 0 auto; display: flex; gap: var(--s-12); align-items: center; flex-wrap: wrap; }
-  .signup-eyes { flex: none; }
-
-  @media (max-width: 900px) {
-    .featured-row { grid-template-columns: 1fr 1fr; }
-    .eras { grid-template-columns: 1fr; }
-    .era-panel--og { border-right: none; border-bottom: 2px solid var(--ink); }
-  }
-  @media (max-width: 560px) {
-    .hero { padding-top: var(--s-8); }
-    .featured-row { grid-template-columns: 1fr; }
+  @media (max-width: 480px) {
+    .strip { padding-inline: var(--s-4); }
+    .wall-wrap { padding-inline: var(--s-4); }
+    .maker-inner { gap: var(--s-6); }
+    .maker-thumb { width: min(126px, 28vw); }
   }
 </style>

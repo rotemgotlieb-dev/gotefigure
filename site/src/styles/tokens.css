@@ -10,13 +10,20 @@
   --sunset: #E8836B;
   --paper-dim: #E5E2D8;
 
-  /* type */
+  /* type — two-register system (research-validated): hand voice for headlines/badges/notes,
+     machine voice (mono) for everything transactional. "No one hand-letters a price." */
   --font-ui: 'Space Grotesk Variable', system-ui, sans-serif;
+  --font-hand: 'Shantell Sans Variable', 'Comic Sans MS', cursive;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', monospace;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
   --text-xl: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
   --text-display: clamp(2.25rem, 1.5rem + 4vw, 4.5rem);
+
+  /* AA-safe text variants of the brand accents (chips/labels on paper) */
+  --teal-text: #186A62;
+  --pink-text: #A03C50;
 
   /* space (4px base) */
   --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;

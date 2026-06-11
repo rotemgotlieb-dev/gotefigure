@@ -28,18 +28,31 @@ body > * { position: relative; z-index: var(--z-content); }
 ::selection { background: var(--amber); color: var(--ink); }
 
 img, picture, svg, video { display: block; max-width: 100%; }
+img { height: auto; } /* responsive images MUST derive height — width/height attrs otherwise stretch (review blocking fix) */
 button { font: inherit; cursor: pointer; }
 a { color: inherit; }
 
 h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
 h1 { font-size: var(--text-display); font-weight: 700; }
 h2 { font-size: var(--text-xl); }
+h1, h2 { font-family: var(--font-hand); font-variation-settings: 'INFM' 52, 'BNCE' 14; font-weight: 600; }
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+.caps { text-transform: uppercase; letter-spacing: 0.09em; }
 
 :focus-visible {
   outline: 3px solid var(--amber);
   outline-offset: 3px;
   border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px var(--ink); /* two-tone ring: ≥3:1 on paper (WCAG 1.4.11) */
 }
+
+/* a closed dialog must be GONE: hidden beats display:flex; inert-equivalent for tab order */
+[hidden] { display: none !important; }
 
 .skip-link {
   position: absolute; left: var(--s-4); top: var(--s-4);
@@ -62,14 +75,15 @@ h2 { font-size: var(--text-xl); }
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='6' viewBox='0 0 44 6'%3E%3Cpath d='M1 4 Q6 1 11 3.5 T22 3 T33 3.5 T43 2.5' fill='none' stroke='%23F0A028' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
-/* margin note — the handwritten-voice annotation (§3.2); grotesque italic until owner lettering lands */
+/* margin note — the handwritten-voice annotation (§3.2), now in the real hand voice */
 .margin-note {
+  font-family: var(--font-hand);
+  font-variation-settings: 'INFM' 70, 'BNCE' 22;
   font-size: var(--text-sm);
-  font-style: italic;
   letter-spacing: 0.01em;
-  color: color-mix(in srgb, var(--ink) 72%, var(--paper));
+  color: color-mix(in srgb, var(--ink) 78%, var(--paper));
 }
-.margin-note::before { content: '↜ '; font-style: normal; color: var(--amber); }
+.margin-note::before { content: '↜ '; color: var(--amber); }
 
 /* draw-on-enter wipe (filled-trace art, §4.1): JS adds .drawn when scrolled into view */
 [data-draw] { clip-path: inset(0 100% 0 0); transition: clip-path var(--dur-scene) var(--ease-arrive); }

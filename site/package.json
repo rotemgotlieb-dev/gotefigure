@@ -15,9 +15,12 @@
     "deploy": "astro build && wrangler deploy"
   },
   "dependencies": {
+    "@fontsource-variable/shantell-sans": "^5.2.7",
     "@fontsource-variable/space-grotesk": "^5.2.10",
     "astro": "^6.4.6",
-    "gsap": "^3.15.0"
+    "gsap": "^3.15.0",
+    "rough-notation": "^0.5.1",
+    "roughjs": "^4.6.6"
   },
   "devDependencies": {
     "svgo": "^4.0.1",

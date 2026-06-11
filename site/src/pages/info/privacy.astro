@@ -1,0 +1,32 @@
+---
+// Privacy (§6 legal minimum): honest and short — because there's honestly not much collected.
+import Layout from '../../layouts/Layout.astro';
+---
+<Layout title="Privacy — GoteFigure" description="What GoteFigure collects (very little) and why.">
+  <section class="info">
+    <h1>Privacy</h1>
+    <p>The short version: this site barely collects anything, and never sells anything about you.</p>
+
+    <h2>What exists</h2>
+    <p>
+      <strong>Your email</strong> — only if you join the drops list, only for drop announcements,
+      unsubscribe anytime. <strong>Order details</strong> — name, address, and payment are handled by
+      our checkout provider (Fourthwall) over encrypted connections; card numbers never touch this
+      site. <strong>Analytics</strong> — privacy-friendly, cookieless page counts (Cloudflare), no
+      tracking you around the internet.
+    </p>
+
+    <h2>What doesn’t</h2>
+    <p>No ad trackers. No data sales. No creepy pixels. The only thing following you here is a drawn rabbit, and it stays on this site.</p>
+
+    <p>Questions: <a href="mailto:hello@gotefigure.com" class="squiggle">hello@gotefigure.com</a></p>
+    <p class="margin-note">last updated June 2026</p>
+  </section>
+</Layout>
+
+<style>
+  .info { max-width: 680px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24); }
+  .info h1 { margin-bottom: var(--s-6); }
+  .info h2 { margin: var(--s-8) 0 var(--s-2); font-size: var(--text-lg); }
+  .info p { margin-bottom: var(--s-3); }
+</style>
