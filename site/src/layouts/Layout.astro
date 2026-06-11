@@ -20,6 +20,13 @@ const { title, description } = Astro.props;
     <meta name="description" content={description} />
     <meta name="theme-color" content="#F2F1EA" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      // pre-paint intro gate: overlay shows only on first home visit, motion-OK sessions (§7.1)
+      if (location.pathname === '/' && !sessionStorage.getItem('gf-intro-seen')
+        && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.dataset.intro = '1';
+      }
+    </script>
     <ClientRouter />
   </head>
   <body>
@@ -32,5 +39,8 @@ const { title, description } = Astro.props;
     <div transition:persist="cart">
       <CartDrawer />
     </div>
+    <script>
+      import '../animations/index';
+    </script>
   </body>
 </html>

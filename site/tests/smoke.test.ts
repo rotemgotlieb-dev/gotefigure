@@ -15,14 +15,14 @@ describe('built routes', () => {
 
 describe('page contract', () => {
   it.each([
-    ['index.html', 'GoteFigure'],
+    ['index.html', 'wearable'],
     ['shop/index.html', 'Shop'],
     ['about/index.html', 'About'],
     ['404.html', 'Nothing here'],
   ])('%s has <main> and its h1', (p, h1) => {
     const html = page(p);
     expect(html).toContain('<main id="main"');
-    expect(html).toMatch(new RegExp(`<h1[^>]*>[^<]*${h1}`));
+    expect(html).toMatch(new RegExp(`<h1[^>]*>[\\s\\S]*?${h1}[\\s\\S]*?</h1>`));
   });
 
   it('nav links to shop and about on every page', () => {

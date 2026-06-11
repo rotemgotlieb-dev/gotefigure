@@ -1,17 +1,182 @@
 ---
+// The gallery door (§6.1): the brand sketches itself into existence, then sells.
+import { readFileSync } from 'node:fs';
 import Layout from '../layouts/Layout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import SectionDivider from '../components/SectionDivider.astro';
+import GlyphDust from '../components/GlyphDust.astro';
+import YouTubeStrip from '../components/YouTubeStrip.astro';
+import NewsletterForm from '../components/NewsletterForm.astro';
+import { commerce } from '../lib/commerce';
+import drops from '../content/drops.json';
+
+const nineHeadsSvg = readFileSync('public/art/nine-heads.svg', 'utf8')
+  .replace('<svg', '<svg class="nine-heads" aria-hidden="true" focusable="false"');
+
+const products = await commerce.getProducts();
+const featured = ['alien-logo-tee', 'figure-2-poster', 'nine-eyes-tee', 'mandala-creature-sticker']
+  .map((s) => products.find((p) => p.slug === s))
+  .filter((p) => p != null);
+const ogCount = products.filter((p) => p.era === 'og').length;
+const newCount = products.filter((p) => p.era === 'new').length;
 ---
 <Layout
   title="GoteFigure — unique wearable art"
   description="Hand-drawn art on tees, hoodies, posters and stickers. An art-based clothing brand from California, founded 2020, reborn 2026."
 >
+  <!-- The Sketch (§7.1): shown pre-paint only on first motion-OK visit; module animates + removes -->
+  <div id="intro-overlay" aria-hidden="true">
+    <div class="intro-art" set:html={nineHeadsSvg} />
+    <p class="intro-skip">tap anywhere to skip</p>
+  </div>
+
+  {drops.active && (
+    <a href={drops.href} class="drops-banner">
+      <span class="drops-flame" aria-hidden="true">🔥</span> {drops.headline}
+    </a>
+  )}
+
   <section class="hero">
-    <h1>GoteFigure</h1>
-    <p>Unique wearable art. Hand-drawn in California.</p>
+    <GlyphDust seed={3} count={12} />
+    <div class="hero-inner">
+      <h1>
+        <span class="hero-line">Unique</span>
+        <span class="hero-line">wearable</span>
+        <span class="hero-line hero-line--accent">art.</span>
+      </h1>
+      <div class="hero-art" data-draw set:html={nineHeadsSvg} />
+      <p class="hero-sub">
+        Hand-drawn in California. Every piece starts as a pen on paper —
+        tees, hoodies, posters, and stickers for people who love the niche.
+      </p>
+      <div class="hero-cta-row">
+        <a href="/shop/" class="hero-cta" data-magnetic>Enter the shop</a>
+        <p class="margin-note">drawn every day since 2020</p>
+      </div>
+    </div>
+  </section>
+
+  <SectionDivider color="var(--og-pink)" />
+
+  <section class="featured" aria-labelledby="featured-title">
+    <header class="featured-head">
+      <h2 id="featured-title">Fresh off the table</h2>
+      <a href="/shop/" class="squiggle">see everything</a>
+    </header>
+    <div class="featured-row">
+      {featured.map((p, i) => <ProductCard product={p} eager={i < 2} />)}
+    </div>
+  </section>
+
+  <section class="eras" aria-label="Two eras of GoteFigure">
+    <a href="/shop/?era=og" class="era-panel era-panel--og">
+      <p class="era-year">2020</p>
+      <h2>The OG era</h2>
+      <p>Born in lockdown, hyped on a boat, sold out by winter. The rabbit, the alien, the nine eyes — {ogCount} pieces back from the archive.</p>
+      <img src="/art/rabbit-cameo.webp" alt="" loading="lazy" class="era-art era-art--rabbit" />
+      <span class="era-go squiggle">shop the OG era</span>
+    </a>
+    <a href="/shop/?era=new" class="era-panel era-panel--new">
+      <p class="era-year">2026</p>
+      <h2>The new era</h2>
+      <p>The figure series, stipple ink, posters printed down the street. {newCount} new pieces — same hand, sharper pen.</p>
+      <img src="/art/silhouette.svg" alt="" loading="lazy" class="era-art era-art--sil" />
+      <span class="era-go squiggle">shop the new era</span>
+    </a>
+  </section>
+
+  <SectionDivider color="var(--teal)" />
+
+  <YouTubeStrip />
+
+  <section class="signup">
+    <GlyphDust seed={23} count={8} />
+    <div class="signup-inner">
+      <svg data-pupils viewBox="0 0 200 110" width="120" aria-hidden="true" class="signup-eyes">
+        <g id="eye-l"><ellipse cx="62" cy="56" rx="44" ry="48" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-l" class="pupil" cx="74" cy="62" r="15" fill="#111"/></g>
+        <g id="eye-r"><ellipse cx="150" cy="52" rx="36" ry="42" fill="#fff" stroke="#111" stroke-width="5"/><circle id="pupil-r" class="pupil" cx="142" cy="44" r="11" fill="#111"/></g>
+      </svg>
+      <NewsletterForm context="home" />
+    </div>
   </section>
 </Layout>
 
 <style>
-  .hero { padding: var(--s-24) var(--s-6); max-width: 60ch; }
-  .hero p { font-size: var(--text-lg); margin-top: var(--s-4); }
+  /* intro overlay — visible pre-paint only when html[data-intro] (inline head script) */
+  #intro-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: var(--z-intro);
+    background: var(--paper);
+    place-items: center;
+  }
+  :global(html[data-intro]) #intro-overlay { display: grid; }
+  .intro-art { width: min(86vw, 980px); }
+  .intro-art :global(svg) { width: 100%; height: auto; }
+  .intro-skip {
+    position: absolute; bottom: var(--s-6); left: 50%; transform: translateX(-50%);
+    font-size: var(--text-sm); font-style: italic; opacity: 0.55;
+  }
+
+  .drops-banner {
+    display: block; text-align: center; padding: var(--s-2) var(--s-4);
+    background: var(--ink); color: var(--paper); font-weight: 700;
+    letter-spacing: 0.06em; text-decoration: none; font-size: var(--text-sm);
+  }
+
+  .hero { position: relative; padding: var(--s-16) var(--s-6) var(--s-12); overflow: hidden; }
+  .hero-inner { max-width: 1180px; margin: 0 auto; }
+  .hero h1 { display: grid; line-height: 0.96; letter-spacing: -0.03em; margin-bottom: var(--s-6); }
+  .hero-line { display: block; }
+  .hero-line--accent {
+    color: var(--amber);
+    -webkit-text-stroke: 2px var(--ink);
+    paint-order: stroke fill;
+  }
+  .hero-art { margin: var(--s-4) 0 var(--s-6); }
+  .hero-art :global(svg) { width: 100%; height: auto; display: block; }
+  .hero-sub { max-width: 48ch; font-size: var(--text-lg); margin-bottom: var(--s-8); }
+  .hero-cta-row { display: flex; align-items: center; gap: var(--s-6); flex-wrap: wrap; }
+  .hero-cta {
+    display: inline-block; padding: var(--s-4) var(--s-12);
+    background: var(--ink); color: var(--paper); text-decoration: none;
+    font-weight: 700; font-size: var(--text-lg); border-radius: 999px;
+    border: 2px solid var(--ink); box-shadow: 5px 5px 0 var(--amber);
+    transition: box-shadow var(--dur-quick) var(--ease-arrive), background var(--dur-quick) var(--ease-arrive);
+  }
+  .hero-cta:hover { background: var(--amber); color: var(--ink); box-shadow: 7px 7px 0 var(--ink); }
+
+  .featured { padding: var(--s-16) var(--s-6); max-width: 1180px; margin: 0 auto; }
+  .featured-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--s-6); flex-wrap: wrap; gap: var(--s-3); }
+  .featured-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--s-6); align-items: end; }
+
+  .eras { display: grid; grid-template-columns: 1fr 1fr; }
+  .era-panel {
+    position: relative; padding: var(--s-16) var(--s-8); text-decoration: none;
+    overflow: hidden; min-height: 380px; display: flex; flex-direction: column; gap: var(--s-3);
+    transition: filter var(--dur-quick) var(--ease-arrive);
+  }
+  .era-panel:hover { filter: saturate(1.15); }
+  .era-panel--og { background: color-mix(in srgb, var(--og-pink) 34%, var(--paper)); border-right: 2px solid var(--ink); }
+  .era-panel--new { background: color-mix(in srgb, var(--teal) 16%, var(--paper)); }
+  .era-year { font-size: var(--text-sm); font-weight: 700; letter-spacing: 0.2em; }
+  .era-panel h2 { font-size: var(--text-xl); }
+  .era-panel p:not(.era-year) { max-width: 38ch; }
+  .era-art { position: absolute; right: -4%; bottom: -6%; opacity: 0.5; pointer-events: none; }
+  .era-art--rabbit { width: 38%; transform: rotate(6deg); }
+  .era-art--sil { width: 44%; }
+  .era-go { margin-top: auto; font-weight: 700; align-self: flex-start; }
+
+  .signup { position: relative; padding: var(--s-16) var(--s-6) var(--s-24); }
+  .signup-inner { max-width: 1180px; margin: 0 auto; display: flex; gap: var(--s-12); align-items: center; flex-wrap: wrap; }
+  .signup-eyes { flex: none; }
+
+  @media (max-width: 900px) {
+    .featured-row { grid-template-columns: 1fr 1fr; }
+    .eras { grid-template-columns: 1fr; }
+    .era-panel--og { border-right: none; border-bottom: 2px solid var(--ink); }
+  }
+  @media (max-width: 560px) {
+    .hero { padding-top: var(--s-8); }
+    .featured-row { grid-template-columns: 1fr; }
+  }
 </style>

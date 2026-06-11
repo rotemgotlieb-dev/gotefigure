@@ -1,0 +1,52 @@
+---
+// "Drawing every day" strip (§6.1): real channel content at build time, subscribe funnel.
+import { getVideos, thumb, watchUrl, CHANNEL_URL } from '../lib/youtube';
+
+const videos = (await getVideos()).slice(0, 3);
+const dayMatch = videos.flatMap((v) => v.title.match(/Day (\d+)/) ?? []);
+const latestDay = dayMatch.length ? dayMatch[1] : null;
+---
+<section class="yt" aria-labelledby="yt-title">
+  <header class="yt-head">
+    <h2 id="yt-title">Drawing every day</h2>
+    <p class="margin-note">{latestDay ? `day ${latestDay} and counting` : 'the practice behind the merch'}</p>
+  </header>
+  <div class="yt-row">
+    {videos.map((v) => (
+      <a href={watchUrl(v)} target="_blank" rel="noopener" class="yt-card">
+        <span class="yt-thumb-wrap">
+          <img src={thumb(v.id)} alt="" loading="lazy" width="480" height="360" />
+          <span class="yt-play" aria-hidden="true">▶</span>
+        </span>
+        <span class="yt-name">{v.title}</span>
+      </a>
+    ))}
+  </div>
+  <a class="yt-sub squiggle" href={`${CHANNEL_URL}?sub_confirmation=1`} target="_blank" rel="noopener">
+    watch the practice → subscribe on YouTube
+  </a>
+</section>
+
+<style>
+  .yt { padding: var(--s-16) var(--s-6); max-width: 1180px; margin: 0 auto; }
+  .yt-head { display: flex; align-items: baseline; gap: var(--s-4); flex-wrap: wrap; margin-bottom: var(--s-6); }
+  .yt-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-6); margin-bottom: var(--s-6); }
+  .yt-card { text-decoration: none; min-width: 0; }
+  .yt-thumb-wrap {
+    position: relative; display: block; border: 2px solid var(--ink); border-radius: 14px;
+    overflow: hidden; aspect-ratio: 16 / 10; background: var(--paper-dim);
+  }
+  .yt-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--dur-moment) var(--ease-arrive); }
+  .yt-card:hover img { transform: scale(1.05) rotate(0.6deg); }
+  .yt-play {
+    position: absolute; right: 10px; bottom: 8px;
+    background: var(--paper); border: 2px solid var(--ink); border-radius: 999px;
+    width: 34px; height: 34px; display: grid; place-items: center; font-size: 12px;
+  }
+  .yt-name { display: block; margin-top: var(--s-2); font-size: var(--text-sm); font-weight: 600; line-height: 1.35; }
+  .yt-sub { font-size: var(--text-base); }
+  @media (max-width: 760px) {
+    .yt-row { grid-template-columns: 1fr; }
+    .yt-card:nth-child(3) { display: none; }
+  }
+</style>

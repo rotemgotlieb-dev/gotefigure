@@ -71,6 +71,15 @@ h2 { font-size: var(--text-xl); }
 }
 .margin-note::before { content: '↜ '; font-style: normal; color: var(--amber); }
 
+/* draw-on-enter wipe (filled-trace art, §4.1): JS adds .drawn when scrolled into view */
+[data-draw] { clip-path: inset(0 100% 0 0); transition: clip-path var(--dur-scene) var(--ease-arrive); }
+[data-draw].drawn { clip-path: inset(0 0% 0 0); }
+@media (prefers-reduced-motion: reduce) { [data-draw] { clip-path: none; transition: none; } }
+
+/* logo easter egg: every pupil on the page spins */
+.gf-eyes-spin .pupil { animation: gf-pupil-spin 0.55s linear infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes gf-pupil-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

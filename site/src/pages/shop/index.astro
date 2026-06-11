@@ -51,7 +51,17 @@ const counts = {
     const wall = document.getElementById('product-wall');
     if (!wall || wall.dataset.wired) return;
     wall.dataset.wired = 'true';
-    const state = { type: 'all', era: 'all' };
+    const params = new URLSearchParams(location.search);
+    const state = {
+      type: ['apparel', 'poster', 'sticker'].includes(params.get('type') ?? '') ? params.get('type')! : 'all',
+      era: ['og', 'new'].includes(params.get('era') ?? '') ? params.get('era')! : 'all',
+    };
+    // reflect deep-linked filters (e.g. /shop/?era=og from the eras panels) in the pills
+    document.querySelectorAll<HTMLElement>('[data-filter-group]').forEach((group) => {
+      const key = group.dataset.filterGroup as 'type' | 'era';
+      group.querySelectorAll<HTMLElement>('.pill').forEach((p) =>
+        p.classList.toggle('is-on', p.dataset.filter === state[key]));
+    });
 
     function apply() {
       let visible = 0;
@@ -74,6 +84,7 @@ const counts = {
         apply();
       });
     });
+    apply();
   }
   wireFilters();
   document.addEventListener('astro:page-load', wireFilters);

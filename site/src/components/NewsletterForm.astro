@@ -1,0 +1,48 @@
+---
+// Drops list signup (§8.4): UI + stub provider (no data stored anywhere yet —
+// real provider is an owner decision; the adapter seam is this one fetch call).
+interface Props { context?: string }
+const { context = 'general' } = Astro.props;
+---
+<form class="nl" data-newsletter data-context={context}>
+  <label class="nl-label" for={`nl-${context}`}>Know when the next drop lands</label>
+  <div class="nl-row">
+    <input id={`nl-${context}`} type="email" name="email" required placeholder="you@somewhere.com" autocomplete="email" />
+    <button type="submit" data-magnetic>I’m in</button>
+  </div>
+  <p class="nl-done" hidden>you’re on the list — the rabbit wrote it down 🐇</p>
+  <p class="nl-note">no spam, only drops. ALL NEW DESIGNS announced here first, 8AM sharp.</p>
+</form>
+
+<script>
+  function wire() {
+    document.querySelectorAll<HTMLFormElement>('[data-newsletter]').forEach((form) => {
+      if (form.dataset.wired) return;
+      form.dataset.wired = 'true';
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        // STUB provider: succeeds locally, stores nothing (see REPORT.md — provider decision pending)
+        form.querySelector<HTMLElement>('.nl-row')!.hidden = true;
+        form.querySelector<HTMLElement>('.nl-done')!.hidden = false;
+      });
+    });
+  }
+  wire();
+  document.addEventListener('astro:page-load', wire);
+</script>
+
+<style>
+  .nl { max-width: 480px; }
+  .nl-label { display: block; font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--s-3); }
+  .nl-row { display: flex; gap: var(--s-2); }
+  .nl-row input {
+    flex: 1; min-width: 0; font: inherit; padding: var(--s-3) var(--s-4);
+    border: 2px solid var(--ink); border-radius: 999px; background: var(--paper);
+  }
+  .nl-row button {
+    font: inherit; font-weight: 700; padding: var(--s-3) var(--s-6);
+    background: var(--teal); color: var(--paper); border: 2px solid var(--ink); border-radius: 999px;
+  }
+  .nl-done { font-weight: 600; color: var(--teal); }
+  .nl-note { font-size: var(--text-sm); font-style: italic; margin-top: var(--s-2); color: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
+</style>
