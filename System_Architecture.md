@@ -223,6 +223,8 @@ Fourthwall reality notes for the build sprint: there is **no list-all-products e
 
 ### 8.5 Repo structure
 
+Layout decision (Phase 1): the repo root is this working folder (blueprint + asset sources + docs); the Astro project lives in **`site/`**. The tree below describes `site/`'s internals — except its first three entries (`System_Architecture.md`, `CLAUDE.md`, `.claude/rules/`), which live at the repo root so every sprint loads them regardless of cwd.
+
 ```
 gotefigure-site/
 ├── System_Architecture.md      # this document (canonical copy lives in repo)
@@ -287,7 +289,8 @@ The owner's Token Optimization Protocol (2026-06-10) is standing law for this re
 |---|---|---|
 | Final apparel fulfillment (Fourthwall POD vs self-ship) — per product | Rotem | Fourthwall setup (Phase 3); architecture indifferent |
 | Final SKU list & pricing | Rotem | Phase 3 |
-| UI grotesque + handwriting fallback faces | build sprint | Phase 1 |
+| UI grotesque | ✅ DECIDED Phase 1: Space Grotesk (variable, self-hosted via Fontsource) | done |
+| Handwriting display | traced owner lettering (Phase 2/5); NO interim handwriting font — grotesque carries display until then | Phase 2 |
 | Newsletter provider | build sprint | Phase 5 |
 | Lenis smooth-scroll (desktop polish) | build sprint | Phase 4 — default NO unless it demonstrably helps |
 | Cart-island implementation (vanilla TS vs tiny lib) | build sprint | Phase 3 |
