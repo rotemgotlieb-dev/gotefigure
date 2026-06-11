@@ -19,16 +19,16 @@
 
 ## Phase 1 — Foundation (~1.5 days) → detailed plan exists
 
-- [ ] Record repo-layout decision (site code in `site/`) in spec §8.5
-- [ ] Scaffold Astro 6 in `site/`, Node 22 pinned, dev server verified
-- [ ] Design tokens (`tokens.css` = §3.1) + base styles (reset, focus states, paper background)
-- [ ] Font: UI grotesque self-hosted (§13 decision executed); no interim handwriting face
-- [ ] `Layout.astro` shell: ClientRouter, header nav (logo / Shop / About / cart placeholder), footer, skip-link
-- [ ] Routes: `/`, `/shop`, `/about`, `404` with correct landmarks
-- [ ] Vitest smoke tests over built HTML
-- [ ] `wrangler.jsonc` (Workers static assets) + deploy scripts; first deploy when Cloudflare token arrives
-- [ ] GitHub Actions: build+deploy on push, weekly cron (inert until repo/secrets exist)
-- [ ] `CLAUDE.md` (≤150 lines, §12 protocol) + `.claude/rules/` (animation §7.6.6, assets §4.1, commerce §8.3)
+- [x] Record repo-layout decision (site code in `site/`) in spec §8.5
+- [x] Scaffold Astro 6 in `site/`, Node 22 pinned, dev server verified
+- [x] Design tokens (`tokens.css` = §3.1) + base styles (reset, focus states, paper background)
+- [x] Font: UI grotesque self-hosted (§13 decision executed); no interim handwriting face
+- [x] `Layout.astro` shell: ClientRouter, header nav (logo / Shop / About / cart placeholder), footer, skip-link
+- [x] Routes: `/`, `/shop`, `/about`, `404` with correct landmarks
+- [x] Vitest smoke tests over built HTML
+- [ ] `wrangler.jsonc` (Workers static assets) + deploy scripts; config ✅ + dry-run validated; first deploy when Cloudflare token arrives
+- [x] GitHub Actions: build+deploy on push, weekly cron (inert until repo/secrets exist)
+- [x] `CLAUDE.md` (≤150 lines, §12 protocol) + `.claude/rules/` (animation §7.6.6, assets §4.1, commerce §8.3)
 - **Exit:** branded-empty site builds green, smoke tests pass, deployable to a preview URL
 
 ## Phase 2 — Asset pipeline (~2 days)
