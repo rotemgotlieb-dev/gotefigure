@@ -1,6 +1,6 @@
 # GoteFigure — System Architecture (Master Blueprint)
 
-**Version 1.0 — 2026-06-11 · Status: pending owner sign-off · Target launch: ~2026-06-25 (2-week window)**
+**Version 1.1 — 2026-06-11 (post-review) · Status: pending owner sign-off · Target launch: ~2026-06-25 (2-week window)**
 
 This is the global context document for all GoteFigure build sprints. Every coding session starts from the decisions recorded here. Sections are numbered so sprints can reference and load only what they need (token discipline — see §12).
 
@@ -31,7 +31,7 @@ This is the global context document for all GoteFigure build sprints. Every codi
 | Accessibility | `prefers-reduced-motion` fully honored; shopping never requires interaction tricks |
 | Timeline | ~2 weeks of sprints |
 | Token economy | The standing Token Optimization Protocol applies to every sprint (§12) |
-| Hosting ToS | Vercel free tier prohibits commercial use (verified 2026-06) — **do not deploy there**. Cloudflare Pages free tier allows commerce |
+| Hosting ToS | Vercel free tier prohibits commercial use (verified 2026-06) — **do not deploy there**. Cloudflare free tier (Workers static assets) allows commerce |
 
 ## 3. Brand & design language — "Ink on paper, alive"
 
@@ -93,6 +93,8 @@ All paths relative to project root. Quality caveats are load-bearing — respect
 | `Screenshot …12.31.48 AM.png` | Wiggle-line sticker blob — hover-jitter element; **sticker SKU candidate** | Low-res (~220px) — re-export/trace |
 | `Screenshot …12.31.56 AM.png` | Doodle-camo texture (headline fills, hover accents) | Low-res; not seamless — needs tile work or .ai source |
 
+**Animation-readiness (Phase 2 contract):** auto-tracing yields *filled* paths, but GSAP DrawSVG animates *stroked* paths — the technique must match the asset. Line art (nine-head lineup, squiggle underlines, stipple-rabbit contour) → centerline/stroke trace, true stroke-draw. Filled art (silhouette, alien, doodle-camo, mandala) → filled trace (vtracer/potrace) + mask-wipe reveal that fakes the drawing motion. Phase 2's exit criterion is not "SVGs exist" but "each asset animates as §7 specifies."
+
 ### 4.2 Photography (marketing folder)
 
 **Hero-grade:** `profile pic.jpg` (nine-eyes tee at sunset — best image in set, 4032×3024); `Web Hero 3.jpg` (sunset marina — **fix EXIF rotation**, lift shadow, crop marina clutter).
@@ -113,20 +115,31 @@ Phone screenshots with IG chrome — **never lift art from these**; they are arc
 
 ## 5. Catalog model
 
-Three product types × two eras. Reconstructed candidates (final picks = owner decision in Fourthwall setup):
+Three product types × two eras. Reconstructed candidates with their **art source** — the honest per-SKU status (final picks = owner decision in Fourthwall setup):
 
-- **Apparel (POD via Fourthwall catalog):** nine-eyes tee, alien/UFO tee (front & back placements), gold-black swirl tee, mushroom stipple tee, sneaker-legs tee/hoodie, OG Rabbit pink hoodie, goggle-bunny hoodie; old-store names as canon: Strut Walk, Astro Kitty, Masked Faces, Double Headed Figure, Triple Figure. Old price anchors: tees $20–22, hoodies $40.
-- **Posters (self-shipped, printed at local poster shop):** *figure* series (figure 2.pdf is print-ready vector), Strut Walk triptych, stipple rabbit. Margin-friendly; provenance note on PDP ("printed locally in California").
-- **Stickers (self-shipped):** alien logo, wiggle-blob, stitch glyphs, mandala creature. Impulse add-ons; surfaced in cart drawer.
+| Candidate | Type / era | Art source for site |
+|---|---|---|
+| Alien/UFO tee (front & back) | apparel / og | ✅ `alien LOGO.profile-01.png` |
+| OG Rabbit pink hoodie | apparel / og | ✅ OG Rabbit PNGs |
+| Stipple rabbit poster | poster / new | ✅ `OG Rabbit 02.png` (after §4.1 cleanup) |
+| *figure 2* poster | poster / new | ✅ `figure 2.pdf` (print-ready vector) |
+| Stickers (alien, wiggle-blob, glyphs, mandala) | sticker / new | ✅ traceable; better from re-export |
+| Nine-eyes tee, swirl tee, mushroom tee, goggle-bunny hoodie | apparel / og | ⚠️ photos only — needs .ai hunt |
+| Sneaker-legs tee/hoodie | apparel / og | ⚠️ mockup-visible only — needs .ai hunt |
+| Strut Walk, Astro Kitty, Masked Faces, Double Headed Figure, Triple Figure | apparel / og | ⚠️ IG screenshots only (lifting forbidden, §4.3) — needs .ai hunt |
 
-Product data is **build-time content** (Astro Content Layer) hydrated from the Fourthwall Storefront API + a local overlay file for site-only fields (era, margin notes, art SVG refs, lifestyle photo mapping).
+**Fallback policy for ⚠️ SKUs (closes the circular fallback):** the .ai hunt is *non-blocking for the architecture but blocking per-SKU*. Any SKU without site-grade art at Phase 3 either (a) uses its Fourthwall mockup render as card face — an explicit, owner-approved exception to the art-first rule — or (b) defers from launch. Owner decides per SKU during Fourthwall setup. Old price anchors: tees $20–22, hoodies $40.
+
+Product data is **build-time content** (Astro Content Layer) hydrated from the Fourthwall Storefront API + a local overlay file for site-only fields.
+
+**Overlay contract** (`src/content/overlay/products.json`): keyed by **Fourthwall product slug/handle**. Required fields: `type` (`apparel | poster | sticker` — drives §6.2 filters, card sizing, the cart sticker row, and the PDP provenance line) and `era` (`og | new`). Optional: `marginNote`, `artSvg` (path in `public/art/`), `lifestylePhoto`. The build **fails loudly** on an overlay key with no matching Fourthwall product (a renamed handle must never silently drop a product's era/art/type).
 
 ## 6. Information architecture — six surfaces
 
 **Nav (all viewports):** alien logo (→ home) · Shop · About · cart icon (drawer). No hamburger mazes; thumb-reachable on mobile.
 
 1. **HOME — the gallery door.** Intro animation (§7.1) → full-bleed hero (`profile pic.jpg` or rotated `Web Hero 3`, page background continues the photo's sky as a sampled CSS gradient) → featured products (3–4) → "two eras" teaser strip → latest 3 YouTube videos (build-time RSS) → email/drops signup → footer (socials, the stitch-glyph dust settles here).
-2. **SHOP — the core.** Filter: type (Apparel / Posters / Stickers) × era (OG '20 / New '26), with personality labels. **Product art, not photography, is the card face** — art on a flat garment-color swatch inside the oval mask; hover/long-press crossfades to the mapped lifestyle photo (Online Ceramics motion pattern, near-zero JS). Poster/sticker cards sized differently than apparel — salon wall, not warehouse grid. Sold-out: "gone — for now" + notify hook.
+2. **SHOP — the core.** Filter: type (Apparel / Posters / Stickers) × era (OG '20 / New '26), with personality labels. **Product art, not photography, is the card face** — art on a flat garment-color swatch inside the oval mask; hover/long-press crossfades to the mapped lifestyle photo (Online Ceramics motion pattern, near-zero JS). Poster/sticker cards sized differently than apparel — salon wall, not warehouse grid. Sold-out: "gone — for now"; its CTA is the §8.4 newsletter signup with the product name attached as a tag/note — there is no per-product restock backend, and none is needed.
 3. **PRODUCT (PDP) — the signature moment.** Ink Bloom entry (§7.3). Art front-and-center; garment-color/size variants; honest sizing note; one unmissable add-to-cart (alien beam-up micro-animation on add, §7.5); lifestyle photo where one exists; margin-note annotation; posters get the local-print provenance line; related items strip.
 4. **ABOUT — the story.** Founded-in-COVID origin → dormant years owned, not hidden → archive: old IG posts as a lo-fi faux-feed (drawn phone bezel, captions/comments preserved verbatim — "This is hella sick") → the 2026 chapter: YouTube embed + subscribe hook + latest videos. Stipple rabbit stroke-draws on scroll-enter.
 5. **CART — slide-out drawer**, never a page-leave. Ink-styled; sticker impulse row; clear shipping expectations (POD items ship separately from posters — say so honestly); single CTA → Fourthwall hosted checkout. Waiting rabbit (§7.4) during cart API calls.
@@ -157,6 +170,7 @@ Cursor-tracked googly pupils (one eye lags ~80ms — the deranged charm; clamped
 3. GPU-cheap properties only (transform/opacity); 60fps on mid-range mobile.
 4. CSS scroll-driven animations (`animation-timeline`) = progressive enhancement behind `@supports` only (Firefox still flag-gated as of 2026-06).
 5. Intro ≤2s, once per session, skippable. No animation ever delays content paint.
+6. **View-transition lifecycle (load-bearing):** with ClientRouter, module scripts execute once per session — not per page. Every module in `src/animations/` exposes `init()`/`destroy()`: `init()` binds on `astro:page-load`; all ScrollTriggers, event listeners, and `gsap.matchMedia` contexts are reverted/killed on `astro:before-swap`. Violations work on first load and silently die or duplicate on the second navigation (stale ScrollTriggers on swapped-out DOM also leak memory). The §7.1 sessionStorage gate protects only the intro; this rule protects everything else.
 
 ## 8. Technical architecture
 
@@ -165,17 +179,19 @@ Cursor-tracked googly pupils (one eye lags ~80ms — the deranged charm; clamped
 | Layer | Choice | Why |
 |---|---|---|
 | Framework | **Astro 6** (6.4.x, stable since 2026-03) | Static-first, zero default JS — JS budget goes to art; Content Layer for catalog; islands for cart; ClientRouter view transitions |
-| Animation | **GSAP** (free incl. ScrollTrigger, DrawSVG, MorphSVG, SplitText since 2025-04 Webflow acquisition; license forbids only competing no-code animation tools) | The exact toolset for hand-drawn SVG motion |
+| Animation | **GSAP** (Webflow acquired GSAP 2024-10; everything incl. ScrollTrigger, DrawSVG, MorphSVG, SplitText free since 2025-04; license forbids only competing no-code animation tools) | The exact toolset for hand-drawn SVG motion |
 | Commerce | **Fourthwall** ($0/mo, 0% platform fee on physical, ~2.9%+30¢ processing pass-through) via **Storefront API** (free, all creators; read products/collections, cart create/manage; checkout = hosted redirect via cart token) | Mixed fulfillment per-product (POD + ship-from-home + 3PL coexist); creator/YouTube-native; MIT reference template exists (FourthwallHQ/vercel-commerce) |
-| Hosting | **Cloudflare Pages** free tier (commercial allowed, 100k req/day incl. Functions if ever needed) | Vercel Hobby prohibits commerce; Netlify free is credit-metered |
+| Hosting | **Cloudflare Workers static assets** free tier (commercial allowed; static requests unlimited; the 100k/day cap applies only to Worker/Function invocations, which this site doesn't use). Conscious choice: Cloudflare Pages has been in maintenance mode since 2025-04 — Workers static assets is the recommended successor and Astro 6's Cloudflare adapter is Workers-first; Pages remains an acceptable fallback | Vercel Hobby prohibits commerce; Netlify free is credit-metered |
 | Styling | Vanilla CSS with design tokens (§3.1) + scoped Astro styles | No framework tax; tokens are the theme |
 | Cart island | One hydrated island (vanilla TS or preact-class tiny lib — build-sprint pick), localStorage-persisted Fourthwall cart token | Single point of interactivity |
 | Analytics | Cloudflare Web Analytics (free, cookieless) | Privacy-friendly, zero config |
 
 ### 8.2 Data flow
 
+Rebuild mechanics: CI builds on git push; a **GitHub Actions weekly cron** hits a **Cloudflare deploy hook**; the same hook URL is the owner's "rebuild now" bookmark for after Fourthwall dashboard edits (optionally wired to Fourthwall `PRODUCT_UPDATED`/`COLLECTION_UPDATED` webhooks later). Free cap is 500 builds/month — this cadence uses under 2% of it. Build policy: a failed Fourthwall product fetch **fails the build loudly** (never ship an empty shop); a failed YouTube RSS fetch falls back to the last committed snapshot.
+
 ```
-BUILD TIME (CI on push + weekly cron rebuild)
+BUILD TIME (git push · weekly cron → deploy hook · owner "rebuild now" hook)
   Fourthwall Storefront API ──> products/variants/prices/stock ──┐
   src/content/overlay/*.json ──> era, margin notes, art refs ────┼──> Astro Content Layer ──> static pages
   YouTube RSS (videos.xml?channel_id=UCPyn9ALLFF4Z37Tc64ujd1Q) ──┘     (no API key, no quota)
@@ -190,11 +206,15 @@ OPERATIONS (owner)
   Posters/stickers ──> "ship from home" orders arrive by email/dashboard
 ```
 
-Stock display note: static pages cache availability at build time; the cart API is the runtime truth — sold-out races resolve at checkout (acceptable at this volume; weekly + on-change rebuilds keep drift small).
+Stock display note: static pages cache availability at build time; the cart API is the runtime truth — sold-out races resolve at checkout (acceptable at this volume; the weekly cron plus owner-triggered rebuilds keep drift small, and keep §10's JSON-LD price/availability honest).
+
+Cart-token hygiene: the cart island validates the stored token via `getCart()` on init and **discards it on a 4xx** (expired/invalid); the token is cleared when the checkout CTA fires — Fourthwall owns the cart from there, so returning buyers never see a stale cart of already-purchased items. Cart API *failures* show an honest inline retry message; the waiting rabbit (§7.4) covers loading, not failure.
 
 ### 8.3 Commerce adapter (the swap seam)
 
-All commerce calls go through `src/lib/commerce/` exposing exactly: `getProducts()`, `getProduct(handle)`, `createCart()`, `addToCart()`, `updateItem()`, `getCheckoutUrl()`. Fourthwall is implementation #1. A future move to Shopify/Stripe = new implementation file + re-point; pages and islands never change. **No Fourthwall types leak outside this directory.**
+All commerce calls go through `src/lib/commerce/` exposing exactly: `getProducts()`, `getProduct(handle)`, `getCart(token)`, `createCart()`, `addToCart()`, `updateItem()` (quantity 0 = remove), `getCheckoutUrl()`. The directory defines the neutral domain types — `Product`, `Variant`, `Cart`, `LineItem` — and **no Fourthwall types leak outside it**. Fourthwall is implementation #1; a future move to Shopify/Stripe = new implementation file + re-point; pages and islands never change.
+
+Fourthwall reality notes for the build sprint: there is **no list-all-products endpoint** — `getProducts()` = List Collections → Get Collection Products; PDPs use Get Product by Slug; auth is the `storefront_token` passed as a query parameter.
 
 ### 8.4 Newsletter adapter
 
@@ -223,16 +243,16 @@ gotefigure-site/
 
 1. **Card data never exists in our system** — checkout is Fourthwall-hosted (PCI-DSS theirs). A compromise of our site cannot leak payment data.
 2. **No server, no database, no auth, no stored PII** — static files on Cloudflare's edge. Attack surface ≈ a poster.
-3. Browser-visible token = Fourthwall *storefront* token: public, read-only-by-design (list products, build carts). Secrets (if any ever) live in CI env vars only — never in the repo.
+3. Browser-visible token = Fourthwall *storefront* token: **public-by-design, scoped to storefront reads plus anonymous cart operations** (create/mutate carts) — no order, customer, or admin access. Worst-case abuse is cart spam, which lands on Fourthwall's infrastructure, not ours. Secrets (if any ever) live in CI env vars only — never in the repo.
 4. HTTPS enforced + security headers (CSP, frame-ancestors, referrer-policy) via Cloudflare/Astro config.
 5. Newsletter form: provider-side double-opt-in; no emails stored by us.
 6. Dependencies pinned via lockfile; Dependabot/`npm audit` in CI.
 
 ## 10. Performance, accessibility, SEO budgets
 
-- **Performance:** LCP < 2.0s mid-range mobile; total JS < 150KB (GSAP core+plugins ~60–70KB leaves room); images AVIF/WebP responsive via Astro assets; fonts: ≤2 families subset + `font-display: swap`; intro never delays paint (§7.1).
+- **Performance:** LCP < 2.0s mid-range mobile; total JS < 150KB **compressed (Brotli) transfer** — the basis matters: GSAP's compressed reality is core ~27KB + ScrollTrigger ~18KB + DrawSVG ~2KB ≈ 47KB, leaving ~100KB for the cart island, ClientRouter, and animation modules (raw-minified numbers would falsely show the budget blown). Budgets are measured on a fixed mid-tier profile: Chrome DevTools 4× CPU throttle + Fast 4G, or a physical Moto-G-class device. Images AVIF/WebP responsive via Astro assets; fonts ≤2 families, subset, `font-display: swap`; intro never delays paint (§7.1).
 - **Accessibility:** WCAG 2.1 AA contrast on paper/ink palette; full keyboard path through shop→cart→checkout CTA; focus states in the squiggle language; reduced-motion parity (§7.6); alt text written in brand voice but descriptive; cart drawer focus-trapped + ESC.
-- **SEO/launch:** repoint gotefigure.com DNS to Cloudflare (kills the dead-Shopify expired-cert 403); per-page meta + OG images (art-led, generated from product art); JSON-LD Product schema; sitemap; cross-link YouTube/IG/X profiles (the brand currently has zero search footprint — uncontested name, easy wins). Owner: fix YouTube description typo ("entertaning"), confirm/claim X handle (@gotefigure returned 404 on 2026-06-11).
+- **SEO/launch:** repoint gotefigure.com DNS to Cloudflare (kills the dead-Shopify expired-cert 403); per-page meta + OG images (static art-led template composed with each product's art, generated at build); JSON-LD Product schema (price/availability kept honest by the §8.2 rebuild hooks); sitemap; cross-link YouTube/IG/X profiles (the brand currently has zero search footprint — uncontested name, easy wins). Owner: fix YouTube description typo ("entertaning"), confirm/claim X handle (@gotefigure returned 404 on 2026-06-11).
 
 ## 11. Build phases (2-week shape; detail lives in the implementation plan)
 
@@ -243,7 +263,12 @@ gotefigure-site/
 5. **Story & layers** — Home assembly, About/archive, YouTube strip, newsletter, info pages. *Exit: content-complete.*
 6. **Hardening & launch** — §10 budgets audited (Lighthouse + real device), copy pass, OG images, DNS repoint, launch checklist. *Exit: live on gotefigure.com.*
 
-Owner-parallel tasks: Fourthwall account + garment picks; .ai hunt; hand-lettering; poster-shop test print; (Gemini research: POD comparison, relaunch playbook — feeds Fourthwall config and marketing, blocks nothing).
+Owner-parallel tasks: Fourthwall account + garment picks; .ai hunt (per-SKU blocking — see §5 fallback policy); hand-lettering; poster-shop test print; (Gemini research: POD comparison, relaunch playbook — feeds Fourthwall config and marketing, blocks nothing).
+
+**Hard owner dependencies (dated — each is a stop the builder cannot self-serve):**
+1. Cloudflare account created + builder access granted — **before Phase 1 day 1** (Phase 1's exit is a live preview URL).
+2. Fourthwall account + storefront token delivered — **before Phase 3 day 1** (Phase 3 cannot fetch products without it).
+3. Domain registrar identified + login confirmed — **by end of Phase 2**. The domain currently points at a dead Shopify binding; if it turns out to be registered *through Shopify*, account recovery/transfer lead time could threaten the launch date — check early, not at Phase 6.
 
 ## 12. Working agreements (token & process protocol)
 
@@ -264,6 +289,9 @@ The owner's Token Optimization Protocol (2026-06-10) is standing law for this re
 | UI grotesque + handwriting fallback faces | build sprint | Phase 1 |
 | Newsletter provider | build sprint | Phase 5 |
 | Lenis smooth-scroll (desktop polish) | build sprint | Phase 4 — default NO unless it demonstrably helps |
+| Cart-island implementation (vanilla TS vs tiny lib) | build sprint | Phase 3 |
+| Per-SKU art fallback (mockup render vs defer) for §5 ⚠️ rows | Rotem | Phase 3, at Fourthwall setup |
+| OG-image template design | build sprint | Phase 6 |
 | Crochet bucket hat SKU | Rotem | whenever |
 
 ## 14. Reference library (validated 2026-06)
