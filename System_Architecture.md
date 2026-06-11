@@ -255,7 +255,7 @@ gotefigure-site/
 
 - **Performance:** LCP < 2.0s mid-range mobile; total JS < 150KB **compressed (Brotli) transfer** — the basis matters: GSAP's compressed reality is core ~27KB + ScrollTrigger ~18KB + DrawSVG ~2KB ≈ 47KB, leaving ~100KB for the cart island, ClientRouter, and animation modules (raw-minified numbers would falsely show the budget blown). Budgets are measured on a fixed mid-tier profile: Chrome DevTools 4× CPU throttle + Fast 4G, or a physical Moto-G-class device. Images AVIF/WebP responsive via Astro assets; fonts ≤2 families, subset, `font-display: swap`; intro never delays paint (§7.1).
 - **Accessibility:** WCAG 2.1 AA contrast on paper/ink palette; full keyboard path through shop→cart→checkout CTA; focus states in the squiggle language; reduced-motion parity (§7.6); alt text written in brand voice but descriptive; cart drawer focus-trapped + ESC.
-- **SEO/launch:** repoint gotefigure.com DNS to Cloudflare (kills the dead-Shopify expired-cert 403); per-page meta + OG images (static art-led template composed with each product's art, generated at build); JSON-LD Product schema (price/availability kept honest by the §8.2 rebuild hooks); sitemap; cross-link YouTube/IG/X profiles (the brand currently has zero search footprint — uncontested name, easy wins). Owner: fix YouTube description typo ("entertaning"), confirm/claim X handle (@gotefigure returned 404 on 2026-06-11).
+- **SEO/launch:** DNS cutover after the GoDaddy transfer completes (~2026-06-16/18): at GoDaddy set nameservers → Cloudflare, add the zone in Cloudflare, attach gotefigure.com as the Worker's custom domain (kills the dead-Shopify expired-cert 403); per-page meta + OG images (static art-led template composed with each product's art, generated at build); JSON-LD Product schema (price/availability kept honest by the §8.2 rebuild hooks); sitemap; cross-link YouTube/IG/X profiles (the brand currently has zero search footprint — uncontested name, easy wins). Owner: fix YouTube description typo ("entertaning"), confirm/claim X handle (@gotefigure returned 404 on 2026-06-11).
 
 ## 11. Build phases (2-week shape; detail lives in the implementation plan)
 
@@ -268,10 +268,11 @@ gotefigure-site/
 
 Owner-parallel tasks: Fourthwall account + garment picks; .ai hunt (per-SKU blocking — see §5 fallback policy); hand-lettering; poster-shop test print; (Gemini research: POD comparison, relaunch playbook — feeds Fourthwall config and marketing, blocks nothing).
 
-**Hard owner dependencies (dated — each is a stop the builder cannot self-serve):**
-1. Cloudflare account created + builder access granted — **before Phase 1 day 1** (Phase 1's exit is a live preview URL).
-2. Fourthwall account + storefront token delivered — **before Phase 3 day 1** (Phase 3 cannot fetch products without it).
-3. Domain registrar identified + login confirmed — **by end of Phase 2**. The domain currently points at a dead Shopify binding; if it turns out to be registered *through Shopify*, account recovery/transfer lead time could threaten the launch date — check early, not at Phase 6.
+**Hard owner dependencies (status as of 2026-06-11):**
+1. ✅ Cloudflare account created. Remaining: one-time `wrangler login` (or API token) for the first deploy + GitHub Actions secrets.
+2. ✅ Fourthwall account created. Remaining: storefront token (dashboard → Settings → For Developers → Headless) — needed Phase 3 day 1.
+3. ✅ RESOLVED (better than feared): domain was at Network Solutions; transfer to **GoDaddy** initiated 2026-06-11 (5-yr registration paid), completes in ~5–7 days. Registrar = GoDaddy permanently; no Network Solutions steps anywhere. Constraint: nameservers cannot change mid-transfer → the Phase 6 DNS cutover waits for transfer completion (~2026-06-16/18), which fits the timeline. Cutover = set nameservers at GoDaddy to Cloudflare's pair (one-time); thereafter DNS records are managed in the Cloudflare dashboard (required for Workers custom domains on the free tier) while GoDaddy remains the registrar (ownership/renewals).
+4. ✅ GitHub: `gh` CLI authenticated as rotemgotlieb-dev; repo + CI secrets managed from the build session.
 
 ## 12. Working agreements (token & process protocol)
 

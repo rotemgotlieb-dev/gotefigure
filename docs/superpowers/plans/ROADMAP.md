@@ -5,10 +5,10 @@
 
 ## Owner to-dos (Rotem) — dated, from §11
 
-- [ ] **Cloudflare account created + API token for deploys — before Phase 1 deploy step**
-- [ ] **Fourthwall account + storefront token — before Phase 3 day 1** (garment picks can follow)
-- [ ] **Find where gotefigure.com is registered + confirm login — by end of Phase 2** ⚠️ deadline risk if Shopify-managed
-- [ ] GitHub account/repo for CI (weekly rebuild cron + deploys) — before Phase 1 CI step
+- [x] **Cloudflare account ✅ (2026-06-11)** — remaining: one-time `wrangler login` for first deploy + CI secrets
+- [x] **Fourthwall account ✅ (2026-06-11)** — remaining: storefront token (Settings → For Developers → Headless) before Phase 3 day 1; garment picks can follow
+- [x] **Registrar ✅ RESOLVED (2026-06-11):** Network Solutions → GoDaddy transfer in flight (5-yr paid, completes ~06-16/18). Phase 6 cutover: GoDaddy nameservers → Cloudflare after transfer completes
+- [x] GitHub ✅ — `gh` authenticated (rotemgotlieb-dev); private repo + push handled in-session
 - [ ] .ai source-file hunt (blocking per-SKU — §5 fallback table decides what ships without it)
 - [ ] Hand-letter ~6 display words (SHOP, ABOUT, CART, GOTEFIGURE…), photograph straight-on
 - [ ] Poster-shop test print (figure 2) + price/size quote
