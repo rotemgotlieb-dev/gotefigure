@@ -1,6 +1,6 @@
 // Cloudflare Workers static assets (§8.1 — Pages is maintenance-mode; Workers is the chosen rail).
 {
-  "name": "gotefigure",
+  "name": "preview",
   "compatibility_date": "2026-06-01",
   "assets": {
     "directory": "./dist",

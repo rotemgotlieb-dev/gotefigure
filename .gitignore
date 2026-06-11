@@ -5,3 +5,5 @@ site/dist/
 site/.astro/
 
 assets-source/work/
+
+site/.env
