@@ -6,5 +6,6 @@ import './scroll-life';
 import './micro';
 import './ink-trail';
 import './boil';
+import './scroll-draw';
 
 startMotion();

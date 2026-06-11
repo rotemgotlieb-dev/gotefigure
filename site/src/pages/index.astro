@@ -8,7 +8,7 @@ import RoughFrame from '../components/RoughFrame.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { commerce, type Category } from '../lib/commerce';
 import { CATEGORY_LABELS } from '../lib/commerce/types';
-import { roughLinePaths, seedFrom } from '../lib/rough-frame';
+import { roughLinePaths, roughVLine, seedFrom } from '../lib/rough-frame';
 import { getVideos, thumb, watchUrl, CHANNEL_URL } from '../lib/youtube';
 
 const products = await commerce.getProducts();
@@ -54,6 +54,11 @@ const rulePathsFor = (label: string) => roughLinePaths(seedFrom(label));
 
     {groups.map((g, gi) => (
       <section class="cat" id={g.cat} aria-labelledby={`cat-h-${g.cat}`}>
+        <svg class="margin-pen" data-scroll-draw viewBox="0 0 24 800" preserveAspectRatio="none" aria-hidden="true">
+          {roughVLine(seedFrom(`pen-${g.cat}`)).map((d) => (
+            <path d={d} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" vector-effect="non-scaling-stroke" />
+          ))}
+        </svg>
         <div class="cat-head">
           <h2 id={`cat-h-${g.cat}`}>{g.label}</h2>
           <svg class="cat-rule" viewBox="0 0 600 16" preserveAspectRatio="none" aria-hidden="true">
@@ -130,6 +135,12 @@ const rulePathsFor = (label: string) => roughLinePaths(seedFrom(label));
     opacity: 0.05; pointer-events: none; z-index: 0;
   }
   .cat { position: relative; z-index: 1; padding: var(--s-8) 0 var(--s-4); scroll-margin-top: 90px; }
+  .margin-pen {
+    position: absolute; left: -52px; top: var(--s-6); bottom: var(--s-2);
+    width: 24px; height: calc(100% - var(--s-8)); color: color-mix(in srgb, var(--ink) 55%, var(--paper));
+    display: none;
+  }
+  @media (min-width: 1290px) { .margin-pen { display: block; } }
   .cat-head { display: flex; align-items: center; gap: var(--s-4); margin-bottom: var(--s-6); }
   .cat-head h2 { font-size: var(--text-xl); flex: none; }
   .cat-rule { flex: 1; height: 14px; color: var(--ink); min-width: 40px; }

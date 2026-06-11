@@ -39,6 +39,12 @@ export function roughLinePaths(seed: number, w = 600): string[][] {
   });
 }
 
+/** A wobbly vertical pen line (scroll-draw margin line) — single variant, drawSVG-animated. */
+export function roughVLine(seed: number, h = 800): string[] {
+  const d = gen.line(12, 6, 12, h - 6, { seed, roughness: 2.2, strokeWidth: 2, bowing: 3.2, disableMultiStroke: true });
+  return gen.toPaths(d).map((p) => p.d);
+}
+
 /** Stable small hash for seeds from strings. */
 export function seedFrom(s: string): number {
   let h = 9;

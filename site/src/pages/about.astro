@@ -2,8 +2,6 @@
 // The story (§6.4): origin → dormant years owned → archive → the daily practice → now.
 import { Image } from 'astro:assets';
 import Layout from '../layouts/Layout.astro';
-import GlyphDust from '../components/GlyphDust.astro';
-import SectionDivider from '../components/SectionDivider.astro';
 import NewsletterForm from '../components/NewsletterForm.astro';
 import { getVideos, thumb, watchUrl, CHANNEL_URL } from '../lib/youtube';
 import { getPhoto } from '../lib/photos';
@@ -14,17 +12,17 @@ const shorts = videos.filter((v) => v.short).slice(0, 4);
 
 const archive = [
   {
-    photo: getPhoto('boatday-1'), date: 'summer 2020',
+    photo: getPhoto('boatday-1'), alt: 'Boat day, summer 2020 — the crew on the lake, nine-eyes tee in the wild', date: 'summer 2020',
     caption: 'Lake day with the nine eyes 👀 — first batch almost gone!',
     comment: '“This is hella sick”',
   },
   {
-    photo: getPhoto('alien-tee-duo-cliffs'), date: 'fall 2020',
+    photo: getPhoto('alien-tee-duo-cliffs'), alt: 'Two alien tees on the cliffs — front print and back print in one frame', date: 'fall 2020',
     caption: 'Alien tee — front AND back print. Super dope and stylish 🛸',
     comment: '“need this immediately”',
   },
   {
-    photo: getPhoto('trail-walk-duo'), date: 'summer 2021',
+    photo: getPhoto('trail-walk-duo'), alt: 'Walking the coastal trail in the swirl and alien tees, summer 2021', date: 'summer 2021',
     caption: 'Sneak peak — ALL NEW DESIGNS DROPPING JULY 11th 8AM 🔥🔥',
     comment: '“taking my whole paycheck”',
   },
@@ -32,8 +30,6 @@ const archive = [
 ---
 <Layout title="About — GoteFigure" description="An art-based clothing brand from California. Founded in lockdown 2020, dormant for a while, reborn in 2026 — drawing every day.">
   <article class="story">
-    <GlyphDust seed={31} count={14} />
-
     <header class="story-hero">
       <h1>About<span class="accent">.</span></h1>
       <p class="lede">
@@ -64,7 +60,7 @@ const archive = [
       <div class="feed">
         {archive.map((post) => (
           <figure class="post">
-            {post.photo && <Image src={post.photo} alt="" widths={[500]} sizes="(max-width: 700px) 90vw, 340px" class="post-img" loading="lazy" />}
+            {post.photo && <Image src={post.photo} alt={post.alt} widths={[500]} sizes="(max-width: 700px) 90vw, 340px" class="post-img" loading="lazy" />}
             <figcaption>
               <p class="post-date">{post.date}</p>
               <p class="post-caption">{post.caption}</p>
@@ -76,8 +72,6 @@ const archive = [
       <p class="margin-note">captions preserved as posted — typos were free in 2020</p>
     </section>
 
-    <SectionDivider color="var(--amber)" />
-
     <section class="chapter chapter--practice" aria-labelledby="practice-title">
       <p class="chapter-year">2026</p>
       <h2 id="practice-title">Drawing every day</h2>
@@ -88,7 +82,7 @@ const archive = [
 
       <div class="practice-grid">
         <a href={watchUrl(mainVideo)} target="_blank" rel="noopener" class="main-video">
-          <img src={thumb(mainVideo.id)} alt="" loading="lazy" width="640" height="480" />
+          <img src={thumb(mainVideo.id)} alt="" loading="lazy" width="640" height="480" onerror={`this.src='https://i.ytimg.com/vi/${mainVideo.id}/mqdefault.jpg';this.onerror=null;`} />
           <span class="main-video-meta">
             <span class="yt-play" aria-hidden="true">▶</span>
             <span>{mainVideo.title}</span>
@@ -97,7 +91,7 @@ const archive = [
         <div class="shorts-rail">
           {shorts.map((s) => (
             <a href={watchUrl(s)} target="_blank" rel="noopener" class="short-card">
-              <img src={thumb(s.id)} alt="" loading="lazy" width="320" height="240" />
+              <img src={thumb(s.id)} alt="" loading="lazy" width="320" height="240" onerror={`this.src='https://i.ytimg.com/vi/${s.id}/mqdefault.jpg';this.onerror=null;`} />
               <span>{s.title}</span>
             </a>
           ))}
@@ -148,7 +142,7 @@ const archive = [
 
   .practice-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: var(--s-6); margin: var(--s-6) 0; }
   .main-video { display: block; position: relative; border: 2px solid var(--ink); border-radius: 16px; overflow: hidden; }
-  .main-video img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/3; }
+  .main-video img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 16/10; }
   .main-video-meta {
     position: absolute; left: 0; right: 0; bottom: 0;
     display: flex; gap: var(--s-2); align-items: center;
