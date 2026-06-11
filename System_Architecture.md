@@ -15,7 +15,7 @@ This is the global context document for all GoteFigure build sprints. Every codi
 **Success criteria, in priority order:**
 1. Selling works flawlessly: browse → product → cart → checkout with zero confusion, on a phone.
 2. The site is visibly *his art, moving* — distinctive enough that people share it.
-3. $0–5/month fixed running cost; owner can operate it alone.
+3. ~$0/month fixed running cost (hard ceiling $5); owner can operate it alone.
 4. Feeds the YouTube ↔ store flywheel.
 
 **Anti-goal:** a generic template with art pasted on (the old site was Shopify's stock "Debut" theme — its layout is explicitly NOT an influence; its *content* — product names, about copy, logo — is reused).
@@ -24,7 +24,7 @@ This is the global context document for all GoteFigure build sprints. Every codi
 
 | Constraint | Value |
 |---|---|
-| Fixed monthly cost | ~$0 (Fourthwall $0/mo + Cloudflare Pages free tier) |
+| Fixed monthly cost | ~$0, ceiling $5/mo (Fourthwall $0/mo + Cloudflare free tier) |
 | Fulfillment | Mixed, undecided per-line: apparel leans POD; posters + stickers printed locally (poster shop near owner) and self-shipped. Architecture must keep fulfillment **swappable per product** |
 | Payment security | Card data must never touch our code (hosted checkout only) |
 | Mobile | First-class; all signature moments work on mid-range phones |
@@ -107,11 +107,12 @@ All paths relative to project root. Quality caveats are load-bearing — respect
 
 Phone screenshots with IG chrome — **never lift art from these**; they are archive-content material (About page faux-feed) and design-language reference (colorway triptych, drop-announcement voice). All original art must come from source files.
 
-### 4.4 Owner asset to-dos (non-blocking)
+### 4.4 Owner asset to-dos (non-blocking for the architecture; the .ai hunt is blocking per-SKU — see §5 fallback policy)
 
 1. Locate .ai source files (Illustrator session screenshots prove they exist) + possible *figure 1/3* PDFs.
 2. Hand-letter ~6 display words on paper, photograph straight-on.
 3. Eventually: flat-lay or clean product shots per SKU; confirm crochet bucket hat as SKU or not.
+4. Process material, when convenient: photos of paper sketches / WIP shots of pieces that became products (feeds the §6 About "process moments"). Format guidance for ALL future art handoffs: **SVG exports from Illustrator are the ideal format** (text-based — costs Claude almost nothing to read AND is production-ready); otherwise PNG/JPG at ~1500–2000px; avoid PDFs where an export exists.
 
 ## 5. Catalog model
 
@@ -141,7 +142,7 @@ Product data is **build-time content** (Astro Content Layer) hydrated from the F
 1. **HOME — the gallery door.** Intro animation (§7.1) → full-bleed hero (`profile pic.jpg` or rotated `Web Hero 3`, page background continues the photo's sky as a sampled CSS gradient) → featured products (3–4) → "two eras" teaser strip → latest 3 YouTube videos (build-time RSS) → email/drops signup → footer (socials, the stitch-glyph dust settles here).
 2. **SHOP — the core.** Filter: type (Apparel / Posters / Stickers) × era (OG '20 / New '26), with personality labels. **Product art, not photography, is the card face** — art on a flat garment-color swatch inside the oval mask; hover/long-press crossfades to the mapped lifestyle photo (Online Ceramics motion pattern, near-zero JS). Poster/sticker cards sized differently than apparel — salon wall, not warehouse grid. Sold-out: "gone — for now"; its CTA is the §8.4 newsletter signup with the product name attached as a tag/note — there is no per-product restock backend, and none is needed.
 3. **PRODUCT (PDP) — the signature moment.** Ink Bloom entry (§7.3). Art front-and-center; garment-color/size variants; honest sizing note; one unmissable add-to-cart (alien beam-up micro-animation on add, §7.5); lifestyle photo where one exists; margin-note annotation; posters get the local-print provenance line; related items strip.
-4. **ABOUT — the story.** Founded-in-COVID origin → dormant years owned, not hidden → archive: old IG posts as a lo-fi faux-feed (drawn phone bezel, captions/comments preserved verbatim — "This is hella sick") → the 2026 chapter: YouTube embed + subscribe hook + latest videos. Stipple rabbit stroke-draws on scroll-enter.
+4. **ABOUT — the story.** Founded-in-COVID origin → dormant years owned, not hidden → archive: old IG posts as a lo-fi faux-feed (drawn phone bezel, captions/comments preserved verbatim — "This is hella sick") → the 2026 chapter: YouTube embed + subscribe hook + latest videos. Stipple rabbit stroke-draws on scroll-enter. **Process moments (owner request, content-permitting):** the art is made paper → ink → Illustrator vector; show that as small "evolution strips" (sketch / ink / final) beside featured pieces — the nine-head small-to-large lineup already speaks this language.
 5. **CART — slide-out drawer**, never a page-leave. Ink-styled; sticker impulse row; clear shipping expectations (POD items ship separately from posters — say so honestly); single CTA → Fourthwall hosted checkout. Waiting rabbit (§7.4) during cart API calls.
 6. **404 — the shareable easter egg.** Full-bleed OG Rabbit 02, spiral-spinning googly eyes, chattering buck teeth, handwritten "nothing here, man" + link home.
 
@@ -188,7 +189,7 @@ Cursor-tracked googly pupils (one eye lags ~80ms — the deranged charm; clamped
 
 ### 8.2 Data flow
 
-Rebuild mechanics: CI builds on git push; a **GitHub Actions weekly cron** hits a **Cloudflare deploy hook**; the same hook URL is the owner's "rebuild now" bookmark for after Fourthwall dashboard edits (optionally wired to Fourthwall `PRODUCT_UPDATED`/`COLLECTION_UPDATED` webhooks later). Free cap is 500 builds/month — this cadence uses under 2% of it. Build policy: a failed Fourthwall product fetch **fails the build loudly** (never ship an empty shop); a failed YouTube RSS fetch falls back to the last committed snapshot.
+Rebuild mechanics: CI builds on git push; a **GitHub Actions weekly cron** hits a **Cloudflare deploy hook**; the same hook URL is the owner's "rebuild now" bookmark for after Fourthwall dashboard edits (optionally wired to Fourthwall `PRODUCT_UPDATED`/`COLLECTION_UPDATED` webhooks later). Build quota: if CI builds run in GitHub Actions with `wrangler deploy`, Cloudflare imposes no build cap at all (Workers Builds' own free tier meters ~3,000 build minutes/mo; legacy Pages allowed 500 builds/mo) — any of these fits this cadence with enormous margin. Build policy: a failed Fourthwall product fetch **fails the build loudly** (never ship an empty shop); a failed YouTube RSS fetch falls back to the last committed snapshot.
 
 ```
 BUILD TIME (git push · weekly cron → deploy hook · owner "rebuild now" hook)
@@ -212,7 +213,7 @@ Cart-token hygiene: the cart island validates the stored token via `getCart()` o
 
 ### 8.3 Commerce adapter (the swap seam)
 
-All commerce calls go through `src/lib/commerce/` exposing exactly: `getProducts()`, `getProduct(handle)`, `getCart(token)`, `createCart()`, `addToCart()`, `updateItem()` (quantity 0 = remove), `getCheckoutUrl()`. The directory defines the neutral domain types — `Product`, `Variant`, `Cart`, `LineItem` — and **no Fourthwall types leak outside it**. Fourthwall is implementation #1; a future move to Shopify/Stripe = new implementation file + re-point; pages and islands never change.
+All commerce calls go through `src/lib/commerce/` exposing exactly: `getProducts()`, `getProduct(handle)`, `createCart()`, `getCart(token)`, `addToCart(token, variantId, qty)`, `updateItem(token, lineId, qty)` (qty 0 = remove), `getCheckoutUrl(token)`. The directory defines the neutral domain types — `Product`, `Variant`, `Cart`, `LineItem` — and **no Fourthwall types leak outside it**. Fourthwall is implementation #1; a future move to Shopify/Stripe = new implementation file + re-point; pages and islands never change.
 
 Fourthwall reality notes for the build sprint: there is **no list-all-products endpoint** — `getProducts()` = List Collections → Get Collection Products; PDPs use Get Product by Slug; auth is the `storefront_token` passed as a query parameter.
 
@@ -257,7 +258,7 @@ gotefigure-site/
 ## 11. Build phases (2-week shape; detail lives in the implementation plan)
 
 1. **Foundation** — repo, Astro 6 scaffold, tokens, fonts, layout shell, Cloudflare deploy pipeline. *Exit: empty-but-branded site live on a preview URL.*
-2. **Asset pipeline** — trace/clean priority art (nine-head lineup, silhouette, alien, rabbit eyes, glyphs); rotation/cleanup fixes; production SVG set. *Exit: `public/art/` populated.*
+2. **Asset pipeline** — trace/clean priority art (nine-head lineup, silhouette, alien, rabbit eyes, glyphs); rotation/cleanup fixes; production SVG set. *Exit: `public/art/` populated AND each asset animates as §7 specifies (the §4.1 contract).*
 3. **Commerce spine** — Fourthwall store setup (owner) + adapter + content layer + shop/PDP/cart-drawer functional with placeholder styling. *Exit: a real test purchase completes.*
 4. **The art layer** — §7 signature moments + micro-layer + 404. *Exit: motion system on-budget on a mid-range phone.*
 5. **Story & layers** — Home assembly, About/archive, YouTube strip, newsletter, info pages. *Exit: content-complete.*
@@ -293,6 +294,7 @@ The owner's Token Optimization Protocol (2026-06-10) is standing law for this re
 | Per-SKU art fallback (mockup render vs defer) for §5 ⚠️ rows | Rotem | Phase 3, at Fourthwall setup |
 | OG-image template design | build sprint | Phase 6 |
 | Crochet bucket hat SKU | Rotem | whenever |
+| Process-moments content (sketch photos available vs skip at launch) | Rotem | Phase 5 |
 
 ## 14. Reference library (validated 2026-06)
 
