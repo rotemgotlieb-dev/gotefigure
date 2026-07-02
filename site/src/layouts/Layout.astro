@@ -41,6 +41,11 @@ const { title, description } = Astro.props;
     <div transition:persist="cart" style="position: relative; z-index: var(--z-drawer);">
       <CartDrawer />
     </div>
+    <!-- Ink flood page-transition overlay (§7.2 Phase 2): persists across swaps; driven by animations/flood-nav -->
+    <svg class="gf-flood" transition:persist="flood" aria-hidden="true" preserveAspectRatio="none"
+      style="position:fixed;inset:0;width:100%;height:100%;z-index:9000;pointer-events:none;opacity:0;display:block;will-change:opacity">
+      <path class="gf-flood-path" d="" fill="#111111"></path>
+    </svg>
     <script>
       import '../animations/index';
     </script>

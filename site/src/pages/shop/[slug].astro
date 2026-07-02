@@ -67,7 +67,7 @@ const shipNote = p.type === 'apparel'
             </fieldset>
           )}
           {p.variants.length === 1 && <input type="hidden" name="variant" value={p.variants[0].id} data-price={p.variants[0].price} />}
-          <button type="submit" class="add-btn" data-add-btn disabled={!p.available}>
+          <button type="submit" class="add-btn" data-add-btn data-ink disabled={!p.available}>
             <span class="add-label">{p.available ? 'Add to cart' : 'gone — for now'}</span>
             <svg class="add-check" viewBox="0 0 28 24" aria-hidden="true">
               <path d="M3 13.2 Q9 17 11.5 19.5 Q16 10 25 3.5" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" pathLength="1"/>
@@ -168,9 +168,10 @@ const shipNote = p.type === 'apparel'
   .add-btn:not(:disabled):active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
   .add-btn:disabled { background: var(--paper-dim); font-style: italic; text-transform: none; box-shadow: none; font-family: var(--font-hand); }
 
-  .add-check { position: absolute; inset: 0; margin: auto; width: 26px; height: 22px; }
+  .add-check { position: absolute; inset: 0; margin: auto; width: 26px; height: 22px; opacity: 0; }
   .add-check path { stroke-dasharray: 1; stroke-dashoffset: 1; }
   .add-btn.added .add-label { opacity: 0; }
+  .add-btn.added .add-check { opacity: 1; }
   .add-btn.added .add-check path { animation: draw-check 300ms var(--ease-arrive) 60ms forwards; }
   @keyframes draw-check { to { stroke-dashoffset: 0; } }
   @media (prefers-reduced-motion: reduce) {

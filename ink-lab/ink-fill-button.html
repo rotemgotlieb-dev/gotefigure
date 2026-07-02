@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#F2F1EA;color:#111111;font-family:'Space Mono',monospace;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .gf-fill{shape-rendering:geometricPrecision}
+  .gf-flood-path{shape-rendering:geometricPrecision}
+</style>
+</head>
+<body>
+<div style="position:fixed;inset:0;z-index:1;pointer-events:none;mix-blend-mode:multiply;opacity:.42;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E&quot;)"></div>
+
+<div style="position:relative;z-index:2">
+
+  <!-- ============ SCREEN A — mock home ============ -->
+  <section data-screen="A" data-screen-label="Home (A)" style="min-height:100dvh;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px">
+    <div style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:#2AA79B;margin-bottom:16px">GoteFigure · phase 02 · flood nav</div>
+    <h1 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(34px,6.4vw,72px);line-height:1.3;margin:0 0 24px;text-align:center;white-space:nowrap">It&rsquo;s all still wet.</h1>
+    <p style="font-family:'Space Mono',monospace;font-size:13px;letter-spacing:.04em;color:#555;margin:22px 0 40px;text-align:center;max-width:34ch">Click to commit &mdash; the ink floods the screen and carries you into the placard.</p>
+
+    <button data-ink-btn data-nav="B" type="button" style="position:relative;overflow:visible;isolation:isolate;border:2.5px solid #111;background:transparent;border-radius:13px;padding:17px 30px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:15px;letter-spacing:.04em;color:#111;outline-offset:4px">
+      <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:11px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#111111"></path></svg></span>
+      <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#111;pointer-events:none">Shop the drop &rarr;</span>
+      <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F2F1EA;pointer-events:none;text-shadow:0 0 1px rgba(17,17,17,.35)">Shop the drop &rarr;</span>
+      <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Shop the drop &rarr;</span>
+      <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+    </button>
+  </section>
+
+  <!-- ============ SCREEN B — mock product placard ============ -->
+  <section data-screen="B" data-screen-label="Placard (B)" style="display:none;min-height:100dvh;width:100%;background:#EAE7DC;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px">
+    <div style="width:100%;max-width:760px">
+
+      <button data-ink-btn data-nav="A" type="button" style="position:relative;overflow:visible;isolation:isolate;border:2.5px solid #111;background:transparent;border-radius:11px;padding:11px 20px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.04em;color:#111;outline-offset:4px;margin-bottom:34px">
+        <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:9px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#111111"></path></svg></span>
+        <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#111;pointer-events:none">&larr; Back</span>
+        <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F2F1EA;pointer-events:none;text-shadow:0 0 1px rgba(17,17,17,.35)">&larr; Back</span>
+        <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">&larr; Back</span>
+        <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+      </button>
+
+      <div style="display:flex;flex-wrap:wrap;gap:36px;align-items:center">
+        <div style="flex:1 1 240px;min-width:220px;aspect-ratio:1;border:2.5px solid #111;border-radius:14px;background-image:repeating-linear-gradient(45deg,#E0DDD1,#E0DDD1 9px,#E7E4D8 9px,#E7E4D8 18px);display:flex;align-items:flex-end;justify-content:flex-start;padding:14px">
+          <span style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#111;background:rgba(234,231,220,.85);padding:5px 9px;border-radius:6px">product shot</span>
+        </div>
+        <div style="flex:1 1 260px;min-width:240px">
+          <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#F2F1EA;background:#2AA79B;padding:5px 11px;border-radius:6px;display:inline-block">New · Drop 01</div>
+          <h2 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(38px,5.4vw,58px);line-height:1.3;margin:14px 0 10px;white-space:nowrap">The Nine Heads</h2>
+          <div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;margin-bottom:18px">$34</div>
+          <p style="font-family:'Space Mono',monospace;font-size:12.5px;line-height:1.7;color:#444;margin:0 0 24px;max-width:34ch">Hand-drawn ink on heavyweight cotton. The cast that lived in the margins, finally out.</p>
+
+          <button data-ink-btn type="button" style="position:relative;overflow:visible;isolation:isolate;border:2.5px solid #111;background:transparent;border-radius:13px;padding:16px 26px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.04em;color:#111;outline-offset:4px">
+            <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:11px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#111111"></path></svg></span>
+            <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#111;pointer-events:none">Add to the Satchel &mdash; $34</span>
+            <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F2F1EA;pointer-events:none;text-shadow:0 0 1px rgba(17,17,17,.35)">Add to the Satchel &mdash; $34</span>
+            <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Add to the Satchel &mdash; $34</span>
+            <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHASE 04 — ink flows around objects (hero showcase) ============ -->
+  <section data-hero data-screen-label="Phase 04 hero" style="position:relative;width:100%;min-height:880px;background:#F2F1EA;overflow:hidden">
+    <div style="position:absolute;top:34px;left:0;right:0;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:#2AA79B">GoteFigure &middot; phase 04 &middot; ink flows around objects</div>
+
+    <svg class="gf-hero-ink" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;overflow:visible"><g class="gf-hero-runs"></g></svg>
+
+    <button data-ink-hero type="button" style="position:absolute;top:80px;left:50%;transform:translateX(-50%);z-index:3;overflow:visible;isolation:isolate;border:2.5px solid #111;background:transparent;border-radius:13px;padding:17px 30px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:15px;letter-spacing:.04em;color:#111;outline-offset:4px">
+      <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:11px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#111111"></path></svg></span>
+      <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#111;pointer-events:none">Pour the ink &darr;</span>
+      <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F2F1EA;pointer-events:none;text-shadow:0 0 1px rgba(17,17,17,.35)">Pour the ink &darr;</span>
+      <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Pour the ink &darr;</span>
+    </button>
+
+    <div data-ink-obstacle aria-hidden="true" style="position:absolute;top:252px;left:50%;transform:translateX(calc(-50% - 100px));width:128px;height:128px;border-radius:50%;z-index:2;border:2.5px solid #111;background-color:#EFEDE3;background-image:repeating-linear-gradient(45deg,#E6E3D8,#E6E3D8 8px,#F1EFE6 8px,#F1EFE6 16px)"></div>
+
+    <div data-ink-obstacle aria-hidden="true" style="position:absolute;top:486px;left:50%;transform:translateX(-50%);width:380px;height:128px;border-radius:20px;z-index:2;border:2.5px solid #111;background-color:#EFEDE3;background-image:repeating-linear-gradient(45deg,#E6E3D8,#E6E3D8 8px,#F1EFE6 8px,#F1EFE6 16px)"></div>
+
+    <div style="position:absolute;bottom:26px;left:0;right:0;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8a857a">Hover the button &mdash; ink pours down and flows around the art.</div>
+  </section>
+
+  <!-- ============ PHASE 05 — global auto: drips weave around UNTAGGED real elements ============ -->
+  <section data-screen-label="Phase 05 global" style="position:relative;width:100%;min-height:540px;background:#F2F1EA;overflow:hidden">
+    <div style="position:absolute;top:30px;left:0;right:0;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:#2AA79B">GoteFigure &middot; phase 05 &middot; ink avoids everything (auto, untagged)</div>
+
+    <button data-ink-btn type="button" style="position:absolute;top:64px;left:50%;transform:translateX(-50%);z-index:5;overflow:visible;isolation:isolate;border:2.5px solid #111;background:transparent;border-radius:13px;padding:17px 30px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:15px;letter-spacing:.04em;color:#111;outline-offset:4px">
+      <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:11px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#111111"></path></svg></span>
+      <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#111;pointer-events:none">Pour over the page &darr;</span>
+      <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F2F1EA;pointer-events:none;text-shadow:0 0 1px rgba(17,17,17,.35)">Pour over the page &darr;</span>
+      <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Pour over the page &darr;</span>
+      <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+    </button>
+
+    <!-- untagged, ordinary page elements the ink must weave around -->
+    <div style="position:absolute;top:230px;left:calc(50% - 168px);width:150px;height:104px;border-radius:14px;border:2.5px solid #111;background-color:#EFEDE3;background-image:repeating-linear-gradient(45deg,#E6E3D8,#E6E3D8 8px,#F1EFE6 8px,#F1EFE6 16px)"></div>
+    <div style="position:absolute;top:244px;left:calc(50% + 28px);width:96px;height:96px;border-radius:50%;border:2.5px solid #111;background-color:#EFEDE3;background-image:repeating-linear-gradient(45deg,#E6E3D8,#E6E3D8 8px,#F1EFE6 8px,#F1EFE6 16px)"></div>
+    <div style="position:absolute;top:336px;left:50%;transform:translateX(-50%);width:248px;height:56px;border-radius:16px;border:2.5px solid #111;background-color:#EFEDE3;background-image:repeating-linear-gradient(45deg,#E6E3D8,#E6E3D8 8px,#F1EFE6 8px,#F1EFE6 16px)"></div>
+
+    <div style="position:absolute;bottom:22px;left:0;right:0;text-align:center;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:#8a857a">Hover &mdash; nothing here is tagged; the ink finds these boxes and weaves around them.</div>
+  </section>
+
+</div>
+
+<!-- ============ FLOOD OVERLAY (single full-viewport element) ============ -->
+<svg class="gf-flood" preserveAspectRatio="none" aria-hidden="true" style="position:fixed;inset:0;width:100vw;height:100dvh;z-index:9000;pointer-events:none;opacity:0;display:block"><path class="gf-flood-path" d="" fill="#111111"></path></svg>
+<script>
+class DCLogic {}
+class Component extends DCLogic {
+  componentDidMount(){
+    // ===================== TUNABLE KNOBS =====================
+    const K = this.K = {
+      FILL_MS:         920,  // ink descend duration (top -> bottom)
+      SNAP_MS:         430,  // retract / snap-up duration
+      SNAP_OVERSHOOT:  1.7,  // easeOutBack overshoot magnitude
+      DRIP_SPACING:    26,   // target px between drips — COUNT scales with button width (fixes wide=too-sparse / narrow=too-crowded)
+      DRIP_MIN:        3,    // fewest drips on a very narrow button
+      DRIP_MAX:        16,   // most drips on a very wide button
+      DRIP_MAX_LEN:    80,   // longest a "leader" run reaches (px)
+      DRIP_GROW_PXPS:  46,   // viscous downward growth speed (px / second)
+      DRIP_HEAD_R:     3.6,  // rounded bulb-head radius at the tip (px)
+      DRIP_TOPW:       7,    // run width where it meets the button (px)
+      DRIP_RETRACT_MS: 360,  // recoil-up duration on leave (ms)
+      DRIP_AVOID:      true, // drips auto-route around real elements beneath the button (global "flow around")
+      DRIP_REACH:      320,  // how far below a button drips scan for + can extend to wrap obstacles (px)
+      DRIP_OBSTACLE_GAP: 9,  // breathing gap drips keep around an element (px)
+      DRIP_SOFT:       14,   // soft-clamp radius (rounds where a drip meets an element)
+      DRIP_LEAD:       18,   // eased lead-in/out above/below a rounded element (px)
+      DRIP_WOBBLE:     2,    // subtle organic waver so drips aren't ruler-straight (px)
+      MENISCUS_H:      5,    // centre surface-tension bulge (px)
+      RIPPLE_AMP:      2.4,  // waterline ripple amplitude (px)
+      FALL_ZONE:       150,  // px below the button the runs can travel
+      SEG:             40,   // waterline tessellation
+      // ---- Phase 2: flood-to-navigate ----
+      FLOOD_COVER_MS:  600,  // ink erupts from button & sheets across the viewport
+      FLOOD_HOLD_MS:   80,   // fully-inked beat (screen swap happens here, hidden)
+      FLOOD_REVEAL_MS: 700,  // ink drains off to uncover the new screen
+      FLOOD_EDGE_AMP:  26,   // wavy-front amplitude on the flood edges (px)
+      REVEAL_DIR:      'down',// 'down' (drain off bottom) | 'up' (drain off top)
+      // ---- Phase 4: ink flows around objects (hero showcase) ----
+      RUN_LENGTH:      560,  // hero-scale: how far the runs pour down
+      OBSTACLE_GAP:    13,   // breathing gap between ink and art (px)
+      FLOW_SPLIT:      true, // a centred run splits & hugs both sides of a wide object
+      POOL:            false,// Tier 2: ink pools on the top edge then overflows
+      HERO_RUN_COUNT:  6,    // rivulets poured from the hero CTA
+      HERO_GROW_PXPS:  230,  // pour speed down the hero (px / second)
+      HERO_RETRACT_MS: 520,  // recoil-up duration on leave
+      HERO_TOPW:       14,   // run width where it meets the button (px) — wetter base
+      HERO_HEAD_R:     5,    // bulb-head radius at the tip (px)
+      HERO_WOBBLE:     3,    // subtle organic horizontal wobble amplitude (px)
+      HERO_FAN:        1.6,  // how far the curtain of rivulets fans outward as it falls
+      HERO_SOFT:       16,   // soft-clamp radius — rounds where a rivulet meets a silhouette (no kinks)
+      HERO_LEADIN:     26,   // vertical ease distance entering/leaving a rect diversion (px)
+      SPLIT_MIN_W:     200   // min object width to allow a split
+    };
+    // ========================================================
+    const reduce  = this.reduce  = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const canHover = this.canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
+
+    const easeOutCubic = p => 1 - Math.pow(1 - p, 3);
+    const s = K.SNAP_OVERSHOOT, c3 = s + 1;
+    const easeOutBack = p => 1 + c3 * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2);
+
+    // ---- flood overlay refs + screen state
+    this.floodSvg  = document.querySelector('.gf-flood');
+    this.floodPath = document.querySelector('.gf-flood-path');
+    this.screens   = { A: document.querySelector('[data-screen="A"]'), B: document.querySelector('[data-screen="B"]') };
+    this.screen    = 'A';
+    this.floodEase = p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // easeInOutCubic
+    this._sizeFlood = () => { this.fvW = innerWidth; this.fvH = innerHeight; if (this.floodSvg) this.floodSvg.setAttribute('viewBox', `0 0 ${this.fvW} ${this.fvH}`); };
+    this._sizeFlood();
+    addEventListener('resize', this._sizeFlood, { passive: true });
+
+    this.ctrls = [...document.querySelectorAll('[data-ink-btn]')]
+      .map(btn => this._make(btn, { K, reduce, canHover, easeOutCubic, easeOutBack }));
+
+    const hero = document.querySelector('[data-hero]');
+    if (hero) this.heroCtrl = this._makeHero(hero, { K, reduce, canHover, easeOutCubic, easeOutBack });
+  }
+
+  componentWillUnmount(){
+    (this.ctrls || []).forEach(c => c.destroy());
+    if (this.heroCtrl) this.heroCtrl.destroy();
+    cancelAnimationFrame(this._fRaf);
+    removeEventListener('resize', this._sizeFlood);
+  }
+
+  // ---------------- Phase 2: flood-to-navigate ----------------
+  _swap(target){
+    this.screens[this.screen].style.display = 'none';
+    this.screens[target].style.display = 'flex';
+    this.screen = target;
+    try { scrollTo(0, 0); } catch (e) {}
+  }
+
+  _flood(target, btn){
+    if (this.flooding || target === this.screen) return;
+    if (this.reduce) { this._swap(target); return; }                 // reduced-motion: instant swap, no flood
+    const r = btn.getBoundingClientRect();
+    this.fOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    const W = this.fvW, H = this.fvH, o = this.fOrigin;
+    this.fRmax = Math.max(Math.hypot(o.x, o.y), Math.hypot(W - o.x, o.y), Math.hypot(o.x, H - o.y), Math.hypot(W - o.x, H - o.y)) + this.K.FLOOD_EDGE_AMP + 60;
+    this.flooding = true; this.fTarget = target; this.fPhase = 'cover'; this.fT0 = performance.now();
+    this.floodSvg.style.opacity = '1';
+    cancelAnimationFrame(this._fRaf);
+    this._fRaf = requestAnimationFrame(this._floodTick);
+  }
+
+  _floodTick = (now) => {
+    const K = this.K, W = this.fvW, H = this.fvH, P = this.floodPath;
+    if (this.fPhase === 'cover') {
+      let p = (now - this.fT0) / K.FLOOD_COVER_MS; if (p >= 1) p = 1;
+      P.setAttribute('d', this._coverPath(this.floodEase(p), now));
+      if (p >= 1) { this._swap(this.fTarget); this.fPhase = 'hold'; this.fT0 = now; P.setAttribute('d', `M 0 0 L ${W} 0 L ${W} ${H} L 0 ${H} Z`); }
+    } else if (this.fPhase === 'hold') {
+      if (now - this.fT0 >= K.FLOOD_HOLD_MS) { this.fPhase = 'reveal'; this.fT0 = now; }
+    } else if (this.fPhase === 'reveal') {
+      let p = (now - this.fT0) / K.FLOOD_REVEAL_MS; if (p >= 1) p = 1;
+      P.setAttribute('d', this._revealPath(this.floodEase(p), now));
+      if (p >= 1) { this.floodSvg.style.opacity = '0'; P.setAttribute('d', ''); this.flooding = false; this._fRaf = 0; return; }
+    }
+    this._fRaf = requestAnimationFrame(this._floodTick);
+  };
+
+  _coverPath(e, now){                                                // wavy circle blooming from the button origin
+    const K = this.K, o = this.fOrigin, R = e * this.fRmax;
+    const amp = K.FLOOD_EDGE_AMP * Math.min(1, R / 40), et = now * 0.006, N = 56;
+    let d = '';
+    for (let i = 0; i <= N; i++) {
+      const a = i / N * Math.PI * 2;
+      const rr = R + amp * 0.7 * Math.sin(a * 5 + et) + amp * 0.4 * Math.sin(a * 9 - et * 1.3);
+      d += (i ? ' L ' : 'M ') + (o.x + rr * Math.cos(a)).toFixed(1) + ' ' + (o.y + rr * Math.sin(a)).toFixed(1);
+    }
+    return d + ' Z';
+  }
+
+  _revealPath(e, now){                                               // ink drains off with an organic wavy trailing edge
+    const K = this.K, W = this.fvW, H = this.fvH, amp = K.FLOOD_EDGE_AMP, N = 48, et = now * 0.001;
+    const edge = x => amp * 0.6 * Math.sin(x * 0.012 + et * 4) + amp * 0.4 * Math.sin(x * 0.03 - et * 6);
+    const span = H + amp * 2 + 30;
+    if (K.REVEAL_DIR === 'up') {                                     // uncover bottom-up, ink exits top
+      const wy = H + amp - e * span;
+      if (wy <= -amp - 5) return '';
+      let d = `M 0 0 L ${W} 0`;
+      for (let i = 0; i <= N; i++) { const x = W * (1 - i / N); d += ` L ${x.toFixed(1)} ${(wy + edge(x)).toFixed(1)}`; }
+      return d + ' Z';
+    }
+    const wy = e * span - amp;                                       // default 'down': uncover top-down, ink exits bottom
+    if (wy >= H + amp + 5) return '';
+    let d = `M 0 ${H} L ${W} ${H}`;
+    for (let i = 0; i <= N; i++) { const x = W * (1 - i / N); d += ` L ${x.toFixed(1)} ${(wy + edge(x)).toFixed(1)}`; }
+    return d + ' Z';
+  }
+
+  // ---------------- Phase 4: ink flows around objects (hero only) ----------------
+  _makeHero(section, env){
+    const { K, reduce, canHover, easeOutCubic, easeOutBack } = env;
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const btn = section.querySelector('[data-ink-hero]');
+    const fillSvg = btn.querySelector('.gf-fillsvg');
+    const fillPath = btn.querySelector('.gf-fill');
+    const paper = btn.querySelector('.gf-lbl-paper');
+    const heroSvg = section.querySelector('.gf-hero-ink');
+    const heroG = section.querySelector('.gf-hero-runs');
+    const obstacleEls = [...section.querySelectorAll('[data-ink-obstacle]')];
+    const GAP = K.OBSTACLE_GAP, STEP = 4;
+
+    let bW = 0, bH = 0, originX = 0, originY = 0, obs = [], heroRuns = [], heroPools = [];
+    let f = 0, anim = null, hovering = false, phase = 0;
+    let lastT = 0, running = false, raf = 0, pendingSnapAt = 0;
+
+    // ---- button fill + label (same mechanic as Phase 1; no short button drips here) ----
+    const waterY = (x, base) => { const men = K.MENISCUS_H * Math.sin(Math.PI * x / bW); const rip = K.RIPPLE_AMP * (Math.sin(x * 0.045 + phase * 2.1) + 0.5 * Math.sin(x * 0.105 - phase * 3.0)); return base + men + rip; };
+    const buildFill = () => { if (f <= 0.002) { fillPath.setAttribute('d', ''); return; } const base = f * bH; let d = `M 0 0 L ${bW} 0`; for (let i = K.SEG; i >= 0; i--) { const x = (i / K.SEG) * bW; d += ` L ${x.toFixed(1)} ${waterY(x, base).toFixed(1)}`; } fillPath.setAttribute('d', d + ' Z'); };
+    const buildLabel = () => { const wY = f * bH + K.MENISCUS_H; const m = `linear-gradient(to bottom, #000 ${(wY - 1.2).toFixed(1)}px, rgba(0,0,0,0) ${(wY + 1.2).toFixed(1)}px)`; paper.style.webkitMaskImage = m; paper.style.maskImage = m; };
+
+    // ---- geometry: route a run's centreline around the known obstacle boxes ----
+    const densify = (poly) => { const out = [{ x: poly[0][0], y: poly[0][1] }]; for (let i = 1; i < poly.length; i++) { const a = poly[i - 1], b = poly[i]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 1e-3) continue; const steps = Math.max(1, Math.round(L / STEP)); for (let k = 1; k <= steps; k++) { const t = k / steps; out.push({ x: a[0] + (b[0] - a[0]) * t, y: a[1] + (b[1] - a[1]) * t }); } } return out; };
+    const smooth = (arr, passes) => { let a = arr; for (let p = 0; p < passes; p++) a = a.map((pt, i) => { if (i === 0 || i === a.length - 1) return { x: pt.x, y: pt.y }; const q = a[i - 1], r = a[i + 1]; return { x: q.x * 0.25 + pt.x * 0.5 + r.x * 0.25, y: q.y * 0.25 + pt.y * 0.5 + r.y * 0.25 }; }); return a; };
+    const withS = (a) => { a[0].s = 0; let acc = 0; for (let i = 1; i < a.length; i++) { acc += Math.hypot(a[i].x - a[i - 1].x, a[i].y - a[i - 1].y); a[i].s = acc; } return a; };
+
+    // route a streamline that hugs each obstacle's TRUE silhouette (offset arc around a
+    // circle, rounded outline around a rect) at a constant gap, with eased lead-in/out so the
+    // ink curves in and out of the diversion instead of jogging at right angles.
+    const SMOOTH01 = p => p <= 0 ? 0 : p >= 1 ? 1 : p * p * (3 - 2 * p);
+    const BIGX = 1e5;
+    const wob = (x0, y) => { const s = x0 * 0.017; return K.HERO_WOBBLE * (Math.sin(y * 0.028 + s) * 0.6 + Math.sin(y * 0.012 - s * 1.7) * 0.4); };
+    const smin = (a, b, k) => { const h = Math.max(0, k - Math.abs(a - b)) / k; return Math.min(a, b) - h * h * k * 0.25; };  // rounded min
+    const smax = (a, b, k) => -smin(-a, -b, k);                                                                              // rounded max
+    const boundaryX = (ob, y, side) => {
+      if (ob.circle) {                                               // exact offset-circle arc
+        const R = ob.r + GAP, dy = y - ob.cy;
+        if (Math.abs(dy) >= R) return null;
+        const dx = Math.sqrt(R * R - dy * dy);
+        return side === 'left' ? ob.cx - dx : ob.cx + dx;
+      }
+      const lead = K.HERO_LEADIN;                                    // rounded-rect: hug the rounded outline
+      const t2 = ob.top - GAP, b2 = ob.bottom + GAP, l2 = ob.left - GAP, r2 = ob.right + GAP;
+      if (y <= t2 - lead || y >= b2 + lead) return null;
+      const R = Math.min(ob.cr + GAP, (r2 - l2) / 2, (b2 - t2) / 2);
+      let t = 1;
+      if (y < t2) t = SMOOTH01((y - (t2 - lead)) / lead);            // ease in above the top edge
+      else if (y > b2) t = SMOOTH01((b2 + lead - y) / lead);         // ease out below the bottom edge
+      const yc = Math.max(t2, Math.min(b2, y));
+      let bx;
+      if (side === 'left') {
+        if (yc <= t2 + R) bx = (l2 + R) - Math.sqrt(Math.max(0, R * R - (yc - (t2 + R)) ** 2));
+        else if (yc >= b2 - R) bx = (l2 + R) - Math.sqrt(Math.max(0, R * R - (yc - (b2 - R)) ** 2));
+        else bx = l2;
+        return bx + (1 - t) * BIGX;                                  // lead zones => far right => no-op under min
+      }
+      if (yc <= t2 + R) bx = (r2 - R) + Math.sqrt(Math.max(0, R * R - (yc - (t2 + R)) ** 2));
+      else if (yc >= b2 - R) bx = (r2 - R) + Math.sqrt(Math.max(0, R * R - (yc - (b2 - R)) ** 2));
+      else bx = r2;
+      return bx - (1 - t) * BIGX;                                    // lead zones => far left => no-op under max
+    };
+    const buildCenterline = (x0, sideFor) => {                       // sample the silhouette-hugging streamline top->bottom
+      const pts = []; const yEnd = originY + K.RUN_LENGTH;
+      for (let y = originY; y <= yEnd + 0.5; y += STEP) {
+        const depth = (y - originY) / K.RUN_LENGTH;                  // curtain fans outward as it falls
+        let x = originX + (x0 - originX) * (1 + K.HERO_FAN * depth) + wob(x0, y);
+        for (const ob of obs) {
+          const side = sideFor(ob), b = boundaryX(ob, y, side);
+          if (b == null) continue;
+          if (side === 'left') x = smin(x, b, K.HERO_SOFT); else x = smax(x, b, K.HERO_SOFT);   // soft-clamp to the offset silhouette
+        }
+        pts.push([x, y]);
+      }
+      return pts;
+    };
+    const routeColumn = (x) => {
+      let split = null;
+      if (K.FLOW_SPLIT) for (const ob of obs) { if (ob.w >= K.SPLIT_MIN_W && Math.abs(x - ob.cx) < ob.w * 0.14 && ob.bottom + GAP > originY && x >= ob.left - GAP && x <= ob.right + GAP) { split = ob; break; } }
+      const near = ob => x < ob.cx ? 'left' : 'right';
+      if (split) return [buildCenterline(x, ob => ob === split ? 'left' : near(ob)), buildCenterline(x, ob => ob === split ? 'right' : near(ob))];
+      return [buildCenterline(x, near)];
+    };
+
+    const buildRibbon = (dense, headLen, topW, headR) => {                // tapering ink ribbon along a routed centreline
+      if (headLen < 3) return '';
+      const pts = []; for (const p of dense) { if (p.s <= headLen) pts.push(p); else break; }
+      if (pts.length < 2) return '';
+      const n = pts.length, L = Math.max(headLen, pts[n - 1].s);
+      const left = [], right = [];
+      for (let i = 0; i < n; i++) { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)]; let tx = b.x - a.x, ty = b.y - a.y; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl; const px = -ty, py = tx; const hw = Math.max(headR * 0.62, headR + (topW / 2 - headR) * Math.pow(1 - pts[i].s / L, 0.72)); left.push([pts[i].x + px * hw, pts[i].y + py * hw]); right.push([pts[i].x - px * hw, pts[i].y - py * hw]); }
+      let d = 'M ' + left[0][0].toFixed(1) + ' ' + left[0][1].toFixed(1);
+      for (let i = 1; i < n; i++) d += ' L ' + left[i][0].toFixed(1) + ' ' + left[i][1].toFixed(1);
+      d += ' A ' + headR.toFixed(1) + ' ' + headR.toFixed(1) + ' 0 0 1 ' + right[n - 1][0].toFixed(1) + ' ' + right[n - 1][1].toFixed(1);
+      for (let i = n - 1; i >= 0; i--) d += ' L ' + right[i][0].toFixed(1) + ' ' + right[i][1].toFixed(1);
+      return d + ' Z';
+    };
+
+    const drawPools = (g) => { for (const pl of heroPools) { const o = pl.o; if (g < 0.04) { pl.el.setAttribute('d', ''); continue; } const cx = o.cx, topY = o.top - GAP; const halfW = ((o.right - o.left) / 2 + GAP) * Math.min(1, 0.55 + g * 0.5); const ph = Math.min(16, 5 + 12 * g); pl.el.setAttribute('d', `M ${(cx - halfW).toFixed(1)} ${topY.toFixed(1)} Q ${cx.toFixed(1)} ${(topY - ph * 1.7).toFixed(1)} ${(cx + halfW).toFixed(1)} ${topY.toFixed(1)} L ${(cx + halfW).toFixed(1)} ${(topY + 3).toFixed(1)} Q ${cx.toFixed(1)} ${(topY - ph * 0.35).toFixed(1)} ${(cx - halfW).toFixed(1)} ${(topY + 3).toFixed(1)} Z`); } };
+    const drawRun = (r) => { for (const c of r.cl) c.el.setAttribute('d', buildRibbon(c.dense, Math.min(r.len, c.fullLen), r.topW, r.headR)); };
+
+    const makeHeroRuns = () => {
+      heroG.innerHTML = ''; heroRuns = []; heroPools = [];
+      if (K.POOL) for (const o of obs) { if (o.bottom + GAP <= originY) continue; const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', '#111111'); heroG.appendChild(el); heroPools.push({ o, el }); }
+      const n = K.HERO_RUN_COUNT, spread = bW * 0.8;
+      for (let i = 0; i < n; i++) {
+        const t = n === 1 ? 0.5 : i / (n - 1);
+        const x = originX + (t - 0.5) * spread;
+        const cl = routeColumn(x).map(poly => { const dense = withS(smooth(densify(poly), 3)); const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', '#111111'); heroG.appendChild(el); return { dense, fullLen: dense[dense.length - 1].s, el }; });
+        heroRuns.push({ cl, maxFull: Math.max(...cl.map(c => c.fullLen)), topW: K.HERO_TOPW * (0.8 + Math.random() * 0.5), headR: K.HERO_HEAD_R * (0.85 + Math.random() * 0.4), len: 0, retracting: false, retractFrom: 0, retractStart: 0 });
+      }
+    };
+
+    const measure = () => {
+      bW = btn.clientWidth; bH = btn.clientHeight;
+      fillSvg.setAttribute('viewBox', `0 0 ${bW} ${bH}`);
+      const sr = section.getBoundingClientRect();
+      heroSvg.setAttribute('viewBox', `0 0 ${sr.width} ${sr.height}`);
+      const br = btn.getBoundingClientRect();
+      originX = br.left - sr.left + br.width / 2; originY = br.bottom - sr.top;
+      obs = obstacleEls.map(o => {
+        const r = o.getBoundingClientRect();
+        const left = r.left - sr.left, right = r.right - sr.left, top = r.top - sr.top, bottom = r.bottom - sr.top;
+        const w = r.width, h = r.height;
+        const radius = parseFloat(getComputedStyle(o).borderTopLeftRadius) || 0;   // read shape on init/resize only
+        const circle = radius >= Math.min(w, h) / 2 - 1;
+        return { left, right, top, bottom, w, h, cx: (left + right) / 2, cy: (top + bottom) / 2, r: Math.min(w, h) / 2, cr: circle ? Math.min(w, h) / 2 : radius, circle };
+      });
+      makeHeroRuns();
+      if (reduce) { heroRuns.forEach(r => { r.len = r.maxFull; }); f = 1; }    // reduced-motion: already-draped, no pour
+      buildFill(); buildLabel(); heroRuns.forEach(drawRun);
+      if (K.POOL) drawPools(reduce ? 1 : 0);
+    };
+    measure();
+    const ro = new ResizeObserver(measure); ro.observe(section);
+
+    const tick = (now) => {
+      const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016; lastT = now; phase += dt;
+      if (anim) { let p = (now - anim.start) / anim.dur; if (p >= 1) p = 1; f = anim.from + (anim.to - anim.from) * anim.ease(p); if (p >= 1) { f = anim.to; anim = null; } }
+      buildFill(); buildLabel();
+      let any = false, gSum = 0;
+      for (const r of heroRuns) {
+        if (hovering) { const tgt = f > 0.98 ? r.maxFull : 0; if (r.len < tgt) r.len = Math.min(tgt, r.len + K.HERO_GROW_PXPS * dt); else if (r.len > tgt) r.len = Math.max(tgt, r.len - K.HERO_GROW_PXPS * 1.6 * dt); r.retracting = false; }
+        else { if (!r.retracting) { r.retracting = true; r.retractFrom = r.len; r.retractStart = now; } let p = (now - r.retractStart) / K.HERO_RETRACT_MS; if (p >= 1) p = 1; r.len = r.retractFrom * (1 - easeOutCubic(p)); }   // recoil up around the objects
+        drawRun(r); gSum += r.len / (r.maxFull || 1); if (r.len > 0.5) any = true;
+      }
+      if (K.POOL && heroPools.length) drawPools(heroRuns.length ? gSum / heroRuns.length : 0);
+      if (pendingSnapAt && now >= pendingSnapAt) { pendingSnapAt = 0; anim = { from: f, to: 0, start: now, dur: K.SNAP_MS, ease: easeOutBack }; }   // stage 2: button fill drains after runs recoil
+      running = !!(anim || hovering || any || pendingSnapAt);
+      if (running) raf = requestAnimationFrame(tick); else { raf = 0; lastT = 0; }
+    };
+    const start = () => { if (!running) { running = true; lastT = 0; raf = requestAnimationFrame(tick); } };
+
+    const onEnter = () => { hovering = true; pendingSnapAt = 0; if (reduce) { f = 1; buildFill(); buildLabel(); return; } anim = { from: f, to: 1, start: performance.now(), dur: K.FILL_MS, ease: easeOutCubic }; start(); };
+    const onLeave = () => { hovering = false; if (reduce) return; pendingSnapAt = performance.now() + K.HERO_RETRACT_MS * 0.82; start(); };
+
+    if (canHover && !reduce) { btn.addEventListener('pointerenter', onEnter); btn.addEventListener('pointerleave', onLeave); btn.addEventListener('focus', onEnter); btn.addEventListener('blur', onLeave); }
+    else if (!reduce) { btn.addEventListener('click', () => { hovering = true; pendingSnapAt = 0; anim = { from: f, to: 1, start: performance.now(), dur: K.FILL_MS * 0.8, ease: easeOutCubic }; start(); setTimeout(() => { hovering = false; pendingSnapAt = performance.now() + K.HERO_RETRACT_MS * 0.82; start(); }, 2600); }); }
+
+    return { destroy(){ cancelAnimationFrame(raf); ro.disconnect(); heroG.innerHTML = ''; } };
+  }
+
+  _make(btn, env){
+    const { K, reduce, canHover, easeOutCubic, easeOutBack } = env;
+    const fillSvg  = btn.querySelector('.gf-fillsvg');
+    const fillPath = btn.querySelector('.gf-fill');
+    const paper    = btn.querySelector('.gf-lbl-paper');
+    const dripSvg  = btn.querySelector('.gf-dripsvg');
+    const dripG    = btn.querySelector('.gf-drips');
+    const SVGNS    = 'http://www.w3.org/2000/svg';
+    const navTarget = btn.getAttribute('data-nav');
+
+    let W = 0, H = 0; const FALL = K.DRIP_REACH;
+    let f = 0, anim = null, hovering = false, phase = 0, crestX = 0;
+    let runs = [], lastT = 0, running = false, rafId = 0, drainAt = 0, pendingSnapAt = 0;
+
+    const measure = () => {
+      W = btn.clientWidth; H = btn.clientHeight;
+      fillSvg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      dripSvg.setAttribute('width', W); dripSvg.setAttribute('height', H + FALL);
+      dripSvg.setAttribute('viewBox', `0 0 ${W} ${H + FALL}`);
+    };
+    measure();
+    const ro = new ResizeObserver(measure); ro.observe(btn);
+
+    // ---- the wet waterline: base level + surface-tension meniscus + multi-freq ripple
+    const waterY = (x, base) => {
+      const men = K.MENISCUS_H * Math.sin(Math.PI * x / W);                 // 0 at walls, bulge at centre
+      const rip = K.RIPPLE_AMP * (Math.sin(x * 0.045 + phase * 2.1)
+                                + 0.5 * Math.sin(x * 0.105 - phase * 3.0)); // two frequencies = organic
+      return base + men + rip;
+    };
+
+    const buildFill = () => {
+      if (f <= 0.002) { fillPath.setAttribute('d', ''); return; }   // f<=0 renders empty (snap overshoot is invisible -> ink only ever moves up)
+      const base = f * H;
+      let d = `M 0 0 L ${W} 0`;
+      let maxY = -1e9, mx = W / 2;
+      for (let i = K.SEG; i >= 0; i--) {
+        const x = (i / K.SEG) * W;
+        const y = waterY(x, base);
+        if (y > maxY) { maxY = y; mx = x; }        // lowest crest = where the front last broke
+        d += ` L ${x.toFixed(1)} ${y.toFixed(1)}`;
+      }
+      d += ' Z';
+      crestX = mx;
+      fillPath.setAttribute('d', d);
+    };
+
+    const buildLabel = () => {
+      const wY = f * H + K.MENISCUS_H;             // paper label visible above the waterline (where ink covers)
+      const m = `linear-gradient(to bottom, #000 ${(wY - 1.2).toFixed(1)}px, rgba(0,0,0,0) ${(wY + 1.2).toFixed(1)}px)`;
+      paper.style.webkitMaskImage = m; paper.style.maskImage = m;
+    };
+
+    // ---- global flow-around engine: drips auto-detect real elements beneath the button and weave around them
+    const STEP = 4, SMOOTH01 = p => p <= 0 ? 0 : p >= 1 ? 1 : p * p * (3 - 2 * p);
+    const smin = (a, b, k) => { const h = Math.max(0, k - Math.abs(a - b)) / k; return Math.min(a, b) - h * h * k * 0.25; };
+    const smax = (a, b, k) => -smin(-a, -b, k);
+    let obs = [];
+
+    const scanObstacles = () => {                    // find solid boxes in the corridor below the button (on hover/resize, never per-frame)
+      obs = []; if (!K.DRIP_AVOID) return;
+      const br = btn.getBoundingClientRect(), reach = K.DRIP_REACH, found = new Map(), COLS = 9, ROWS = 12;
+      for (let i = 0; i <= COLS; i++) for (let j = 0; j <= ROWS; j++) {
+        const px = br.left + br.width * (i / COLS), py = br.bottom + 2 + (reach - 2) * (j / ROWS);
+        for (const el of document.elementsFromPoint(px, py)) {
+          if (!el || el === btn || btn.contains(el) || el.contains(btn) || found.has(el)) continue;
+          if (el === document.body || el === document.documentElement || el.closest('[data-ink-btn],[data-ink-hero]')) continue;
+          const cl = el.classList;
+          if (cl && (cl.contains('gf-dripsvg') || cl.contains('gf-drips') || cl.contains('gf-fillsvg') || cl.contains('gf-hero-ink') || cl.contains('gf-flood') || cl.contains('gf-fillwrap'))) continue;
+          const r = el.getBoundingClientRect();
+          if (r.width < 12 || r.height < 12) continue;
+          if (r.width > br.width + reach * 2 && r.height > reach) continue;          // skip page-spanning containers
+          const cs = getComputedStyle(el), bg = cs.backgroundColor;
+          const hasBg = bg && bg !== 'transparent' && bg !== 'rgba(0, 0, 0, 0)';
+          const hasBorder = (parseFloat(cs.borderTopWidth) || 0) > 0 && cs.borderTopStyle !== 'none';
+          const solid = /^(IMG|BUTTON|A|INPUT|SELECT|TEXTAREA|CANVAS|VIDEO|svg)$/i.test(el.tagName) || el.hasAttribute('data-ink-obstacle');
+          if (!(hasBg || hasBorder || solid)) continue;                              // ignore plain text; only weave around real boxes
+          found.set(el, r);
+        }
+      }
+      obs = [...found.entries()].map(([el, r]) => {           // shape each box: border-radius -> circle vs rounded-rect
+        const left = r.left - br.left, right = r.right - br.left, top = r.top - br.top, bottom = r.bottom - br.top;
+        const w = r.width, h = r.height, radius = parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0;
+        const circle = radius >= Math.min(w, h) / 2 - 1;
+        return { left, right, top, bottom, w, h, cx: (left + right) / 2, cy: (top + bottom) / 2, r: Math.min(w, h) / 2, cr: circle ? Math.min(w, h) / 2 : radius, circle };
+      }).filter(o => o.bottom > H + 1);
+    };
+
+    const boundaryX = (ob, y, side) => {             // offset silhouette x (arc for circle, rounded outline for rect)
+      const GAP = K.DRIP_OBSTACLE_GAP;
+      if (ob.circle) { const R = ob.r + GAP, dy = y - ob.cy; if (Math.abs(dy) >= R) return null; const dx = Math.sqrt(R * R - dy * dy); return side === 'left' ? ob.cx - dx : ob.cx + dx; }
+      const lead = K.DRIP_LEAD, t2 = ob.top - GAP, b2 = ob.bottom + GAP, l2 = ob.left - GAP, r2 = ob.right + GAP;
+      if (y <= t2 - lead || y >= b2 + lead) return null;
+      const R = Math.min(ob.cr + GAP, (r2 - l2) / 2, (b2 - t2) / 2);
+      let t = 1; if (y < t2) t = SMOOTH01((y - (t2 - lead)) / lead); else if (y > b2) t = SMOOTH01((b2 + lead - y) / lead);
+      const yc = Math.max(t2, Math.min(b2, y)); let bx;
+      if (side === 'left') { if (yc <= t2 + R) bx = (l2 + R) - Math.sqrt(Math.max(0, R * R - (yc - (t2 + R)) ** 2)); else if (yc >= b2 - R) bx = (l2 + R) - Math.sqrt(Math.max(0, R * R - (yc - (b2 - R)) ** 2)); else bx = l2; return bx + (1 - t) * 1e5; }
+      if (yc <= t2 + R) bx = (r2 - R) + Math.sqrt(Math.max(0, R * R - (yc - (t2 + R)) ** 2)); else if (yc >= b2 - R) bx = (r2 - R) + Math.sqrt(Math.max(0, R * R - (yc - (b2 - R)) ** 2)); else bx = r2; return bx - (1 - t) * 1e5;
+    };
+
+    const densify = (poly) => { const out = [{ x: poly[0][0], y: poly[0][1] }]; for (let i = 1; i < poly.length; i++) { const a = poly[i - 1], b = poly[i]; const L = Math.hypot(b[0] - a[0], b[1] - a[1]); if (L < 1e-3) continue; const steps = Math.max(1, Math.round(L / STEP)); for (let k = 1; k <= steps; k++) { const u = k / steps; out.push({ x: a[0] + (b[0] - a[0]) * u, y: a[1] + (b[1] - a[1]) * u }); } } return out; };
+    const smoothPts = (arr, passes) => { let a = arr; for (let p = 0; p < passes; p++) a = a.map((pt, i) => { if (i === 0 || i === a.length - 1) return { x: pt.x, y: pt.y }; const q = a[i - 1], r = a[i + 1]; return { x: q.x * 0.25 + pt.x * 0.5 + r.x * 0.25, y: q.y * 0.25 + pt.y * 0.5 + r.y * 0.25 }; }); return a; };
+    const withS = (a) => { a[0].s = 0; let acc = 0; for (let i = 1; i < a.length; i++) { acc += Math.hypot(a[i].x - a[i - 1].x, a[i].y - a[i - 1].y); a[i].s = acc; } return a; };
+
+    const centerline = (x0, reach) => {              // drip centreline, soft-clamped around each obstacle silhouette
+      const pts = [], yEnd = H + reach;
+      for (let y = H; y <= yEnd + 0.5; y += STEP) {
+        let x = x0 + K.DRIP_WOBBLE * (Math.sin(y * 0.05 + x0 * 0.02) * 0.6 + Math.sin(y * 0.021 - x0 * 0.03) * 0.4) * Math.min(1, (y - H) / 45);  // organic waver, ramped in from the anchor
+        for (const ob of obs) { const side = x0 < ob.cx ? 'left' : 'right'; const b = boundaryX(ob, y, side); if (b == null) continue; x = side === 'left' ? smin(x, b, K.DRIP_SOFT) : smax(x, b, K.DRIP_SOFT); }
+        pts.push([x, y]);
+      }
+      return pts;
+    };
+
+    const buildRibbon = (dense, headLen, topW, headR) => {   // tapering ink ribbon along a routed centreline, bulb head at the tip
+      if (headLen < 3) return '';
+      const pts = []; for (const p of dense) { if (p.s <= headLen) pts.push(p); else break; }
+      if (pts.length < 2) return '';
+      const n = pts.length, L = Math.max(headLen, pts[n - 1].s), left = [], right = [];
+      for (let i = 0; i < n; i++) { const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)]; let tx = b.x - a.x, ty = b.y - a.y; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl; const px = -ty, py = tx; const hw = Math.max(headR * 0.62, headR + (topW / 2 - headR) * Math.pow(1 - pts[i].s / L, 0.72)); left.push([pts[i].x + px * hw, pts[i].y + py * hw]); right.push([pts[i].x - px * hw, pts[i].y - py * hw]); }
+      let d = 'M ' + left[0][0].toFixed(1) + ' ' + left[0][1].toFixed(1);
+      for (let i = 1; i < n; i++) d += ' L ' + left[i][0].toFixed(1) + ' ' + left[i][1].toFixed(1);
+      d += ' A ' + headR.toFixed(1) + ' ' + headR.toFixed(1) + ' 0 0 1 ' + right[n - 1][0].toFixed(1) + ' ' + right[n - 1][1].toFixed(1);
+      for (let i = n - 1; i >= 0; i--) d += ' L ' + right[i][0].toFixed(1) + ' ' + right[i][1].toFixed(1);
+      return d + ' Z';
+    };
+
+    // ---- attached ink runs: anchored to the bottom edge, ooze down, weave around elements, recoil up. Never detach.
+    const makeRuns = () => {
+      dripG.innerHTML = ''; runs = [];
+      const n = Math.max(K.DRIP_MIN, Math.min(K.DRIP_MAX, Math.round(W / K.DRIP_SPACING)));  // count tracks button width => constant density
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n;
+        let x0 = t * W + (Math.random() - 0.5) * (W / n) * 0.42;
+        const topW = K.DRIP_TOPW * (0.7 + Math.random() * 0.85);
+        x0 = Math.max(topW, Math.min(W - topW, x0));
+        const leader = Math.random() < 0.34;
+        let reach = leader ? K.DRIP_MAX_LEN * (0.78 + Math.random() * 0.22) : K.DRIP_MAX_LEN * (0.24 + Math.random() * 0.36);
+        for (const ob of obs) if (x0 >= ob.left - K.DRIP_OBSTACLE_GAP && x0 <= ob.right + K.DRIP_OBSTACLE_GAP && ob.bottom > H) reach = Math.max(reach, ob.bottom - H + 28);  // extend to wrap an element in this column
+        reach = Math.min(reach, K.DRIP_REACH);
+        const headR = K.DRIP_HEAD_R * (0.8 + Math.random() * 0.55);
+        const grow = K.DRIP_GROW_PXPS * (0.8 + Math.random() * 0.5);
+        const dense = withS(smoothPts(densify(centerline(x0, reach)), 3));
+        const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', '#111111');
+        dripG.appendChild(el);
+        runs.push({ x0, topW, headR, grow, dense, fullLen: dense[dense.length - 1].s, len: 0, retracting: false, retractFrom: 0, retractStart: 0, el });
+      }
+    };
+
+    const drawRun = (r) => { r.el.setAttribute('d', r.len < 0.6 ? '' : buildRibbon(r.dense, r.len, r.topW, r.headR)); };
+
+    const tick = (now) => {
+      const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016; lastT = now;
+      phase += dt;
+
+      if (anim) {
+        let p = (now - anim.start) / anim.dur; if (p >= 1) p = 1;
+        f = anim.from + (anim.to - anim.from) * anim.ease(p);
+        if (p >= 1) { f = anim.to; anim = null; }
+      }
+      buildFill(); buildLabel();
+
+      if (drainAt && now >= drainAt) { drainAt = 0; hovering = false; pendingSnapAt = now + K.DRIP_RETRACT_MS * 0.82; }  // touch: runs recoil first, then fill
+
+      let anyRun = false;
+      for (const r of runs) {
+        if (hovering && !reduce) {                                   // grow only once the fill has reached the bottom
+          const tgt = f > 0.98 ? r.fullLen : 0;
+          if (r.len < tgt) r.len = Math.min(tgt, r.len + r.grow * dt);
+          else if (r.len > tgt) r.len = Math.max(tgt, r.len - r.grow * 2 * dt);
+          r.retracting = false;
+        } else {                                                     // recoil up to the edge first (stage 1 of the snap)
+          if (!r.retracting) { r.retracting = true; r.retractFrom = r.len; r.retractStart = now; }
+          let p = (now - r.retractStart) / K.DRIP_RETRACT_MS; if (p >= 1) p = 1;
+          r.len = r.retractFrom * (1 - easeOutCubic(p));
+        }
+        drawRun(r);
+        if (r.len > 0.4) anyRun = true;
+      }
+      if (!hovering && !anyRun && runs.length) { dripG.innerHTML = ''; runs = []; }
+
+      // two-stage snap-up: the fill only begins draining once the runs have recoiled to the edge
+      if (pendingSnapAt && now >= pendingSnapAt) { pendingSnapAt = 0; anim = { from: f, to: 0, start: now, dur: K.SNAP_MS, ease: easeOutBack }; }
+
+      running = !!(anim || (hovering && !reduce) || anyRun || drainAt || pendingSnapAt);
+      if (running) rafId = requestAnimationFrame(tick); else { rafId = 0; lastT = 0; }
+    };
+    const start = () => { if (!running) { running = true; lastT = 0; rafId = requestAnimationFrame(tick); } };
+
+    // ---------------- handlers ----------------
+    const fill = (dur) => { anim = { from: f, to: 1, start: performance.now(), dur, ease: easeOutCubic }; start(); };
+
+    const onEnter = () => { hovering = true; pendingSnapAt = 0; drainAt = 0; if (reduce) { f = 1; buildFill(); buildLabel(); } else { if (!runs.length) { scanObstacles(); makeRuns(); } fill(K.FILL_MS); } };
+    const onLeave = () => {
+      hovering = false;
+      if (reduce) { f = 0; dripG.innerHTML = ''; runs = []; buildFill(); buildLabel(); }
+      else { pendingSnapAt = performance.now() + K.DRIP_RETRACT_MS * 0.82; start(); }   // stage 1: runs recoil; stage 2 (fill drain) fires from tick
+    };
+    const onTap = () => {                          // touch (non-nav): tap fills + short drip burst, then auto-drains
+      if (reduce) { f = 1; buildFill(); buildLabel(); setTimeout(() => { f = 0; buildFill(); buildLabel(); }, 700); return; }
+      hovering = true; if (!runs.length) { scanObstacles(); makeRuns(); } fill(K.FILL_MS * 0.7); drainAt = performance.now() + 900;
+    };
+
+    if (canHover) {
+      btn.addEventListener('pointerenter', onEnter);
+      btn.addEventListener('pointerleave', onLeave);
+      btn.addEventListener('focus', onEnter);
+      btn.addEventListener('blur', onLeave);
+    }
+    if (navTarget) {                               // click = commit -> flood-to-navigate (cancels any pending snap)
+      btn.addEventListener('click', (e) => { e.preventDefault(); pendingSnapAt = 0; drainAt = 0; this._flood(navTarget, btn); });
+    } else if (!canHover) {
+      btn.addEventListener('click', onTap);
+    }
+
+    buildFill(); buildLabel();   // initial idle render: mask hides the paper label so the solid #111 label is visible at rest
+    return { destroy(){ cancelAnimationFrame(rafId); ro.disconnect(); dripG.innerHTML = ''; } };
+  }
+
+  renderVals(){ return {}; }
+}
+const __inst = new Component();
+const __boot = () => __inst.componentDidMount();
+if (document.readyState !== "loading") __boot();
+else document.addEventListener("DOMContentLoaded", __boot);
+window.__inkInst = __inst;
+</script>
+</body>
+</html>

@@ -14,7 +14,7 @@ defineModule('ink-trail', ({ reduced }) => {
 
   const canvas = document.createElement('canvas');
   canvas.setAttribute('aria-hidden', 'true');
-  canvas.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:70;';
+  canvas.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:70;';
   document.body.appendChild(canvas);
   const ctx = canvas.getContext('2d')!;
 

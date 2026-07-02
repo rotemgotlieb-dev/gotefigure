@@ -8,7 +8,7 @@ const { context = 'general' } = Astro.props;
   <label class="nl-label" for={`nl-${context}`}>Know when the next drop lands</label>
   <div class="nl-row">
     <input id={`nl-${context}`} type="email" name="email" required placeholder="you@somewhere.com" autocomplete="email" />
-    <button type="submit" data-magnetic>I’m in</button>
+    <button type="submit" data-magnetic data-ink>I’m in</button>
   </div>
   <p class="nl-done" hidden>you’re on the list — the rabbit wrote it down 🐇</p>
   <p class="nl-note">no spam, only drops. ALL NEW DESIGNS announced here first, 8AM sharp.</p>
