@@ -1,0 +1,95 @@
+---
+// The signature ink-fill CTA — markup identical to the design (fill svg, ink+paper label
+// clones, hidden sizer, drip svg). Behavior = src/animations/ink-button.ts (v3 engine).
+// dark=true renders the cream-ink variant used on #16130F surfaces (data-ink-color).
+interface Props {
+  label: string;
+  /** navigation target path — click floods then navigates */
+  nav?: string;
+  /** cart add source: 'hero' | 'pdp' | piece id */
+  add?: string;
+  /** checkout seal button */
+  seal?: boolean;
+  /** form submit button */
+  submit?: boolean;
+  dark?: boolean;
+  wide?: boolean;
+  size?: 'lg' | 'md' | 'sm';
+  class?: string;
+}
+const { label, nav, add, seal, submit, dark = false, wide = false, size = 'lg', class: cls = '' } = Astro.props;
+const ink = dark ? '#F7F5F0' : '#16130F';
+const type = submit ? 'submit' : 'button';
+---
+<button
+  data-ink-btn
+  data-nav={nav}
+  data-add={add}
+  data-seal={seal ? '' : undefined}
+  data-submit={submit ? '' : undefined}
+  data-ink-color={dark ? '#F7F5F0' : undefined}
+  data-flood={dark ? '#F7F5F0' : undefined}
+  type={type}
+  class:list={['gf-ink-btn', size, { dark, wide }, cls]}
+>
+  <span class="gf-fillwrap" aria-hidden="true"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none"><path class="gf-fill" d="" fill={ink}></path></svg></span>
+  <span class="gf-lbl-ink" aria-hidden="true">{label}</span>
+  <span class="gf-lbl-paper" aria-hidden="true">{label}</span>
+  <span class="gf-sizer" aria-hidden="true">{label}</span>
+  <svg class="gf-dripsvg" preserveAspectRatio="none" aria-hidden="true"><g class="gf-drips"></g></svg>
+</button>
+
+<style>
+  /* base (design inline) + hand-drawn L2 skin resolved:
+     border 3px, shadow 4px 4px 0 currentColor, sloppy radius, rotate -.8deg, ::after ring */
+  .gf-ink-btn {
+    position: relative;
+    overflow: visible;
+    isolation: isolate;
+    border: 3px solid var(--ink);
+    background: transparent;
+    border-radius: var(--sloppy-pill);
+    cursor: pointer;
+    font-family: var(--font-scrawl);
+    font-weight: 700;
+    color: var(--ink);
+    outline-offset: 4px;
+    rotate: -0.8deg;
+    box-shadow: 4px 4px 0 currentColor;
+  }
+  .gf-ink-btn::after {
+    content: '';
+    position: absolute;
+    inset: -5px;
+    border: 1.6px solid currentColor;
+    opacity: .7;
+    border-radius: var(--sloppy-pill-ring);
+    rotate: -1.1deg;
+    pointer-events: none;
+  }
+  .gf-ink-btn.lg { padding: 18px 46px; }
+  .gf-ink-btn.md { padding: 16px 38px; }
+  .gf-ink-btn.sm { padding: 12px 24px; }
+  .gf-ink-btn.wide { width: 100%; }
+  .gf-ink-btn.dark { border-color: var(--paper); color: var(--paper); }
+
+  .gf-fillwrap {
+    position: absolute; inset: 0;
+    border-radius: var(--sloppy-pill);
+    overflow: hidden; z-index: 1; pointer-events: none;
+  }
+  .gf-fillsvg { position: absolute; inset: 0; display: block; }
+  .gf-lbl-ink, .gf-lbl-paper {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+    font-size: 26px;
+    line-height: 1;
+  }
+  .gf-lbl-ink { z-index: 2; color: var(--ink); }
+  .gf-lbl-paper { z-index: 3; color: var(--paper); text-shadow: 0 0 1px rgba(22, 19, 15, .35); }
+  .gf-ink-btn.dark .gf-lbl-ink { color: var(--paper); }
+  .gf-ink-btn.dark .gf-lbl-paper { color: var(--ink); text-shadow: none; }
+  .gf-sizer { visibility: hidden; white-space: nowrap; font-size: 26px; line-height: 1; display: inline-block; }
+  .gf-dripsvg { position: absolute; left: 0; top: 0; overflow: visible; z-index: 4; pointer-events: none; }
+</style>

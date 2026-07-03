@@ -1,0 +1,17 @@
+{
+  "_comment": "The Vault — every retired piece, forever. sub = what it was. strip lists the 5 shown on the home vault band.",
+  "strip": ["og1", "og4", "og5", "og8", "og11"],
+  "pieces": [
+    { "id": "og1",  "img": "/art/v3/og/og1.jpg",  "name": "OG Rabbit",      "sub": "hood" },
+    { "id": "og2",  "img": "/art/v3/og/og2.jpg",  "name": "Twin Figs",      "sub": "tee" },
+    { "id": "og3",  "img": "/art/v3/og/og3.jpg",  "name": "Street Walkers", "sub": "tee" },
+    { "id": "og4",  "img": "/art/v3/og/og4.jpg",  "name": "Fly Agaric",     "sub": "tee" },
+    { "id": "og5",  "img": "/art/v3/og/og5.jpg",  "name": "The Alien",      "sub": "hood" },
+    { "id": "og6",  "img": "/art/v3/og/og6.jpg",  "name": "Signed Blank",   "sub": "hood" },
+    { "id": "og7",  "img": "/art/v3/og/og7.jpg",  "name": "Golden Fig",     "sub": "tee" },
+    { "id": "og8",  "img": "/art/v3/og/og8.jpg",  "name": "One-Line Face",  "sub": "tee" },
+    { "id": "og9",  "img": "/art/v3/og/og9.jpg",  "name": "Walkers",        "sub": "hood" },
+    { "id": "og10", "img": "/art/v3/og/og10.jpg", "name": "Two Heads",      "sub": "tee" },
+    { "id": "og11", "img": "/art/v3/og/og11.jpg", "name": "Azrieli Cat",    "sub": "tee" }
+  ]
+}

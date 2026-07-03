@@ -1,16 +1,21 @@
 ---
-// HTML shell for every page. Head/meta, ClientRouter (view transitions, §7.3), header/footer.
+// HTML shell — v3 (Fable 5 store design). Header + satchel drawer + flood overlay persist;
+// grain overlay; fonts: Nanum Brush (display) / Kalam + Reenie Beanie (hand skin) / Space Mono.
 import { ClientRouter } from 'astro:transitions';
-import '@fontsource-variable/space-grotesk';
-import '@fontsource-variable/shantell-sans/full.css'; // full = INFM/BNCE axes (the hand voice's informality dial)
+import '@fontsource/nanum-brush-script';
+import '@fontsource/kalam/300.css';
+import '@fontsource/kalam/400.css';
+import '@fontsource/kalam/700.css';
+import '@fontsource/reenie-beanie';
+import '@fontsource/space-mono/400.css';
+import '@fontsource/space-mono/700.css';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import CartDrawer from '../components/CartDrawer.astro';
+import SatchelDrawer from '../components/SatchelDrawer.astro';
 
-interface Props { title: string; description: string; }
-const { title, description } = Astro.props;
+interface Props { title: string; description: string; dark?: boolean; }
+const { title, description, dark = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -19,46 +24,37 @@ const { title, description } = Astro.props;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#F2F1EA" />
+    <meta name="theme-color" content="#F7F5F0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <script is:inline>
-      // pre-paint intro gate: overlay shows only on first home visit, motion-OK sessions (§7.1)
-      if (location.pathname === '/' && !sessionStorage.getItem('gf-intro-seen')
+      // pre-paint arrival gate: first home visit, motion-OK sessions only (design gf3-intro)
+      if (location.pathname === '/' && !sessionStorage.getItem('gf3-intro')
         && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.documentElement.dataset.intro = '1';
+        document.documentElement.dataset.arrival = '1';
       }
     </script>
     <ClientRouter />
   </head>
-  <body>
+  <body class:list={[{ 'page-dark': dark }]}>
     <a href="#main" class="skip-link">Skip to content</a>
-    <p class="announce mono caps">hand-drawn in California <span aria-hidden="true">✶</span> tees print to order <span aria-hidden="true">✶</span> posters &amp; stickers ship in 2–4 days</p>
     <Header />
     <main id="main">
       <slot />
     </main>
-    <Footer />
     <div transition:persist="cart" style="position: relative; z-index: var(--z-drawer);">
-      <CartDrawer />
+      <SatchelDrawer />
     </div>
-    <!-- Ink flood page-transition overlay (§7.2 Phase 2): persists across swaps; driven by animations/flood-nav -->
+    <!-- flood-to-navigate overlay — persists across swaps; driven by animations/flood-nav -->
     <svg class="gf-flood" transition:persist="flood" aria-hidden="true" preserveAspectRatio="none"
-      style="position:fixed;inset:0;width:100%;height:100%;z-index:9000;pointer-events:none;opacity:0;display:block;will-change:opacity">
-      <path class="gf-flood-path" d="" fill="#111111"></path>
+      style="position:fixed;inset:0;width:100vw;height:100dvh;z-index:9000;pointer-events:none;opacity:0;display:block;will-change:opacity">
+      <path class="gf-flood-path" d="" fill="#16130F"></path>
     </svg>
+    <div class="gf-grain" aria-hidden="true"></div>
     <script>
       import '../animations/index';
     </script>
-    <style>
-      .announce {
-        text-align: center;
-        font-size: 0.72rem;
-        padding: 9px var(--s-4);
-        background: var(--ink);
-        color: var(--paper);
-        margin: 0;
-      }
-      .announce span { color: var(--amber); }
+    <style is:global>
+      body.page-dark { background: var(--ink); }
     </style>
   </body>
 </html>

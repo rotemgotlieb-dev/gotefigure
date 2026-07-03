@@ -1,103 +1,62 @@
-/* Base — reset, defaults, a11y. No component styles here. */
+/* Base — reset, defaults, a11y, global keyframes. Matches design head <style> (lines 15-29). */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
 
 html { color-scheme: light; }
+html, body { padding: 0; }
 body {
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-ui);
-  font-size: var(--text-base);
-  line-height: 1.55;
+  /* hand-drawn Level 2 skin: Reenie Beanie is the page voice; mono/brush opt back in per element */
+  font-family: var(--font-scrawl), cursive;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
   min-height: 100svh;
 }
 
-/* paper grain — one tiny inline SVG noise tile, fixed, never repaints */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.05;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-body > * { position: relative; z-index: var(--z-content); }
-
-::selection { background: var(--amber); color: var(--ink); }
+::selection { background: var(--ink); color: var(--paper); }
 
 img, picture, svg, video { display: block; max-width: 100%; }
-img { height: auto; } /* responsive images MUST derive height — width/height attrs otherwise stretch (review blocking fix) */
+img { height: auto; }
 button { font: inherit; cursor: pointer; }
 a { color: inherit; }
+input { font-family: var(--font-scrawl); }
+input::placeholder { color: var(--muted-2); }
 
-h1, h2, h3 { line-height: 1.15; text-wrap: balance; }
-h1 { font-size: var(--text-display); font-weight: 700; }
-h2 { font-size: var(--text-xl); }
-h1, h2 { font-family: var(--font-hand); font-variation-settings: 'INFM' 52, 'BNCE' 14; font-weight: 600; }
+/* design keyframes (verbatim) */
+@keyframes gf-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .25; transform: scale(.72); } }
+@keyframes gf-fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes gf-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+@keyframes gf-slidein { from { transform: translateX(104%); } to { transform: none; } }
+@keyframes gf-drift { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1.4deg); } }
 
-.mono {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+/* grain overlay element lives in Layout (fixed, multiply, .3 — design line 42) */
+.gf-grain {
+  position: fixed; inset: 0; z-index: var(--z-grain);
+  pointer-events: none; mix-blend-mode: multiply; opacity: .3;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
 }
-.caps { text-transform: uppercase; letter-spacing: 0.09em; }
 
 :focus-visible {
-  outline: 3px solid var(--amber);
+  outline: 3px solid var(--pink);
   outline-offset: 3px;
   border-radius: 2px;
-  box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px var(--ink); /* two-tone ring: ≥3:1 on paper (WCAG 1.4.11) */
+  box-shadow: 0 0 0 1px var(--ink), 0 0 0 5px var(--ink);
 }
 
-/* a closed dialog must be GONE: hidden beats display:flex; inert-equivalent for tab order */
 [hidden] { display: none !important; }
 
 .skip-link {
-  position: absolute; left: var(--s-4); top: var(--s-4);
+  position: absolute; left: 1rem; top: 1rem;
   background: var(--ink); color: var(--paper);
-  padding: var(--s-2) var(--s-4);
+  padding: .5rem 1rem;
   transform: translateY(-200%);
 }
 .skip-link:focus { transform: none; z-index: 100; }
 
-/* hand-drawn squiggle underline — the site's link voice (§3.3) */
-.squiggle {
-  text-decoration: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='6' viewBox='0 0 44 6'%3E%3Cpath d='M1 4 Q6 1 11 3.5 T22 3 T33 3.5 T43 2.5' fill='none' stroke='%23111111' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: 44px 6px;
-  background-position: 0 100%;
-  padding-bottom: 5px;
-}
-.squiggle:hover, .squiggle:focus-visible {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='6' viewBox='0 0 44 6'%3E%3Cpath d='M1 4 Q6 1 11 3.5 T22 3 T33 3.5 T43 2.5' fill='none' stroke='%23F0A028' stroke-width='2.2' stroke-linecap='round'/%3E%3C/svg%3E");
-}
-
-/* margin note — the handwritten-voice annotation (§3.2), now in the real hand voice */
-.margin-note {
-  font-family: var(--font-hand);
-  font-variation-settings: 'INFM' 70, 'BNCE' 22;
-  font-size: var(--text-sm);
-  letter-spacing: 0.01em;
-  color: color-mix(in srgb, var(--ink) 78%, var(--paper));
-}
-.margin-note::before { content: '↜ '; color: var(--amber); }
-
-/* draw-on-enter wipe (filled-trace art, §4.1): JS adds .drawn when scrolled into view */
-[data-draw] { clip-path: inset(0 100% 0 0); transition: clip-path var(--dur-scene) var(--ease-arrive); }
-[data-draw].drawn { clip-path: inset(0 0% 0 0); }
-@media (prefers-reduced-motion: reduce) { [data-draw] { clip-path: none; transition: none; } }
-
-/* logo easter egg: every pupil on the page spins */
-.gf-eyes-spin .pupil { animation: gf-pupil-spin 0.55s linear infinite; transform-origin: center; transform-box: fill-box; }
-@keyframes gf-pupil-spin { from { rotate: 0deg; } to { rotate: 360deg; } }
+/* mono voice (prices, chips, countdown) — hand-drawn skin bumps sizes per-component */
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  * { animation: none !important; transition: none !important; }
 }
