@@ -1,5 +1,5 @@
-// Smoke tests over BUILT html (run `npm run verify`). Guards the v3 (Fable 5) store
-// contract: routes, landmarks, drop-state machinery, signature-motion mount points.
+// Smoke tests over BUILT html (run `npm run verify`). Guards the routing contract:
+// `/` is the pre-launch After Hours gate (v3 skin); the v3 store home now lives at `/store`.
 // Not a substitute for browser verification.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
@@ -10,7 +10,8 @@ const page = (p: string) => readFileSync(join(dist, p), 'utf8');
 
 describe('built routes', () => {
   it.each([
-    'index.html',
+    'index.html',            // After Hours (the gate)
+    'store/index.html',      // v3 store home, preserved behind the gate
     'vault/index.html',
     'piece/sticker/index.html',
     'piece/print/index.html',
@@ -28,7 +29,7 @@ describe('built routes', () => {
   });
 });
 
-describe('home — the drop', () => {
+describe('home — After Hours (the pre-launch gate)', () => {
   const html = page('index.html');
 
   it('has landmarks and skip link', () => {
@@ -36,6 +37,51 @@ describe('home — the drop', () => {
     expect(html).toContain('skip-link');
     expect(html).toContain('lang="en"');
   });
+
+  it('mounts the dark-salon stage + torch overlay + light cord + hero states', () => {
+    expect(html).toContain('data-room-stage');
+    expect(html).toContain('data-dark');
+    expect(html).toContain('data-cord');
+    expect(html).toContain('the lights aren');   // "the lights aren't on yet."
+    expect(html).toContain('there, that');        // lit-state headline
+  });
+
+  it('hangs the four framed pieces with catalog numbers', () => {
+    for (const name of ['the committee', 'the hare', 'brain weather', 'the regular']) {
+      expect(html).toContain(name);
+    }
+    for (const no of ['NO 001', 'NO 002', 'NO 003', 'NO 004']) {
+      expect(html).toContain(no);
+    }
+    expect(html).toContain('works on paper');
+  });
+
+  it('captures email (the whole point of the page)', () => {
+    expect(html).toContain('data-email-form');
+    expect(html).toContain('tell me when the shop opens');
+    expect(html).toContain('data-email-done');
+  });
+
+  it('carries the hidden author access gate', () => {
+    expect(html).toContain('data-gate');
+    expect(html).toContain('data-gate-input');
+  });
+
+  it('is chromeless: no store nav / cart / flood on the gate', () => {
+    expect(html).not.toContain('data-cart-count');
+    expect(html).not.toContain('data-home-main');
+    expect(html).not.toContain('gf-flood');
+  });
+
+  it('no daily-cadence claims anywhere', () => {
+    expect(html.toLowerCase()).not.toContain('drawn every day');
+    expect(html.toLowerCase()).not.toContain('drawing every day');
+    expect(html).not.toMatch(/Day \d+ of/);
+  });
+});
+
+describe('store — the drop (now at /store, behind the gate)', () => {
+  const html = page('store/index.html');
 
   it('mounts the scroll brush-stroke + arrival + home main', () => {
     expect(html).toContain('data-home-main');
@@ -73,12 +119,6 @@ describe('home — the drop', () => {
     expect(html).toContain('drawn by me, once');
     expect(html).toContain('signature.png');
   });
-
-  it('no daily-cadence claims anywhere', () => {
-    expect(html.toLowerCase()).not.toContain('drawn every day');
-    expect(html.toLowerCase()).not.toContain('drawing every day');
-    expect(html).not.toMatch(/Day \d+ of/);
-  });
 });
 
 describe('piece pages', () => {
@@ -112,8 +152,8 @@ describe('the vault', () => {
   });
 });
 
-describe('satchel drawer', () => {
-  const html = page('index.html');
+describe('satchel drawer (store)', () => {
+  const html = page('store/index.html');
   it('drawer shell with seal ritual + honest prototype note', () => {
     expect(html).toContain('data-satchel');
     expect(html).toContain('Seal the order');

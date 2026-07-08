@@ -1,0 +1,13 @@
+# Token-lint exceptions (repo-level, adapterless). One JS regex per line; `  #` starts a reason.
+# A hit whose LINE or file:line matches any pattern is counted "allowed", not a violation.
+# These are all justified 1:1 reproductions of the approved After Hours Claude Design mock,
+# plus the author-gate's a11y sizing. Colours all resolve to tokens; these are px/clamp/meta cases.
+
+width:56px  # After Hours cord pull: fixed hit-width, mock-verbatim px
+min-height:22px  # After Hours wordmark: min-height fallback, mock-verbatim px
+clamp\(26px,11cqw,42px\)  # After Hours hero headline: cqw-fluid type, mock-verbatim clamp
+clamp\(14px,5cqw,20px\)  # After Hours hero subhead: cqw-fluid type, mock-verbatim clamp
+gfahm-wob  # After Hours shake keyframe: translateX px is motion geometry, mock-verbatim
+\.ah-gate \{  # author gate: layout micro-spacing (added utility, not from the mock)
+\.ah-gate-dot \{  # author gate: 44px WCAG hit target (a11y floor; visible dot stays 9px)
+themeColor = '#0C0906'  # <meta name=theme-color> needs a literal hex (= --ah-night)

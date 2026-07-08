@@ -22,11 +22,51 @@
   /* legacy-era token kept for archive contexts (spec §3.1) */
   --og-pink: #F27C8D;
 
+  /* After Hours — dark-salon scene palette (2026-07-08) */
+  --ah-night: #0C0906;        /* room black behind the stage + the darkness */
+  --ah-wall: #E9E2D3;         /* lit salon wall */
+  --ah-floor: #CDC3AC;        /* floor band */
+  --ah-skirt: #F2EDE0;        /* skirting highlight */
+  --ah-frame: #F9F7F1;        /* picture-frame mat board */
+  --ah-mat-pink: #F0A3AE;     /* the hare's pink mat */
+  --ah-lamp: #FFE9A8;         /* glowing eyes / lamp warm */
+  --ah-beam: 255, 214, 140;   /* torch beam warm — rgb triplet for rgba() */
+  --ah-night-rgb: 12, 9, 6;   /* --ah-night as rgb triplet, for the beam/darkness rgba() */
+  --ah-glow: 255, 224, 160;   /* warm room glow when lit — rgb triplet */
+  --ink-rgb: 22, 19, 15;      /* --ink as rgb triplet, for shadow rgba() */
+  --pink-rgb: 218, 114, 133;  /* --pink as rgb triplet, for tape rgba() */
+  --ah-tape-rgb: 233, 226, 205; /* masking-tape tint (near-wall) for card corners */
+  --ah-lamp-rgb: 255, 233, 168; /* eye / lamp glow, for box-shadow rgba() */
+  --ah-wash: 255, 248, 233;     /* warm light wash down the wall from above */
+  --white: #FFFFFF;             /* picture-frame mat board */
+  --white-rgb: 255, 255, 255;   /* mat + cord-knob highlight rgba() */
+  --ah-cord-a: #A8814C;       /* cord knob gradient top */
+  --ah-cord-b: #7A5C33;       /* cord knob gradient bottom */
+  --ah-cord-string: #4A4336;  /* cord string */
+  --ah-hero-lit: #EFE9DB;     /* headline over the dark */
+  --ah-sub-dark: #9C9585;     /* subhead, lights off */
+  --ah-sub-lit: #6E675B;      /* subhead, lights on */
+  --ah-hint: #7E7869;         /* hint, lights off */
+  --ah-hint-lit: #A8A192;     /* hint, lights on */
+  --ah-tagline: #B9B2A2;      /* tagline, lights off */
+
   /* type */
   --font-brush: 'Nanum Brush Script', cursive;   /* display voice */
   --font-hand: 'Kalam', cursive;                 /* hand-drawn body voice (L1) */
   --font-scrawl: 'Reenie Beanie', cursive;       /* hand-drawn overlay voice (L2) */
   --font-mono: 'Space Mono', monospace;          /* transactional numerals under the skin */
+
+  /* type scale — ported from V2 canonical 2026-07-08 (fixes V3's missing scale; general hygiene.
+     After Hours is a cqw-fluid composition so it reproduces clamp() values verbatim, per Spec Sheet). */
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
+  --text-display: clamp(2.25rem, 1.5rem + 4vw, 4.5rem);
+
+  /* spacing scale — 4px base, ported from V2 canonical 2026-07-08 */
+  --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
+  --s-6: 1.5rem; --s-8: 2rem; --s-12: 3rem; --s-16: 4rem; --s-24: 6rem;
 
   /* motion canon */
   --ease-traverse: cubic-bezier(0.77, 0, 0.175, 1);

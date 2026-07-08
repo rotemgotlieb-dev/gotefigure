@@ -44,7 +44,12 @@ function destroyAll() {
   ScrollTrigger.getAll().forEach((st) => st.kill());
 }
 
+let started = false;
 export function startMotion() {
+  // Idempotent: multiple motion entries (full index vs a lean immersive bootstrap) may both
+  // call this in one session. Bind the lifecycle listeners exactly once.
+  if (started) return;
+  started = true;
   // astro:page-load fires on the initial load too (ClientRouter) — initializing here AND
   // at import time would double-init and e.g. kill the intro instantly (session key races itself).
   document.addEventListener('astro:page-load', () => { destroyAll(); initAll(); });
