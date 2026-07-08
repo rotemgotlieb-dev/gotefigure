@@ -1,8 +1,9 @@
 ---
-// After Hours — the dark salon (pre-launch demand-capture takeover). 1:1 with the approved
-// Claude Design mock. DESKTOP build (this branch); mobile reflow owned by the parallel branch.
-// Structure/IDs/copy/assets shared per .context/MERGE-CONTRACT.md. Desktop = a fixed 1512x946
-// stage scaled to the viewport; all stage geometry lives under @media (min-width:1024px).
+// SITE ROOT (/) — After Hours "dark salon", the pre-launch takeover shown at gotefigure.com
+// while the shop is closed. The real store home is preserved at /store (not deleted) and is gated
+// behind the author code entered via the hidden corner button (logic in src/animations/after-hours.ts).
+// 1:1 with the approved Claude Design mock. Desktop = a fixed 1512x946 stage scaled to the viewport;
+// all stage geometry lives under @media (min-width:1024px). Mobile reflow owned by the parallel branch.
 import AfterHoursLayout from '../layouts/AfterHoursLayout.astro';
 import { Image } from 'astro:assets';
 import committee from '../assets/after-hours/work-01-committee.png';
@@ -42,7 +43,7 @@ const frames = [
 ];
 ---
 <AfterHoursLayout
-  title="After Hours — GoteFigure"
+  title="GoteFigure — after hours"
   description="The shop opens soon. Grab a torch and wander the dark salon, then leave your email to hear when the next drop lands."
 >
   <div id="ah-root" class="ah" data-screen-label="After Hours — the dark salon">
@@ -139,6 +140,15 @@ const frames = [
     <div class="ah-dark ah-desk" data-dark aria-hidden="true"></div>
     <div class="ah-glow ah-desk" data-glow aria-hidden="true"></div>
 
+    <!-- author gate: a near-invisible corner dot; the code unlocks the closed store at /store -->
+    <div class="ah-gate" data-gate>
+      <button class="ah-gate-dot" data-gate-toggle type="button" aria-label="author access"></button>
+      <form class="ah-gate-form" data-gate-form hidden>
+        <input class="ah-gate-input" data-gate-input type="password" autocomplete="off" spellcheck="false" aria-label="access code" placeholder="code" />
+        <button class="ah-gate-go" type="submit" aria-label="enter">→</button>
+      </form>
+    </div>
+
   </div>
 </AfterHoursLayout>
 
@@ -154,6 +164,16 @@ const frames = [
     mix-blend-mode: multiply; opacity: .22;
     background-image: url('/art/after-hours/grain.png'); background-repeat: repeat;
   }
+
+  /* author gate — tiny, near-invisible corner dot; opens a code field that unlocks /store */
+  .ah-gate { position: fixed; right: 10px; bottom: 10px; z-index: 10600; display: flex; align-items: center; gap: 6px; }
+  .ah-gate-dot { width: 12px; height: 12px; padding: 0; border: none; border-radius: 50%; background: var(--ah-gray); opacity: .1; cursor: pointer; transition: opacity .3s ease; }
+  .ah-gate-dot:hover, .ah-gate[data-open] .ah-gate-dot { opacity: .55; }
+  .ah-gate-form[hidden] { display: none; }
+  .ah-gate-form { display: flex; align-items: center; gap: 4px; background: var(--ah-card); padding: 5px 6px; box-shadow: 0 6px 18px rgba(12,9,6,.35); }
+  .ah-gate-input { width: 110px; border: none; border-bottom: 1.5px solid var(--ah-ink); background: transparent; padding: 4px 2px; font-family: var(--font-typewriter); font-size: 13px; color: var(--ah-ink); outline: none; }
+  .ah-gate-go { border: none; background: var(--ah-ink); color: var(--ah-card); cursor: pointer; font-family: var(--font-typewriter); font-size: 12px; padding: 4px 9px; border-radius: 3px; }
+  .ah-gate-go:hover { background: var(--ah-pink); }
 
   /* frame + caption look */
   .ah-frame-mat { background: var(--ah-mat); }

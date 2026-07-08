@@ -6,6 +6,12 @@
 
 const BEAM = 180; // mock prop default (range 110-320)
 
+// Author preview gate: typing this code into the hidden corner button unlocks the closed store
+// (/store) for THIS browser (sets localStorage 'gf-preview'). It is a client-side soft gate — the
+// value ships in the bundle, so it keeps the public out of a not-yet-launched shop, it is not real
+// security. ← SET YOUR CODE HERE (Rotem):
+const ACCESS_CODE = 'CHANGE-ME';
+
 let raf = 0;
 let lit = false;
 let bx = 0, by = 0, tx = 0, ty = 0, lastMove = 0, t0 = 0;
@@ -15,6 +21,8 @@ let onMove: ((e: PointerEvent | TouchEvent) => void) | null = null;
 let onResize: (() => void) | null = null;
 let onCord: (() => void) | null = null;
 let onSubmit: ((e: Event) => void) | null = null;
+let onGateToggle: (() => void) | null = null;
+let onGateSubmit: ((e: Event) => void) | null = null;
 
 const q = <T extends Element>(s: string) => document.querySelector<T>(s);
 const isDesktop = () => matchMedia('(min-width: 1024px)').matches;
@@ -117,10 +125,40 @@ function submitEmail(e: Event) {
   if (done) { done.style.display = 'block'; done.style.animation = 'gfah-pop .5s ease both'; }
 }
 
+// Hidden corner button: reveal a code field; correct code unlocks /store for this browser.
+function initGate() {
+  const wrap = q<HTMLElement>('[data-gate]');
+  const toggle = q<HTMLButtonElement>('[data-gate-toggle]');
+  const form = q<HTMLFormElement>('[data-gate-form]');
+  const input = q<HTMLInputElement>('[data-gate-input]');
+  if (toggle && form) {
+    onGateToggle = () => {
+      if (form.hasAttribute('hidden')) { form.removeAttribute('hidden'); wrap?.setAttribute('data-open', ''); input?.focus(); }
+      else { form.setAttribute('hidden', ''); wrap?.removeAttribute('data-open'); }
+    };
+    toggle.addEventListener('click', onGateToggle);
+  }
+  if (form) {
+    onGateSubmit = (e: Event) => {
+      e.preventDefault();
+      const v = (input?.value || '').trim();
+      if (v && v === ACCESS_CODE) {
+        try { localStorage.setItem('gf-preview', '1'); } catch { /* private mode */ }
+        window.location.href = '/store';
+      } else if (input) {
+        input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfah-wob .4s ease'; input.value = '';
+      }
+    };
+    form.addEventListener('submit', onGateSubmit);
+  }
+}
+
 export function initAfterHours() {
   const root = q('#ah-root');
   if (!root || bound) return;
   bound = true;
+
+  initGate(); // works on every breakpoint, independent of the torch/stage
 
   // Shared across breakpoints: email capture (the linchpin) + the pull-cord.
   applyEmailPref();
@@ -190,5 +228,9 @@ export function destroyAfterHours() {
   if (form && onSubmit) form.removeEventListener('submit', onSubmit);
   const cordBtn = q<HTMLButtonElement>('[data-cord]');
   if (cordBtn && onCord) cordBtn.removeEventListener('click', onCord);
-  onResize = onMove = onCord = onSubmit = null;
+  const gateToggle = q<HTMLButtonElement>('[data-gate-toggle]');
+  if (gateToggle && onGateToggle) gateToggle.removeEventListener('click', onGateToggle);
+  const gateForm = q<HTMLFormElement>('[data-gate-form]');
+  if (gateForm && onGateSubmit) gateForm.removeEventListener('submit', onGateSubmit);
+  onResize = onMove = onCord = onSubmit = onGateToggle = onGateSubmit = null;
 }

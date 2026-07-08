@@ -4,7 +4,8 @@ The desktop build (branch `luxembourg`) and the mobile build (branch `salvador`)
 responsive page**. This is the shared surface so the two branches merge with minimal conflict.
 
 ## Shared (do not diverge)
-- **Route** `/after-hours` · **page** `src/pages/after-hours.astro` · **layout** `src/layouts/AfterHoursLayout.astro` (minimal full-viewport takeover — no store header/footer/cart).
+- **Route** `/` (site root) · **page** `src/pages/index.astro` · **layout** `src/layouts/AfterHoursLayout.astro` (minimal full-viewport takeover — no store header/footer/cart). After Hours is the pre-launch homepage; the real store home is preserved at `/store` and gated behind the author code.
+- **Author gate**: a near-invisible bottom-right dot (`[data-gate]`) → code field; correct code sets `localStorage['gf-preview']` and opens `/store`. Code constant `ACCESS_CODE` in `src/animations/after-hours.ts`. Store pages (Layout) bounce to `/` unless `gf-preview` is set.
 - **Tokens** `src/styles/tokens.css`: the `--ah-*` palette + `--font-brush` / `--font-marker` / `--font-typewriter`. (V2 and V3 tokens.css already had the 4px spacing + type scales — nothing was ported; the `--ah-*` group was added.)
 - **Fonts** `src/styles/after-hours.css` (@font-face) → `public/fonts/after-hours/*.woff2` (self-hosted latin subsets extracted from the mock).
 - **Art** `src/assets/after-hours/*.png` (Astro `<Image>` → webp) + `public/art/after-hours/grain.png` (tiled bg).
