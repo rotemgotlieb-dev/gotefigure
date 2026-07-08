@@ -22,6 +22,12 @@ const { title, description, dark = false } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Pre-launch: the shop is closed. Every store page bounces to the After Hours door (/) unless
+      // the author has unlocked preview via the code on the door (localStorage 'gf-store-open'). Runs
+      // pre-paint so the closed store never flashes.
+      try { if (!localStorage.getItem('gf-store-open')) location.replace('/'); } catch (e) {}
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#F7F5F0" />

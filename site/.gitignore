@@ -24,3 +24,7 @@ pnpm-debug.log*
 .idea/
 .vercel
 .env*
+
+# design-proof generated artifacts (evidence lives in docs/evidence/)
+site/tests/design/out/
+tests/design/out/

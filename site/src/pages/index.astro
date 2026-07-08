@@ -1,162 +1,265 @@
 ---
-// After Hours — the dark salon (mobile). Pre-order demand-capture page. 1:1 reproduction of the
-// approved Claude Design artifact (GoteFigure After Hours Phone.dc.html). Single-screen, no-scroll:
-// a torch-lit dark room, a wall of framed drawings, a pull-cord light switch, an email capture.
-// Interaction lives in animations/after-hours.ts (torch/eyes/toggle/email). Chromeless shell.
-// cqw units and clamp() values are verbatim from the mock; every colour resolves to a token.
+// SITE ROOT (/) — After Hours "dark salon", the pre-launch takeover shown at gotefigure.com while
+// the shop is closed. ONE responsive page:
+//   < 1024px  → the mobile (phone) salon, verbatim from the approved "After Hours Phone.dc.html".
+//   ≥ 1024px  → the desktop (landscape) salon, 1:1 from "GoteFigure After Hours.dc.html" (1512×946
+//               stage scaled to the viewport).
+// Shared: Immersive layout, /art/after-hours assets, --ah-* tokens, gfahm-* keyframes, one
+// breakpoint-aware module (animations/after-hours.ts), and the author gate. The Fable 5 store lives
+// at /store, gated behind the gate code. (Two em dashes in the mock copy are swapped to satisfy the
+// no-em-dash rule; everything else is verbatim.)
 import Immersive from '../layouts/Immersive.astro';
+
+// Desktop framed works — geometry in the 1512×946 stage space (scaled as one unit). Verbatim from the mock.
+const frames = [
+  { img: '/art/after-hours/committee.png', alt: 'Nine ink heads in a row', title: 'the committee', no: 'NO 001 · INK · NOT FOR SALE (YET)',
+    l: '14.6%', t: '10.6%', rot: '-1.5deg', fw: '348px', fpad: '5.3% 5.3% 7.3%', inner: 'var(--white)', ipad: '0',
+    shadow: '0 16px 38px rgba(12,9,6,.28), 0 2px 6px rgba(12,9,6,.2)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '.8deg' },
+  { img: '/art/after-hours/twins.png', alt: 'Pink mirrored figures', title: 'the twins', no: 'NO 007 · SEEING DOUBLE',
+    l: '31%', t: '66.7%', rot: '1.8deg', fw: '150px', fpad: '8% 8% 11.3%', inner: 'var(--white)', ipad: '8%',
+    shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-.6deg' },
+  { img: '/art/after-hours/hare.png', alt: 'The hare, wide-eyed', title: 'the hare', no: 'NO 002 · DO NOT FEED',
+    l: '14.2%', t: '62.5%', rot: '1.4deg', fw: '151px', fpad: '12.4% 12.4% 17.1%', inner: 'var(--ah-mat-pink)', ipad: '0',
+    shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-1deg' },
+  { img: '/art/after-hours/brain-weather.png', alt: 'Pink liquid maze blob', title: 'brain weather', no: 'NO 003 · WET PAINT',
+    l: '39.2%', t: '17.4%', rot: '1.6deg', fw: '237px', fpad: '5.8% 5.8% 7.7%', inner: 'var(--white)', ipad: '0',
+    shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-.7deg' },
+  { img: '/art/after-hours/regular.png', alt: 'Teal antenna creature', title: 'the regular', no: 'NO 004 · HE WAITS TOO',
+    l: '78.6%', t: '19.1%', rot: '-2deg', fw: '151px', fpad: '9.2% 9.2% 13.1%', inner: 'var(--white)', ipad: '7.7%',
+    shadow: '0 14px 32px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '1deg' },
+  { img: '/art/after-hours/overthinking.png', alt: 'Tangled colour maze', title: 'overthinking', no: 'NO 005 · MARKER',
+    l: '54.2%', t: '67.6%', rot: '-1.6deg', fw: '210px', fpad: '7.6% 7.6% 10.6%', inner: 'var(--white)', ipad: '0',
+    shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '.9deg' },
+  { img: '/art/after-hours/four-birds.png', alt: 'Four mirrored birds', title: 'four birds, one bird', no: 'NO 006 · MIRRORED',
+    l: '60%', t: '17.4%', rot: '1.2deg', fw: '215px', fpad: '7% 7% 9.5%', inner: 'var(--white)', ipad: '0',
+    shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '-.8deg' },
+];
 ---
 <Immersive
   title="After Hours — GoteFigure"
   description="The lights aren't on yet. GoteFigure is coming back — a salon of hand-drawn work. Leave your email and we'll tell you when the shop opens."
 >
-  <!-- film grain (matches V3 --z-grain layer, mock opacity .22) -->
+  <!-- film grain (shared) -->
   <div class="ah-grain" aria-hidden="true"></div>
 
-  <div class="ah-screen" data-screen-label="After Hours — the dark salon (phone)">
-    <div class="ah-stage" data-room-stage>
+  <!-- ================= MOBILE (< 1024px): phone salon, verbatim ================= -->
+  <div class="ah-block ah-block--mobile" data-ah-block="mobile">
+    <div class="ah-screen" data-screen-label="After Hours — the dark salon (phone)">
+      <div class="ah-stage" data-room-stage>
 
-      <!-- the salon wall -->
-      <div style="position:absolute;inset:0;background:var(--ah-wall)">
-        <div style="position:absolute;inset:0;background-image:radial-gradient(130% 60% at 50% -6%,rgba(var(--ah-wash),.75),transparent 58%);pointer-events:none"></div>
-        <div style="position:absolute;inset:0;box-shadow:inset 0 -40px 110px rgba(var(--ink-rgb),.16),inset 0 0 120px rgba(var(--ink-rgb),.08);pointer-events:none"></div>
-        <div style="position:absolute;left:0;right:0;bottom:0;height:7.5%;background:var(--ah-floor);box-shadow:inset 0 10px 18px rgba(var(--ink-rgb),.18)"></div>
-        <div style="position:absolute;left:0;right:0;bottom:7.5%;height:4px;background:var(--ah-skirt);box-shadow:0 2px 4px rgba(var(--ink-rgb),.22)"></div>
+        <div style="position:absolute;inset:0;background:var(--ah-wall)">
+          <div style="position:absolute;inset:0;background-image:radial-gradient(130% 60% at 50% -6%,rgba(var(--ah-wash),.75),transparent 58%);pointer-events:none"></div>
+          <div style="position:absolute;inset:0;box-shadow:inset 0 -40px 110px rgba(var(--ink-rgb),.16),inset 0 0 120px rgba(var(--ink-rgb),.08);pointer-events:none"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:7.5%;background:var(--ah-floor);box-shadow:inset 0 10px 18px rgba(var(--ink-rgb),.18)"></div>
+          <div style="position:absolute;left:0;right:0;bottom:7.5%;height:4px;background:var(--ah-skirt);box-shadow:0 2px 4px rgba(var(--ink-rgb),.22)"></div>
 
-        <!-- ghosted background drawing -->
-        <img src="/art/after-hours/ghost.png" alt="" aria-hidden="true" decoding="async"
-          style="position:absolute;left:50%;top:52%;width:92cqw;height:auto;transform:translate(-50%,-50%) rotate(-4deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none" />
+          <img src="/art/after-hours/ghost.png" alt="" aria-hidden="true" decoding="async"
+            style="position:absolute;left:50%;top:52%;width:92cqw;height:auto;transform:translate(-50%,-50%) rotate(-4deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none" />
 
-        <!-- NO 001 · the committee -->
-        <div style="position:absolute;left:36%;top:40%;transform:translate(-50%,-50%) rotate(-1.5deg);width:58cqw;z-index:6">
-          <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.6cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28),0 2px 6px rgba(var(--ah-night-rgb),.2)">
-            <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-              <img src="/art/after-hours/committee.png" alt="Nine ink heads in a row" decoding="async" style="width:100%;height:auto" />
+          <div style="position:absolute;left:36%;top:40%;transform:translate(-50%,-50%) rotate(-1.5deg);width:58cqw;z-index:6">
+            <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.6cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28),0 2px 6px rgba(var(--ah-night-rgb),.2)">
+              <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
+                <img src="/art/after-hours/committee.png" alt="Nine ink heads in a row" decoding="async" style="width:100%;height:auto" />
+              </div>
+            </div>
+            <div style="display:flex">
+              <div style="background:var(--ah-frame);padding:5px 10px 4px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(.8deg);text-align:left">
+                <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the committee</div>
+                <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 001 · INK · NOT FOR SALE (YET)</div>
+              </div>
             </div>
           </div>
-          <div style="display:flex">
-            <div style="background:var(--ah-frame);padding:5px 10px 4px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(.8deg);text-align:left">
-              <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the committee</div>
-              <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 001 · INK · NOT FOR SALE (YET)</div>
+
+          <div style="position:absolute;left:80%;top:43.5%;transform:translate(-50%,-50%) rotate(1.4deg);width:21cqw;z-index:5">
+            <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 14px 30px rgba(var(--ah-night-rgb),.28)">
+              <div style="background:var(--ah-mat-pink);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
+                <img src="/art/after-hours/hare.png" alt="The hare, wide-eyed" decoding="async" style="width:100%;height:auto" />
+              </div>
             </div>
+            <div style="display:flex">
+              <div style="background:var(--ah-frame);padding:4px 9px 3px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(-1deg);text-align:left">
+                <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the hare</div>
+                <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 002 · DO NOT FEED</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:absolute;left:38%;top:63.5%;transform:translate(-50%,-50%) rotate(1.6deg);width:36cqw;z-index:4">
+            <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.7cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28)">
+              <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
+                <img src="/art/after-hours/brain-weather.png" alt="Pink liquid maze blob" decoding="async" style="width:100%;height:auto" />
+              </div>
+            </div>
+            <div style="display:flex">
+              <div style="background:var(--ah-frame);padding:5px 10px 4px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(-.7deg);text-align:left">
+                <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">brain weather</div>
+                <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 003 · WET PAINT</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="position:absolute;left:78%;top:67.5%;transform:translate(-50%,-50%) rotate(-2deg);width:21cqw;z-index:3">
+            <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 12px 28px rgba(var(--ah-night-rgb),.3)">
+              <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
+                <img src="/art/after-hours/regular.png" alt="Teal antenna creature" decoding="async" style="width:100%;height:auto" />
+              </div>
+            </div>
+            <div style="display:flex">
+              <div style="background:var(--ah-frame);padding:4px 9px 3px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(1deg);text-align:left">
+                <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the regular</div>
+                <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 004 · HE WAITS TOO</div>
+              </div>
+            </div>
+          </div>
+
+          <div data-eyes style="position:absolute;left:8%;top:63%;display:flex;gap:2.3cqw;z-index:3;opacity:1;transition:opacity .4s ease">
+            <span style="width:1.8cqw;height:2.6cqw;background:var(--ah-lamp);border-radius:50%;box-shadow:0 0 12px rgba(var(--ah-lamp-rgb),.9);animation:gfahm-blink 4.6s ease infinite"></span>
+            <span style="width:1.8cqw;height:2.6cqw;background:var(--ah-lamp);border-radius:50%;box-shadow:0 0 12px rgba(var(--ah-lamp-rgb),.9);animation:gfahm-blink 4.6s ease infinite .07s"></span>
+          </div>
+
+          <button data-cord type="button" aria-label="pull the light cord"
+            style="position:absolute;left:92%;top:0;transform:translateX(-50%);height:17%;width:56px;background:none;border:none;padding:0;z-index:6">
+            <span data-cord-inner style="position:absolute;left:50%;top:0;transform:translateX(-50%);transform-origin:top center;height:100%;display:block">
+              <span style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:2px;height:calc(100% - 6.2cqw);background:var(--ah-cord-string);display:block"></span>
+              <span style="position:absolute;left:50%;bottom:.5cqw;transform:translateX(-50%);width:3.4cqw;height:6.2cqw;background:linear-gradient(160deg,var(--ah-cord-a),var(--ah-cord-b));border-radius:46% 54% 50% 50%/40% 40% 60% 60%;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.4),inset 0 1px 2px rgba(var(--white-rgb),.35);display:block"></span>
+            </span>
+          </button>
+
+          <div data-email-card style="position:absolute;left:4cqw;right:4cqw;bottom:calc(11cqw + env(safe-area-inset-bottom));background:var(--paper);padding:3.6cqw 4cqw;box-shadow:0 14px 34px rgba(var(--ah-night-rgb),.3);transform:rotate(1.2deg);z-index:4">
+            <span aria-hidden="true" style="position:absolute;left:-10px;top:-9px;width:14cqw;height:5cqw;background:rgba(var(--ah-tape-rgb),.92);box-shadow:0 1px 3px rgba(var(--ink-rgb),.18);transform:rotate(-22deg)"></span>
+            <span aria-hidden="true" style="position:absolute;right:-8px;bottom:-7px;width:13cqw;height:4.6cqw;background:rgba(var(--pink-rgb),.4);box-shadow:0 1px 3px rgba(var(--ink-rgb),.14);transform:rotate(-18deg)"></span>
+            <div style="font-family:var(--font-scrawl);font-size:clamp(17px,6cqw,24px);color:var(--ink);transform:rotate(-.8deg)">tell me when the shop opens →</div>
+            <div data-email-wrap style="margin-top:2cqw">
+              <form data-email-form style="display:flex;gap:2cqw">
+                <input data-email-input type="email" required placeholder="you@email" aria-label="your email"
+                  style="flex:1;min-width:0;border:none;border-bottom:1.5px solid var(--ink);background:transparent;padding:2.5cqw 2px;font-size:clamp(12px,3.6cqw,14px);color:var(--ink);outline:none" />
+                <button type="submit" style="border:none;background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:clamp(9px,2.9cqw,11px);letter-spacing:.14em;text-transform:uppercase;padding:0 3.6cqw;border-radius:3px">notify</button>
+              </form>
+            </div>
+            <div data-email-done style="display:none;margin-top:2cqw;font-family:var(--font-scrawl);font-size:clamp(17px,6cqw,24px);color:var(--ink)">noted. ♥ you're on the list.</div>
+            <a href="/info" style="display:inline-block;margin-top:2cqw;font-family:var(--font-mono);font-size:clamp(8px,2.6cqw,10px);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:2px 0 3px">meanwhile: the sketchbooks →</a>
+          </div>
+
+          <div style="position:absolute;left:4cqw;bottom:calc(2.4cqw + env(safe-area-inset-bottom));display:flex;align-items:center;gap:2.3cqw;opacity:.85;z-index:4">
+            <img src="/art/after-hours/signature.png" alt="Gote — signature" decoding="async" style="height:5cqw;width:auto;mix-blend-mode:multiply" />
+            <span style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)">works on paper</span>
           </div>
         </div>
 
-        <!-- NO 002 · the hare -->
-        <div style="position:absolute;left:80%;top:43.5%;transform:translate(-50%,-50%) rotate(1.4deg);width:21cqw;z-index:5">
-          <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 14px 30px rgba(var(--ah-night-rgb),.28)">
-            <div style="background:var(--ah-mat-pink);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-              <img src="/art/after-hours/hare.png" alt="The hare, wide-eyed" decoding="async" style="width:100%;height:auto" />
-            </div>
+        <div data-dark style="position:absolute;inset:0;z-index:20;pointer-events:none;opacity:1;background:radial-gradient(circle 280px at 50% 45%, rgba(var(--ah-beam),.09), rgba(var(--ah-night-rgb),0) 56px, rgba(var(--ah-night-rgb),.55) 135px, rgba(var(--ah-night-rgb),.987) 260px)"></div>
+        <div data-glow style="position:absolute;inset:0;z-index:21;pointer-events:none;opacity:0;transition:opacity 1.1s ease;background:radial-gradient(120% 46% at 86% -4%,rgba(var(--ah-glow),.32),transparent 62%)"></div>
+
+        <header style="position:absolute;left:0;right:0;top:0;z-index:40;display:flex;align-items:flex-start;justify-content:space-between;gap:3.6cqw;padding:4.1cqw 4.1cqw 0;pointer-events:none">
+          <div style="display:flex;align-items:baseline;gap:2.6cqw">
+            <img data-wm src="/art/after-hours/wordmark.png" alt="Gote Figure" decoding="async" style="height:7.7cqw;min-height:22px;width:auto;filter:invert(1) brightness(1.6);transition:filter .9s ease" />
+            <span data-tagline style="font-family:var(--font-scrawl);font-size:clamp(13px,4.8cqw,19px);color:var(--ah-tagline);transform:rotate(-2deg) translateY(-3px);display:inline-block;transition:color .9s ease;white-space:nowrap">· after hours</span>
           </div>
-          <div style="display:flex">
-            <div style="background:var(--ah-frame);padding:4px 9px 3px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(-1deg);text-align:left">
-              <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the hare</div>
-              <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 002 · DO NOT FEED</div>
-            </div>
+        </header>
+
+        <div style="position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:40;width:92cqw;text-align:center;pointer-events:none">
+          <div style="display:grid;font-size:clamp(26px,11cqw,42px)">
+            <h1 data-h-dark style="grid-area:1/1;margin:0;font-family:var(--font-brush);font-weight:400;font-size:1em;line-height:.95;color:var(--ah-hero-lit);opacity:1;transition:opacity .9s ease">the lights aren't on yet.</h1>
+            <h1 data-h-lit style="grid-area:1/1;margin:0;font-family:var(--font-brush);font-weight:400;font-size:1em;line-height:.95;color:var(--ink);opacity:0;transition:opacity .9s ease">there, that's better.</h1>
           </div>
+          <div style="display:grid;font-size:clamp(14px,5cqw,20px);line-height:1.25;margin-top:2cqw">
+            <p data-s-dark style="grid-area:1/1;margin:0;font-family:var(--font-scrawl);font-size:1em;color:var(--ah-sub-dark);transform:rotate(-.6deg);opacity:1;transition:opacity .9s ease">the shop opens soon. you brought a torch. have a wander.</p>
+            <p data-s-lit style="grid-area:1/1;margin:0;font-family:var(--font-scrawl);font-size:1em;color:var(--ah-sub-lit);transform:rotate(-.6deg);opacity:0;transition:opacity .9s ease">welcome to the salon. everything hangs, nothing's for sale (yet).</p>
+          </div>
+          <div data-hint style="margin-top:2cqw;font-family:var(--font-mono);font-size:clamp(9px,2.8cqw,11px);letter-spacing:.26em;text-transform:uppercase;color:var(--ah-hint);animation:gfahm-hintpulse 3.4s ease infinite;transition:color .9s ease">drag your thumb · a cord hangs somewhere</div>
         </div>
 
-        <!-- NO 003 · brain weather -->
-        <div style="position:absolute;left:38%;top:63.5%;transform:translate(-50%,-50%) rotate(1.6deg);width:36cqw;z-index:4">
-          <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.7cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28)">
-            <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-              <img src="/art/after-hours/brain-weather.png" alt="Pink liquid maze blob" decoding="async" style="width:100%;height:auto" />
-            </div>
-          </div>
-          <div style="display:flex">
-            <div style="background:var(--ah-frame);padding:5px 10px 4px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(-.7deg);text-align:left">
-              <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">brain weather</div>
-              <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 003 · WET PAINT</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- NO 004 · the regular -->
-        <div style="position:absolute;left:78%;top:67.5%;transform:translate(-50%,-50%) rotate(-2deg);width:21cqw;z-index:3">
-          <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 12px 28px rgba(var(--ah-night-rgb),.3)">
-            <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-              <img src="/art/after-hours/regular.png" alt="Teal antenna creature" decoding="async" style="width:100%;height:auto" />
-            </div>
-          </div>
-          <div style="display:flex">
-            <div style="background:var(--ah-frame);padding:4px 9px 3px;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.25);transform:rotate(1deg);text-align:left">
-              <div style="font-family:var(--font-scrawl);font-size:clamp(13px,4.6cqw,19px);line-height:1;color:var(--ink);white-space:nowrap">the regular</div>
-              <div style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.16em;color:var(--muted);white-space:nowrap">NO 004 · HE WAITS TOO</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- glowing eyes in the dark -->
-        <div data-eyes style="position:absolute;left:8%;top:63%;display:flex;gap:2.3cqw;z-index:3;opacity:1;transition:opacity .4s ease">
-          <span style="width:1.8cqw;height:2.6cqw;background:var(--ah-lamp);border-radius:50%;box-shadow:0 0 12px rgba(var(--ah-lamp-rgb),.9);animation:gfahm-blink 4.6s ease infinite"></span>
-          <span style="width:1.8cqw;height:2.6cqw;background:var(--ah-lamp);border-radius:50%;box-shadow:0 0 12px rgba(var(--ah-lamp-rgb),.9);animation:gfahm-blink 4.6s ease infinite .07s"></span>
-        </div>
-
-        <!-- the pull cord (light switch) -->
-        <button data-cord type="button" aria-label="pull the light cord"
-          style="position:absolute;left:92%;top:0;transform:translateX(-50%);height:17%;width:56px;background:none;border:none;padding:0;z-index:6">
-          <span data-cord-inner style="position:absolute;left:50%;top:0;transform:translateX(-50%);transform-origin:top center;height:100%;display:block">
-            <span style="position:absolute;left:50%;top:0;transform:translateX(-50%);width:2px;height:calc(100% - 6.2cqw);background:var(--ah-cord-string);display:block"></span>
-            <span style="position:absolute;left:50%;bottom:.5cqw;transform:translateX(-50%);width:3.4cqw;height:6.2cqw;background:linear-gradient(160deg,var(--ah-cord-a),var(--ah-cord-b));border-radius:46% 54% 50% 50%/40% 40% 60% 60%;box-shadow:0 3px 8px rgba(var(--ah-night-rgb),.4),inset 0 1px 2px rgba(var(--white-rgb),.35);display:block"></span>
-          </span>
-        </button>
-
-        <!-- email capture card -->
-        <div data-email-card style="position:absolute;left:4cqw;right:4cqw;bottom:calc(11cqw + env(safe-area-inset-bottom));background:var(--paper);padding:3.6cqw 4cqw;box-shadow:0 14px 34px rgba(var(--ah-night-rgb),.3);transform:rotate(1.2deg);z-index:4">
-          <span aria-hidden="true" style="position:absolute;left:-10px;top:-9px;width:14cqw;height:5cqw;background:rgba(var(--ah-tape-rgb),.92);box-shadow:0 1px 3px rgba(var(--ink-rgb),.18);transform:rotate(-22deg)"></span>
-          <span aria-hidden="true" style="position:absolute;right:-8px;bottom:-7px;width:13cqw;height:4.6cqw;background:rgba(var(--pink-rgb),.4);box-shadow:0 1px 3px rgba(var(--ink-rgb),.14);transform:rotate(-18deg)"></span>
-          <div style="font-family:var(--font-scrawl);font-size:clamp(17px,6cqw,24px);color:var(--ink);transform:rotate(-.8deg)">tell me when the shop opens →</div>
-          <div data-email-wrap style="margin-top:2cqw">
-            <form data-email-form style="display:flex;gap:2cqw">
-              <input data-email-input type="email" required placeholder="you@email" aria-label="your email"
-                style="flex:1;min-width:0;border:none;border-bottom:1.5px solid var(--ink);background:transparent;padding:2.5cqw 2px;font-size:clamp(12px,3.6cqw,14px);color:var(--ink);outline:none" />
-              <button type="submit" style="border:none;background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:clamp(9px,2.9cqw,11px);letter-spacing:.14em;text-transform:uppercase;padding:0 3.6cqw;border-radius:3px">notify</button>
-            </form>
-          </div>
-          <div data-email-done style="display:none;margin-top:2cqw;font-family:var(--font-scrawl);font-size:clamp(17px,6cqw,24px);color:var(--ink)">noted. ♥ you're on the list.</div>
-          <a href="/info" style="display:inline-block;margin-top:2cqw;font-family:var(--font-mono);font-size:clamp(8px,2.6cqw,10px);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:2px 0 3px">meanwhile: the sketchbooks →</a>
-        </div>
-
-        <!-- works-on-paper signature -->
-        <div style="position:absolute;left:4cqw;bottom:calc(2.4cqw + env(safe-area-inset-bottom));display:flex;align-items:center;gap:2.3cqw;opacity:.85;z-index:4">
-          <img src="/art/after-hours/signature.png" alt="Gote — signature" decoding="async" style="height:5cqw;width:auto;mix-blend-mode:multiply" />
-          <span style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)">works on paper</span>
-        </div>
       </div>
-
-      <!-- the darkness (torch beam painted here by JS) -->
-      <div data-dark style="position:absolute;inset:0;z-index:20;pointer-events:none;opacity:1;background:radial-gradient(circle 280px at 50% 45%, rgba(var(--ah-beam),.09), rgba(var(--ah-night-rgb),0) 56px, rgba(var(--ah-night-rgb),.55) 135px, rgba(var(--ah-night-rgb),.987) 260px)"></div>
-
-      <!-- warm room glow when the lights are on -->
-      <div data-glow style="position:absolute;inset:0;z-index:21;pointer-events:none;opacity:0;transition:opacity 1.1s ease;background:radial-gradient(120% 46% at 86% -4%,rgba(var(--ah-glow),.32),transparent 62%)"></div>
-
-      <!-- header -->
-      <header style="position:absolute;left:0;right:0;top:0;z-index:40;display:flex;align-items:flex-start;justify-content:space-between;gap:3.6cqw;padding:4.1cqw 4.1cqw 0;pointer-events:none">
-        <div style="display:flex;align-items:baseline;gap:2.6cqw">
-          <img data-wm src="/art/after-hours/wordmark.png" alt="Gote Figure" decoding="async" style="height:7.7cqw;min-height:22px;width:auto;filter:invert(1) brightness(1.6);transition:filter .9s ease" />
-          <span data-tagline style="font-family:var(--font-scrawl);font-size:clamp(13px,4.8cqw,19px);color:var(--ah-tagline);transform:rotate(-2deg) translateY(-3px);display:inline-block;transition:color .9s ease;white-space:nowrap">— after hours</span>
-        </div>
-      </header>
-
-      <!-- hero -->
-      <div style="position:absolute;left:50%;top:12%;transform:translateX(-50%);z-index:40;width:92cqw;text-align:center;pointer-events:none">
-        <div style="display:grid;font-size:clamp(26px,11cqw,42px)">
-          <h1 data-h-dark style="grid-area:1/1;margin:0;font-family:var(--font-brush);font-weight:400;font-size:1em;line-height:.95;color:var(--ah-hero-lit);opacity:1;transition:opacity .9s ease">the lights aren't on yet.</h1>
-          <h1 data-h-lit style="grid-area:1/1;margin:0;font-family:var(--font-brush);font-weight:400;font-size:1em;line-height:.95;color:var(--ink);opacity:0;transition:opacity .9s ease">there, that's better.</h1>
-        </div>
-        <div style="display:grid;font-size:clamp(14px,5cqw,20px);line-height:1.25;margin-top:2cqw">
-          <p data-s-dark style="grid-area:1/1;margin:0;font-family:var(--font-scrawl);font-size:1em;color:var(--ah-sub-dark);transform:rotate(-.6deg);opacity:1;transition:opacity .9s ease">the shop opens soon. you brought a torch — have a wander.</p>
-          <p data-s-lit style="grid-area:1/1;margin:0;font-family:var(--font-scrawl);font-size:1em;color:var(--ah-sub-lit);transform:rotate(-.6deg);opacity:0;transition:opacity .9s ease">welcome to the salon. everything hangs, nothing's for sale (yet).</p>
-        </div>
-        <div data-hint style="margin-top:2cqw;font-family:var(--font-mono);font-size:clamp(9px,2.8cqw,11px);letter-spacing:.26em;text-transform:uppercase;color:var(--ah-hint);animation:gfahm-hintpulse 3.4s ease infinite;transition:color .9s ease">drag your thumb · a cord hangs somewhere</div>
-      </div>
-
     </div>
   </div>
 
-  <!-- author access gate: faint bottom-right dot → code → preview the (not-yet-open) store on production.
-       Code is client-side (a soft gate, not real security). Set GATE_CODE in animations/after-hours.ts. -->
+  <!-- ================= DESKTOP (≥ 1024px): landscape 1512×946 stage ================= -->
+  <div class="ah-block ah-block--desktop" data-ah-block="desktop">
+    <div id="ah-root" class="ah-d">
+
+      <div class="ah-front" data-stage-front>
+        <header class="ah-header">
+          <div class="ah-brand">
+            <img class="ah-wm" data-wm src="/art/after-hours/wordmark.png" alt="Gote Figure" decoding="async" />
+            <span class="ah-tagline" data-tagline>· after hours</span>
+          </div>
+        </header>
+        <div class="ah-copy">
+          <div class="ah-h-stack">
+            <h1 class="ah-h ah-h--dark" data-h-dark>the lights aren't on yet.</h1>
+            <h1 class="ah-h ah-h--lit" data-h-lit>there, that's better.</h1>
+          </div>
+          <div class="ah-sub-stack">
+            <p class="ah-sub ah-sub--dark" data-s-dark>the shop opens soon. meanwhile, you brought a torch. have a wander.</p>
+            <p class="ah-sub ah-sub--lit" data-s-lit>welcome to the salon. everything hangs, nothing's for sale (yet).</p>
+          </div>
+          <div class="ah-hint" data-hint>somewhere, a cord is hanging · pull it</div>
+        </div>
+      </div>
+
+      <div class="ah-room" data-stage-back data-room-stage="desktop" data-room>
+        <div class="ah-walllight" aria-hidden="true"></div>
+        <div class="ah-vignette" aria-hidden="true"></div>
+        <div class="ah-floor" aria-hidden="true"></div>
+        <div class="ah-rail" aria-hidden="true"></div>
+        <img class="ah-walltag" src="/art/after-hours/ghost.png" alt="" aria-hidden="true" decoding="async" />
+
+        <div class="ah-gallery" data-art-band>
+          {frames.map((f) => (
+            <div class="ah-frame" style={`--l:${f.l};--t:${f.t};--rot:${f.rot};--fw:${f.fw}`}>
+              <div class="ah-frame-mat" style={`padding:${f.fpad};box-shadow:${f.shadow}`}>
+                <div class="ah-frame-inner" style={`background:${f.inner};${f.ipad !== '0' ? `padding:${f.ipad};` : ''}`}>
+                  <img src={f.img} alt={f.alt} decoding="async" />
+                </div>
+              </div>
+              <div class="ah-cap-wrap" style={`margin-top:${f.capMt}`}>
+                <div class="ah-cap" style={`padding:${f.capPad};transform:rotate(${f.capRot})`}>
+                  <div class="ah-cap-title" style={`font-size:${f.tSize}`}>{f.title}</div>
+                  <div class="ah-cap-no">{f.no}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div class="ah-eyes" data-eyes aria-hidden="true">
+            <span class="ah-eye"></span>
+            <span class="ah-eye ah-eye--2"></span>
+          </div>
+        </div>
+
+        <button class="ah-cord" data-cord type="button" aria-label="pull the light cord" title="pull">
+          <span class="ah-cord-inner" data-cord-inner>
+            <span class="ah-cord-string"></span>
+            <span class="ah-cord-knob"></span>
+          </span>
+        </button>
+
+        <div class="ah-email" data-email-card>
+          <span class="ah-tape ah-tape--1" aria-hidden="true"></span>
+          <span class="ah-tape ah-tape--2" aria-hidden="true"></span>
+          <div class="ah-email-h">tell me when the shop opens&nbsp;→</div>
+          <div class="ah-email-wrap" data-email-wrap>
+            <form class="ah-email-form" data-email-form>
+              <input class="ah-email-input" data-email-input type="email" required placeholder="you@email" aria-label="your email" />
+              <button class="ah-email-btn" type="submit">notify</button>
+            </form>
+          </div>
+          <div class="ah-email-done" data-email-done>noted. ♥ you're on the list.</div>
+          <a class="ah-email-link" href="/info">meanwhile: the sketchbooks →</a>
+        </div>
+
+        <div class="ah-signature">
+          <img class="ah-sig-img" src="/art/after-hours/signature.png" alt="Gote — signature" decoding="async" />
+          <span class="ah-sig-label">works on paper</span>
+        </div>
+      </div>
+
+      <div class="ah-dark" data-dark aria-hidden="true"></div>
+      <div class="ah-glow" data-glow aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <!-- author gate (shared): a near-invisible corner dot → code → unlock /store for this browser.
+       Code lives in animations/after-hours.ts (GATE_CODE). Client-side soft gate, not real security. -->
   <div class="ah-gate" data-gate>
     <button type="button" data-gate-btn class="ah-gate-dot" aria-label="author access"></button>
     <form data-gate-form class="ah-gate-form" hidden>
@@ -167,7 +270,7 @@ import Immersive from '../layouts/Immersive.astro';
 </Immersive>
 
 <style is:global>
-  /* After Hours motion keyframes (verbatim from the mock; global so inline animation: refs resolve) */
+  /* After Hours motion keyframes — global so JS-set `animation:` refs resolve (verbatim from the mock) */
   @keyframes gfahm-flickon { 0%{opacity:1} 52%{opacity:1} 56%{opacity:.12} 63%{opacity:.82} 70%{opacity:.04} 79%{opacity:.38} 100%{opacity:0} }
   @keyframes gfahm-sway { 0%,100%{transform:rotate(-2.2deg)} 50%{transform:rotate(2.2deg)} }
   @keyframes gfahm-blink { 0%,91%,100%{transform:scaleY(1)} 94%,97%{transform:scaleY(.08)} }
@@ -176,17 +279,20 @@ import Immersive from '../layouts/Immersive.astro';
   @keyframes gfahm-hintpulse { 0%,100%{opacity:.85} 50%{opacity:.35} }
 
   .ah-grain {
-    position: fixed; inset: 0; z-index: var(--z-grain);
-    pointer-events: none; mix-blend-mode: multiply; opacity: .22;
-    background-image: url("/art/after-hours/grain.png"); background-repeat: repeat; /* mock's noise tile, natural size (1:1) */
-  }
-  .ah-screen { position: fixed; inset: 0; display: flex; justify-content: center; background: var(--ah-night); }
-  .ah-stage {
-    position: relative; height: 100%; width: min(100vw, 52dvh);
-    overflow: hidden; touch-action: none; container-type: size;
+    position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
+    mix-blend-mode: multiply; opacity: .22;
+    background-image: url("/art/after-hours/grain.png"); background-repeat: repeat;
   }
 
-  /* author access gate — deliberately faint; 44px hit area, 9px visible dot */
+  /* ---- block toggle: mobile is the base, desktop takes over at 1024px ---- */
+  .ah-block--desktop { display: none; }
+  @media (min-width: 1024px) { .ah-block--mobile { display: none; } }
+
+  /* ---- mobile stage (phone salon) ---- */
+  .ah-screen { position: fixed; inset: 0; display: flex; justify-content: center; background: var(--ah-night); }
+  .ah-stage { position: relative; height: 100%; width: min(100vw, 52dvh); overflow: hidden; touch-action: none; container-type: size; }
+
+  /* ---- author access gate — deliberately faint; 44px hit area, 9px visible dot ---- */
   .ah-gate { position: fixed; right: 0; bottom: 0; z-index: 11000; display: flex; align-items: center; gap: 6px; padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); }
   .ah-gate-dot { width: 44px; height: 44px; padding: 0; border: none; background: transparent; cursor: pointer; position: relative; }
   .ah-gate-dot::after { content: ''; position: absolute; right: 9px; bottom: 9px; width: 9px; height: 9px; border-radius: 50%; background: var(--ah-hint); opacity: .12; transition: opacity .3s ease; }
@@ -195,4 +301,80 @@ import Immersive from '../layouts/Immersive.astro';
   .ah-gate-form[hidden] { display: none; }
   .ah-gate-form input { width: 100px; font-family: var(--font-mono); font-size: 16px; color: var(--ah-wall); background: transparent; border: none; border-bottom: 1px solid var(--ah-hint); outline: none; padding: 2px; }
   .ah-gate-go { border: none; background: transparent; color: var(--ah-wall); font-family: var(--font-mono); font-size: 15px; padding: 2px 4px; cursor: pointer; }
+
+  /* ================= DESKTOP STAGE (≥ 1024px): 1512×946 canvas scaled to the viewport ================= */
+  @media (min-width: 1024px) {
+    .ah-block--desktop { display: block; }
+    .ah-d { position: fixed; inset: 0; overflow: hidden; background: var(--ah-night); }
+
+    .ah-room, .ah-front { position: absolute; left: 50%; top: 50%; width: 1512px; height: 946px; transform: translate(-50%,-50%); transform-origin: center; }
+    .ah-room { background: var(--ah-wall); overflow: hidden; z-index: 1; }
+    .ah-front { z-index: 40; pointer-events: none; }
+
+    .ah-walllight { position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(115% 85% at 50% -6%, rgba(255,248,233,.75), transparent 58%); }
+    .ah-vignette { position: absolute; inset: 0; pointer-events: none; box-shadow: inset 0 -46px 130px rgba(22,19,15,.16), inset 0 0 150px rgba(22,19,15,.08); }
+    .ah-floor { position: absolute; left: 0; right: 0; bottom: 0; height: 10.5%; background: var(--ah-floor); box-shadow: inset 0 10px 18px rgba(22,19,15,.18); }
+    .ah-rail { position: absolute; left: 0; right: 0; bottom: 10.5%; height: 5px; background: var(--ah-skirt); box-shadow: 0 2px 4px rgba(22,19,15,.22); }
+    .ah-walltag { position: absolute; left: 50%; top: 49%; width: 397px; height: auto; transform: translate(-50%,-50%) rotate(-4deg); opacity: .07; mix-blend-mode: multiply; pointer-events: none; }
+
+    .ah-gallery { position: absolute; left: 0; right: 0; top: 255px; bottom: 99px; z-index: 2; }
+    .ah-frame { position: absolute; left: var(--l); top: var(--t); width: var(--fw); transform: translate(-50%,-50%) rotate(var(--rot)); z-index: 2; }
+    .ah-frame-mat { background: var(--ah-frame); }
+    .ah-frame-inner { box-shadow: inset 0 0 0 1px rgba(22,19,15,.08); }
+    .ah-frame-inner img { width: 100%; height: auto; display: block; }
+    .ah-cap-wrap { display: flex; justify-content: center; margin-top: 9px; }
+    .ah-cap { background: var(--ah-frame); box-shadow: 0 3px 8px rgba(12,9,6,.25); text-align: left; }
+    .ah-cap-title { font-family: var(--font-scrawl); line-height: 1; color: var(--ink); white-space: nowrap; }
+    .ah-cap-no { font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+
+    .ah-eyes { position: absolute; left: 7%; top: 50%; display: flex; gap: 10px; z-index: 3; opacity: 1; transition: opacity .4s ease; }
+    .ah-eye { width: 9px; height: 13px; background: var(--ah-lamp); border-radius: 50%; box-shadow: 0 0 12px rgba(255,233,168,.9); animation: gfahm-blink 4.6s ease infinite; }
+    .ah-eye--2 { animation-delay: .07s; }
+
+    .ah-cord { position: absolute; left: 86%; top: 0; transform: translateX(-50%); height: 36%; width: 72px; background: none; border: none; padding: 0; cursor: pointer; z-index: 6; outline: none; }
+    .ah-cord-inner { position: absolute; left: 50%; top: 0; transform: translateX(-50%); transform-origin: top center; height: 100%; display: block; animation: gfahm-sway 4.5s ease-in-out infinite; }
+    .ah-cord-string { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 3px; height: calc(100% - 42px); background: var(--ah-cord-string); display: block; }
+    .ah-cord-knob { position: absolute; left: 50%; bottom: 2px; transform: translateX(-50%); width: 23px; height: 42px; background: linear-gradient(160deg, var(--ah-cord-a), var(--ah-cord-b)); border-radius: 46% 54% 50% 50% / 40% 40% 60% 60%; box-shadow: 0 3px 8px rgba(12,9,6,.4), inset 0 1px 2px rgba(255,255,255,.35); display: block; }
+
+    .ah-email { position: absolute; right: 6%; bottom: 20.5%; width: 300px; background: var(--paper); padding: 14px 16px 16px; box-shadow: 0 14px 34px rgba(12,9,6,.3); transform: rotate(2deg); z-index: 4; }
+    .ah-tape { position: absolute; }
+    .ah-tape--1 { left: -12px; top: -10px; width: 62px; height: 22px; background: rgba(233,226,205,.92); box-shadow: 0 1px 3px rgba(22,19,15,.18); transform: rotate(-22deg); }
+    .ah-tape--2 { right: -10px; bottom: -8px; width: 56px; height: 20px; background: rgba(218,114,133,.4); box-shadow: 0 1px 3px rgba(22,19,15,.14); transform: rotate(-18deg); }
+    .ah-email-h { font-family: var(--font-scrawl); font-size: 36px; color: var(--ink); -webkit-text-stroke: .6px var(--ink); transform: rotate(-.8deg); }
+    .ah-email-wrap { margin-top: 8px; }
+    .ah-email-form { display: flex; gap: 6px; }
+    .ah-email-input { flex: 1; min-width: 0; border: none; border-bottom: 1.5px solid var(--ink); background: transparent; padding: 6px 2px; color: var(--ink); outline: none; font-family: var(--font-mono); font-size: 13px; }
+    .ah-email-input::placeholder { color: var(--muted-2); }
+    .ah-email-btn { border: none; background: var(--ink); color: var(--paper); cursor: pointer; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; padding: 0 11px; border-radius: 3px; transition: background .25s; }
+    .ah-email-btn:hover { background: var(--pink); }
+    .ah-email-done { display: none; margin-top: 8px; font-family: var(--font-scrawl); font-size: 21px; color: var(--ink); }
+    .ah-email-link { display: inline-block; margin-top: 10px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 1px solid rgba(138,132,120,.5); padding-bottom: 2px; transition: color .25s, border-color .25s; }
+    .ah-email-link:hover { color: var(--pink); border-color: var(--pink); }
+
+    .ah-signature { position: absolute; left: 24px; bottom: 2.6%; display: flex; align-items: center; gap: 10px; opacity: .85; z-index: 4; }
+    .ah-sig-img { height: 24px; width: auto; mix-blend-mode: multiply; }
+    .ah-sig-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+
+    .ah-header { position: absolute; left: 0; right: 0; top: 0; z-index: 40; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; padding: 22px 28px 0; pointer-events: none; }
+    .ah-brand { display: flex; align-items: flex-end; gap: 14px; }
+    .ah-wm { height: 40px; width: auto; filter: invert(1) brightness(1.6); transition: filter .9s ease; }
+    .ah-tagline { font-family: var(--font-scrawl); font-size: 23px; color: var(--ah-tagline); transform: rotate(-2deg) translateY(-4px); display: inline-block; transition: color .9s ease; }
+    .ah-copy { position: absolute; left: 50%; top: 95px; transform: translateX(-50%); z-index: 40; width: 820px; text-align: center; pointer-events: none; }
+    .ah-h-stack, .ah-sub-stack { display: grid; }
+    .ah-h-stack > .ah-h { grid-area: 1 / 1; margin: 0; font-family: var(--font-brush); font-weight: 400; line-height: .92; font-size: 82px; transition: opacity .9s ease; }
+    .ah-h--dark { color: var(--ah-hero-lit); }
+    .ah-h--lit { color: var(--ink); opacity: 0; }
+    .ah-sub-stack { margin-top: .2em; }
+    .ah-sub-stack > .ah-sub { grid-area: 1 / 1; margin: 0; font-family: var(--font-scrawl); font-size: 31px; transform: rotate(-.6deg); transition: opacity .9s ease; }
+    .ah-sub--dark { color: var(--ah-sub-dark); }
+    .ah-sub--lit { color: var(--ah-sub-lit); opacity: 0; }
+    .ah-hint { margin-top: .8em; font-family: var(--font-mono); font-size: 15px; letter-spacing: .26em; text-transform: uppercase; color: var(--ah-hint); animation: gfahm-hintpulse 3.4s ease infinite; transition: color .9s ease; }
+
+    .ah-dark { position: absolute; inset: 0; z-index: 20; pointer-events: none; opacity: 1; background: radial-gradient(circle 380px at 50% 42%, rgba(255,214,140,.09), rgba(12,9,6,0) 76px, rgba(12,9,6,.55) 180px, rgba(12,9,6,.987) 345px); }
+    .ah-glow { position: absolute; inset: 0; z-index: 21; pointer-events: none; opacity: 0; transition: opacity 1.1s ease; background: radial-gradient(90% 60% at 86% -4%, rgba(255,224,160,.32), transparent 62%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ah-block *, .ah-grain { animation: none !important; transition: none !important; }
+  }
 </style>
