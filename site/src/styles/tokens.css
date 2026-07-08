@@ -1,80 +1,92 @@
-/* Design tokens — §3.1 colors verbatim + Phase-1 type/space/motion vocabulary.
-   The ONLY place colors and scale are defined. */
+/* GoteFigure design tokens — v3 (Fable 5 store design, research/design/GoteFigure Store.dc.html)
+   The ONLY place colors and scale are defined. Hand-drawn Level 2 is the permanent skin. */
 :root {
-  /* color */
-  --paper: #F2F1EA;
-  --ink: #111111;
-  --amber: #F0A028;
-  --teal: #2AA79B;
-  --og-pink: #F27C8D;   /* RESERVED: archive/OG-era only (§3.1 rule) */
-  --sunset: #E8836B;
-  --paper-dim: #E5E2D8;
+  /* v3 palette */
+  --paper: #F7F5F0;
+  --ink: #16130F;
+  --card: #FCFBF6;
+  --pink: #DA7285;            /* accents, underlines, quick-add pools, splats */
+  --muted: #8A8478;
+  --muted-2: #A29B8D;
+  --muted-3: #C9C2B4;
+  --muted-dark: #5C564A;
+  --body-soft: #3E3A31;
+  --hand-muted: #3E382C;      /* hand-drawn skin darkens muted on paper */
+  --hand-muted-mid: #554E3E;
+  --hand-muted-3: #6B6557;
+  --dark-muted: #E6E1D4;      /* muted on dark surfaces (hand-drawn skin) */
+  --dark-body: #B5AE9F;       /* vault body text */
+  --dark-tile-muted: #D8D2C4;
+  --size-idle: #4C4638;
 
-  /* type — two-register system (research-validated): hand voice for headlines/badges/notes,
-     machine voice (mono) for everything transactional. "No one hand-letters a price." */
-  --font-ui: 'Space Grotesk Variable', system-ui, sans-serif;
-  --font-hand: 'Shantell Sans Variable', 'Comic Sans MS', cursive;
-  --font-mono: ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', monospace;
+  /* legacy-era token kept for archive contexts (spec §3.1) */
+  --og-pink: #F27C8D;
+
+  /* After Hours — dark-salon scene palette (2026-07-08) */
+  --ah-night: #0C0906;        /* room black behind the stage + the darkness */
+  --ah-wall: #E9E2D3;         /* lit salon wall */
+  --ah-floor: #CDC3AC;        /* floor band */
+  --ah-skirt: #F2EDE0;        /* skirting highlight */
+  --ah-frame: #F9F7F1;        /* picture-frame mat board */
+  --ah-mat-pink: #F0A3AE;     /* the hare's pink mat */
+  --ah-lamp: #FFE9A8;         /* glowing eyes / lamp warm */
+  --ah-beam: 255, 214, 140;   /* torch beam warm — rgb triplet for rgba() */
+  --ah-night-rgb: 12, 9, 6;   /* --ah-night as rgb triplet, for the beam/darkness rgba() */
+  --ah-glow: 255, 224, 160;   /* warm room glow when lit — rgb triplet */
+  --ink-rgb: 22, 19, 15;      /* --ink as rgb triplet, for shadow rgba() */
+  --pink-rgb: 218, 114, 133;  /* --pink as rgb triplet, for tape rgba() */
+  --ah-tape-rgb: 233, 226, 205; /* masking-tape tint (near-wall) for card corners */
+  --ah-lamp-rgb: 255, 233, 168; /* eye / lamp glow, for box-shadow rgba() */
+  --ah-wash: 255, 248, 233;     /* warm light wash down the wall from above */
+  --white: #FFFFFF;             /* picture-frame mat board */
+  --white-rgb: 255, 255, 255;   /* mat + cord-knob highlight rgba() */
+  --ah-cord-a: #A8814C;       /* cord knob gradient top */
+  --ah-cord-b: #7A5C33;       /* cord knob gradient bottom */
+  --ah-cord-string: #4A4336;  /* cord string */
+  --ah-hero-lit: #EFE9DB;     /* headline over the dark */
+  --ah-sub-dark: #9C9585;     /* subhead, lights off */
+  --ah-sub-lit: #6E675B;      /* subhead, lights on */
+  --ah-hint: #7E7869;         /* hint, lights off */
+  --ah-hint-lit: #A8A192;     /* hint, lights on */
+  --ah-tagline: #B9B2A2;      /* tagline, lights off */
+
+  /* type */
+  --font-brush: 'Nanum Brush Script', cursive;   /* display voice */
+  --font-hand: 'Kalam', cursive;                 /* hand-drawn body voice (L1) */
+  --font-scrawl: 'Reenie Beanie', cursive;       /* hand-drawn overlay voice (L2) */
+  --font-mono: 'Space Mono', monospace;          /* transactional numerals under the skin */
+
+  /* type scale — ported from V2 canonical 2026-07-08 (fixes V3's missing scale; general hygiene.
+     After Hours is a cqw-fluid composition so it reproduces clamp() values verbatim, per Spec Sheet). */
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.25rem;
   --text-xl: clamp(1.5rem, 1.1rem + 2vw, 2.25rem);
   --text-display: clamp(2.25rem, 1.5rem + 4vw, 4.5rem);
 
-  /* AA-safe text variants of the brand accents (chips/labels on paper) */
-  --teal-text: #186A62;
-  --pink-text: #A03C50;
-
-  /* space (4px base) */
+  /* spacing scale — 4px base, ported from V2 canonical 2026-07-08 */
   --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
   --s-6: 1.5rem; --s-8: 2rem; --s-12: 3rem; --s-16: 4rem; --s-24: 6rem;
 
-  /* shape & motion (easing canon: traversal/arrival from validated portfolio spec) */
-  --oval: 50% / 42%;           /* cameo mask ratio (§3.3) */
-  --ease-ink: cubic-bezier(0.33, 1, 0.68, 1);
+  /* motion canon */
   --ease-traverse: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-arrive: cubic-bezier(0.23, 1, 0.32, 1);
-  --dur-quick: 180ms;
-  --dur-moment: 420ms;
-  --dur-scene: 900ms;
+  --ease-tile: cubic-bezier(0.2, 0.7, 0.25, 1);
+  --ease-pop: cubic-bezier(0.18, 0.89, 0.32, 1.2);
+  --ease-soak: cubic-bezier(0.55, 0.05, 0.3, 1);
+
+  /* hand-drawn sloppy radii (design _applyHandDrawn css1/css2) */
+  --sloppy-pill: 255px 22px 225px 28px / 28px 225px 22px 255px;
+  --sloppy-tile: 18px 225px 22px 255px / 255px 22px 225px 18px;
+  --sloppy-tile-ring: 230px 24px 250px 20px / 20px 250px 24px 230px;
+  --sloppy-pill-ring: 250px 26px 238px 32px / 32px 238px 26px 250px;
+  --sloppy-btn: 14px 32px 16px 30px / 30px 16px 32px 14px;
+  --sloppy-quickadd: 18px 8px 16px 9px;
 
   /* layers */
-  --z-dust: 0;
-  --z-content: 1;
-  --z-nav: 50;
-  --z-drawer: 80;
-  --z-intro: 100;
-
-  /* After Hours page fonts (self-hosted latin subsets; extracted from the approved mock).
-     Distinct display registers used only by /after-hours; the store keeps Shantell + Space Grotesk. */
-  --font-brush: 'Nanum Brush Script', cursive;      /* the two H1s */
-  --font-marker: 'Reenie Beanie', cursive;          /* handwritten captions/subhead/email */
-  --font-typewriter: 'Space Mono', ui-monospace, monospace; /* catalog #s, hint, notify, labels */
-
-  /* After Hours palette — a distinct dark-salon context (not the daytime store).
-     --og-pink stays reserved (§3.1); these are new named tokens, matched to the mock. */
-  --ah-black: #0C0906;        /* darkness / page base */
-  --ah-ink: #16130F;          /* warm near-black ink/text */
-  --ah-wall: #E9E2D3;         /* salon wall */
-  --ah-mat: #F9F7F1;          /* frame mat */
-  --ah-mat-inner: #FFFFFF;    /* inner mat behind the art (paper white) */
-  --ah-card: #F7F5F0;         /* email card / ::selection */
-  --ah-floor: #CDC3AC;        /* floor band */
-  --ah-rail: #F2EDE0;         /* chair rail */
-  --ah-pink: #DA7285;         /* accent / hover (notify, links) */
-  --ah-pink-mat: #F0A3AE;     /* "the hare" frame mat */
-  --ah-gray: #8A8478;         /* mono caption gray */
-  --ah-placeholder: #B4AC9C;  /* input placeholder */
-  --ah-eyes: #FFE9A8;         /* eyes glow */
-  --ah-h-dark: #EFE9DB;       /* headline, lights off */
-  --ah-sub-dark: #9C9585;     /* subhead, lights off */
-  --ah-hint-dark: #7E7869;    /* hint, lights off */
-  --ah-h-lit: #16130F;        /* headline, lights on */
-  --ah-sub-lit: #6E675B;      /* subhead, lights on */
-  --ah-hint-lit: #A8A192;     /* hint, lights on */
-  --ah-tag-dark: #B9B2A2;     /* tagline, lights off */
-  --ah-tag-lit: #6E675B;      /* tagline, lights on */
-  --ah-cord-string: #4A4336;  /* light-cord string */
-  --ah-cord-knob-1: #A8814C;  /* cord knob gradient top */
-  --ah-cord-knob-2: #7A5C33;  /* cord knob gradient bottom */
+  --z-header: 5000;
+  --z-drawer: 8000;
+  --z-flood: 9000;
+  --z-intro: 9980;
+  --z-grain: 10500;
 }

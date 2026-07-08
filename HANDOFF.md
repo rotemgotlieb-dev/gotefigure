@@ -10,7 +10,8 @@ The art label of **Rotem** — hand-drawn ink art. Launched 2020, vanished, rela
 from 2020, five years later"). Every drawing is made by **one human hand** (Rotem) — that human
 craft is the soul of the brand. It's an art **store that is also an experience**: wow-factor,
 interactive, makes people want to click/explore — and buy. Stack: Astro 6 (`site/`), GSAP,
-Fourthwall Storefront API, Cloudflare Workers. Node 22.
+Fourthwall Storefront API. Node 22. Hosting: **Vercel Hobby while non-commercial** (owner
+decision 2026-07-02); at commercialization → Vercel Pro or back to Cloudflare (config retained).
 
 ## Current phase (IMPORTANT)
 A **full V2 redesign is underway in Claude Design (Fable 5)** — reimagining the whole storefront

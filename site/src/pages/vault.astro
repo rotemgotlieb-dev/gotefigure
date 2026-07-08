@@ -1,0 +1,57 @@
+---
+// THE VAULT (design lines 411-444) — where every drop ends up. Dark room, 11 pieces, forever.
+import Layout from '../layouts/Layout.astro';
+import InkButton from '../components/InkButton.astro';
+import { vault } from '../lib/drop';
+---
+<Layout title="The Vault — GoteFigure" description="Where every drop ends up. Sold out, never reprinted, not for sale." dark>
+  <div class="vault">
+    <div class="inner">
+      <div class="head">
+        <h1 class="brush">The Vault</h1>
+        <div class="tag mono">sold out · never reprinted · not for sale</div>
+      </div>
+      <p class="lede">Where every drop ends up. Once a piece sells through, it hangs here for good.</p>
+
+      <div class="grid">
+        {vault.map((v) => (
+          <figure data-rv="fade">
+            <div class="mat"><div role="img" aria-label={v.name} style={`background-image:url('${v.img}')`}></div></div>
+            <figcaption>
+              <span class="name brush">{v.name}</span>
+              <span class="sub mono">{v.sub}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+
+      <div class="backrow">
+        <InkButton label="Back to the living →" nav="/" dark size="md" />
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .brush { font-family: var(--font-brush); font-weight: 400; }
+  .vault { background: var(--ink); min-height: 100vh; color: var(--paper); padding: 44px 28px 90px; animation: gf-fadein .4s ease; }
+  .inner { max-width: 1220px; margin: 0 auto; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 8px; }
+  h1 { font-size: clamp(46px, 5vw, 70px); line-height: 1; margin: 0; }
+  .tag { font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--dark-muted); }
+  .lede { font-family: var(--font-hand); font-size: 18px; line-height: 1.5; color: var(--dark-muted); max-width: 52ch; margin: 0 0 44px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 22px; }
+  figure { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s var(--ease-tile); margin: 0; display: flex; flex-direction: column; gap: 12px; }
+  .mat { background: var(--paper); padding: 9px; border-radius: 2px; }
+  .mat > div { width: 100%; aspect-ratio: 1; background-position: center; background-size: cover; }
+  figcaption { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .name { font-size: 21px; line-height: 1; }
+  .sub { font-size: 14px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--dark-muted); flex-shrink: 0; }
+
+  .backrow { display: flex; justify-content: center; margin-top: 70px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    figure { opacity: 1; transform: none; }
+  }
+</style>

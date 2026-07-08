@@ -1,27 +1,23 @@
-# After Hours — desktop/mobile merge contract
+# After Hours — one responsive page (desktop + mobile reconciled)
 
-The desktop build (branch `luxembourg`) and the mobile build (branch `salvador`) target **one
-responsive page**. This is the shared surface so the two branches merge with minimal conflict.
+The desktop build (this branch) and the mobile build (merged into `main` via PR #2) are now
+**one responsive page** at `/`. This documents the final unified structure.
 
-## Shared (do not diverge)
-- **Route** `/` (site root) · **page** `src/pages/index.astro` · **layout** `src/layouts/AfterHoursLayout.astro` (minimal full-viewport takeover — no store header/footer/cart). After Hours is the pre-launch homepage; the real store home is preserved at `/store` and gated behind the author code.
-- **Author gate**: a near-invisible bottom-right dot (`[data-gate]`) → code field; correct code sets `localStorage['gf-preview']` and opens `/store`. Code constant `ACCESS_CODE` in `src/animations/after-hours.ts`. Store pages (Layout) bounce to `/` unless `gf-preview` is set.
-- **Tokens** `src/styles/tokens.css`: the `--ah-*` palette + `--font-brush` / `--font-marker` / `--font-typewriter`. (V2 and V3 tokens.css already had the 4px spacing + type scales — nothing was ported; the `--ah-*` group was added.)
-- **Fonts** `src/styles/after-hours.css` (@font-face) → `public/fonts/after-hours/*.woff2` (self-hosted latin subsets extracted from the mock).
-- **Art** `src/assets/after-hours/*.png` (Astro `<Image>` → webp) + `public/art/after-hours/grain.png` (tiled bg).
-- **Motion** `src/animations/after-hours.ts` — `initAfterHours()/destroyAfterHours()`, bound in the layout to `astro:page-load` / `astro:before-swap`. Keyframes `gfah-*` live in the page `<style>`.
-- **Email seam**: `localStorage['gf-soon-email']`; real provider is one integration point (see `submitEmail`). Lights memory: `localStorage['gf-ah-found']`.
-- **Copy** (em-dashes swapped per the no-em-dash rule): tagline `· after hours`; dark subhead `the shop opens soon. meanwhile, you brought a torch. have a wander.` Everything else verbatim from the mock.
-- **Stable IDs**: `#ah-root #ah-header #ah-headline #ah-gallery #ah-notify #ah-signature`.
-- **data-hooks** (JS depends on these): `data-stage-back` `data-stage-front` `data-dark` `data-glow` `data-cord` `data-cord-inner` `data-eyes` `data-email-card` `data-email-form` `data-email-input` `data-email-wrap` `data-email-done` `data-h-dark` `data-h-lit` `data-s-dark` `data-s-lit` `data-hint` `data-wm` `data-tagline`.
+## Structure
+- **Route** `/` (site root) · **page** `src/pages/index.astro` · **layout** `src/layouts/Immersive.astro` (chromeless full-viewport takeover). After Hours is the pre-launch homepage; the Fable 5 store is preserved at `/store` (+ `piece/[id]`, `vault`, `about`, `info`, `404`) and gated behind the author code.
+- **Two blocks, one DOM**, toggled purely by CSS:
+  - `[data-ah-block="mobile"]` — the phone salon (cqw stage), verbatim from "After Hours Phone.dc.html". Shown `< 1024px`.
+  - `[data-ah-block="desktop"]` — the landscape salon (1512×946 stage scaled to the viewport), 1:1 from "GoteFigure After Hours.dc.html". Shown `≥ 1024px`.
+- **One breakpoint-aware module** `src/animations/after-hours.ts` (`defineModule` via core; init on `astro:page-load`, teardown on `astro:before-swap`). It wires the shared gate once, mounts only the active block's torch/cord/email/eyes, and re-mounts the other block on a media-query change. Reduced-motion → static lit in both.
+- **Author gate** (shared, single corner element `[data-gate]`/`[data-gate-btn]`): near-invisible 9px dot (44px hit area, 16px input) → code field. Correct `GATE_CODE` (in `after-hours.ts`) sets `localStorage['gf-store-open']` and opens `/store`. Store pages (`Layout`) bounce to `/` pre-paint unless `gf-store-open` is set. Client-side soft gate (not real security — the durable hard gate is a post-hosting Worker/middleware step).
+- **Tokens** `src/styles/tokens.css`: the `--ah-*` palette + rgb-triplet lighting tokens + `--font-brush` / `--font-scrawl` / `--font-mono`. Both blocks use them.
+- **Assets** `public/art/after-hours/*.png` (one set; `grain.png` tiled bg). Fonts via `@fontsource` (loaded by `Immersive`).
+- **Keyframes** `gfahm-*` (global, in the page `<style is:global>`) so JS-set `animation:` refs resolve. Both blocks + the module use them.
+- **State keys**: `gf-ah-found` (lights memory), `gf-soon-email` (notify capture, stub provider — one integration point in `submitEmail`), `gf-store-open` (author preview unlock).
 
-## The split (each branch owns one block)
-- **DOM** is authored in **mobile-flow order** (copy → room/gallery → email → signature → overlays). Desktop absolutely-positions via z-index, so DOM order is free for desktop and correct for mobile.
-- **CSS `<style>` has three delimited blocks**: `SHARED` (fonts/colors/keyframes/visual treatment), `MOBILE BASE (< 1024px)`, and `DESKTOP STAGE (>= 1024px)`. Desktop owns the last block; mobile owns the middle one. Merge = keep both blocks.
-- **JS** is breakpoint-aware: the fixed 1512×946 scaled stage + torch + cord run only on `min-width:1024px`; `initAfterHours()` returns early on mobile after wiring the email form. Mobile motion (touch reveal, etc.) goes in that early-return branch / a mobile helper — `salvador` owns it.
-- Elements with class `.ah-desk` are desktop-only (room lighting, floor, eyes, cord, dark/glow); hidden in the mobile base.
+## Copy
+Verbatim from the mocks except two em dashes swapped to satisfy the no-em-dash rule: tagline `· after hours`; mobile dark subhead `the shop opens soon. you brought a torch. have a wander.` (desktop uses `…meanwhile, you brought a torch. have a wander.`).
 
-## Known follow-ups (not blockers)
-- The `meanwhile: the sketchbooks →` link points to `/notebooks` (a forward reference to a not-yet-built page — currently 404). Wire or remove when that page ships.
-- Email provider is a local-storage stub (§8.4 owner decision).
-- Mobile base in `after-hours.astro` is a coherent placeholder (`salvador` refines it): iOS-safe (≥16px input, ≥24px tap targets), lit copy shown, torch hidden.
+## Follow-ups (not blockers)
+- Email provider is a localStorage stub (§8.4 owner decision).
+- The durable server-side store hard-gate (Worker/middleware + secret) is a post-hosting step; the current gate is client-side.

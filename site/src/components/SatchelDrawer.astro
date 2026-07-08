@@ -1,0 +1,238 @@
+---
+// The Satchel — bag drawer (design lines 446-513). Client-rendered rows from lib/satchel.
+// Focus-trapped + ESC (a11y law §10). "Seal the order" = mock ritual → sealed state.
+import { pieces, money } from '../lib/drop';
+import InkButton from './InkButton.astro';
+
+const pieceMap = Object.fromEntries(pieces.map((p) => [p.id, {
+  name: p.name, kindShort: p.kindShort, price: p.price, art: p.art,
+}]));
+
+// sealed-badge boil: 3 pre-generated wobbly circles stepped at ~6fps (no animated filters — §7.6.3)
+function wobblyCircle(seed: number): string {
+  let s = seed >>> 0;
+  const rnd = () => { s = (s + 0x6d2b79f5) >>> 0; let t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  const N = 22, R = 52, pts: number[][] = [];
+  for (let i = 0; i <= N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    const rr = R * (0.96 + rnd() * 0.07);
+    pts.push([54 + Math.cos(a) * rr, 54 + Math.sin(a) * rr]);
+  }
+  pts[N] = pts[0].slice();
+  let d = `M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for (let i = 1; i < N; i++) {
+    const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2;
+    d += ` Q ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+  }
+  return d + ' Z';
+}
+const boilVariants = [11, 47, 83].map(wobblyCircle);
+---
+<div class="gf-satchel" data-satchel hidden data-pieces={JSON.stringify(pieceMap)}>
+  <div class="backdrop" data-satchel-close></div>
+  <aside role="dialog" aria-modal="true" aria-label="Your bag">
+
+    <div class="state-bag" data-state-bag>
+      <div class="head">
+        <h2>Your bag</h2>
+        <button class="close" data-satchel-close type="button">close ✕</button>
+      </div>
+
+      <div class="body">
+        <div class="empty" data-empty>
+          <img src="/art/v3/alien.png" alt="" width="74" height="59" />
+          <div class="empty-note">nothing yet — the ink dries fast.</div>
+        </div>
+        <div data-rows></div>
+      </div>
+
+      <div class="totals" data-totals hidden>
+        <div class="line mono"><span>subtotal</span><span data-subtotal></span></div>
+        <div class="line mono ship"><span>shipping</span><span>free (US)</span></div>
+        <div class="total"><span>Total</span><span data-total></span></div>
+        <InkButton label="Seal the order" seal wide size="lg" />
+        <div class="proto mono" data-ink-obstacle>prototype — nothing is charged</div>
+      </div>
+    </div>
+
+    <div class="state-sealed" data-state-sealed hidden>
+      <div class="seal-badge">
+        <svg viewBox="0 0 108 108" aria-hidden="true">
+          {boilVariants.map((d, i) => (
+            <path d={d} fill="none" stroke="#DA7285" stroke-width="2.5" class={`bv bv${i}`}></path>
+          ))}
+        </svg>
+        <span>sealed</span>
+      </div>
+      <div class="yours">it's yours.</div>
+      <div class="blurb mono">order sealed in the book. you'll get the knock when it ships.</div>
+      <button class="keep" data-keep-looking type="button">keep looking →</button>
+    </div>
+
+  </aside>
+</div>
+
+<style>
+  .gf-satchel { position: fixed; inset: 0; z-index: var(--z-drawer); }
+  .backdrop { position: absolute; inset: 0; background: rgba(22, 19, 15, .42); animation: gf-fadein .3s ease; }
+  aside {
+    position: absolute; top: 0; right: 0; bottom: 0;
+    width: min(430px, 94vw);
+    background: var(--paper);
+    border-left: 1px solid rgba(22, 19, 15, .2);
+    display: flex; flex-direction: column;
+    animation: gf-slidein .45s cubic-bezier(.2, .75, .25, 1);
+  }
+  .state-bag { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding: 26px 26px 18px; border-bottom: 1px solid rgba(22, 19, 15, .12);
+  }
+  .head h2 { font-family: var(--font-brush); font-weight: 400; font-size: 36px; line-height: 1; margin: 0; }
+  /* the drawer is an aside — outside the hand-drawn skin's main/header/footer scope, so
+     Space Mono survives here (design ground truth: only headings/names are brush) */
+  .close { border: none; background: none; font-family: var(--font-mono); font-size: 13px; font-weight: 400; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); padding: 6px; }
+  .close:hover { color: var(--ink); }
+  .body { flex: 1; overflow-y: auto; padding: 10px 26px; }
+
+  .empty { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 70px 0; text-align: center; }
+  .empty img { width: 74px; opacity: .5; animation: gf-drift 6s ease-in-out infinite; }
+  .empty-note { font-family: var(--font-brush); font-size: 26px; color: var(--muted-dark); transform: rotate(-1.5deg); }
+
+  :global([data-rows] .row) { display: flex; align-items: center; gap: 14px; padding: 16px 0; border-bottom: 1px solid rgba(22, 19, 15, .1); }
+  :global([data-rows] .thumb) { width: 58px; height: 58px; flex: none; background: var(--card); border: 1px solid rgba(22, 19, 15, .12); border-radius: 3px; padding: 7px; }
+  :global([data-rows] .thumb > div) { width: 100%; height: 100%; background-position: center; background-size: contain; background-repeat: no-repeat; }
+  :global([data-rows] .info) { flex: 1; min-width: 0; }
+  :global([data-rows] .name) { font-family: var(--font-brush); font-size: 21px; line-height: 1.05; }
+  :global([data-rows] .sub) { font-family: var(--font-mono); font-size: 15px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--hand-muted); margin-top: 3px; }
+  :global([data-rows] .qty) { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; }
+  :global([data-rows] .qty button) { width: 24px; height: 24px; border: 1px solid rgba(22, 19, 15, .3); border-radius: 50%; background: none; color: var(--ink); line-height: 1; }
+  :global([data-rows] .qty button:hover) { border-color: var(--ink); }
+  :global([data-rows] .qty span) { min-width: 14px; text-align: center; }
+  :global([data-rows] .price) { font-size: 16px; font-weight: 700; min-width: 44px; text-align: right; }
+  :global([data-rows] .rm) { border: none; background: none; color: var(--muted-2); font-size: 13px; padding: 4px; }
+  :global([data-rows] .rm:hover) { color: var(--pink); }
+
+  .totals { padding: 20px 26px 26px; border-top: 1.5px solid rgba(22, 19, 15, .16); }
+  .line { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; color: var(--muted-dark); padding: 3px 0; }
+  .line.ship { padding-bottom: 12px; }
+  .total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; padding: 10px 0 18px; border-top: 1px solid rgba(22, 19, 15, .12); }
+  .proto { font-size: 15px; font-weight: 700; letter-spacing: .09em; color: var(--hand-muted); text-align: center; margin-top: 12px; width: fit-content; margin-left: auto; margin-right: auto; }
+  /* seal button label stays mono in the drawer (skin scope) */
+  .totals :global(.gf-ink-btn .gf-lbl-ink),
+  .totals :global(.gf-ink-btn .gf-lbl-paper),
+  .totals :global(.gf-ink-btn .gf-sizer) { font-family: var(--font-mono); font-size: 24px; }
+
+  .state-sealed { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; text-align: center; }
+  .seal-badge { position: relative; width: 108px; height: 108px; display: flex; align-items: center; justify-content: center; transform: rotate(-9deg); animation: gf-rise .5s cubic-bezier(.2, .75, .25, 1); }
+  .seal-badge svg { position: absolute; inset: 0; }
+  .seal-badge .bv { opacity: 0; }
+  .seal-badge .bv0 { animation: gf-boil3-a .495s steps(1) infinite; }
+  .seal-badge .bv1 { animation: gf-boil3-b .495s steps(1) infinite; }
+  .seal-badge .bv2 { animation: gf-boil3-c .495s steps(1) infinite; }
+  .seal-badge span { font-family: var(--font-mono); font-size: 12px; letter-spacing: .3em; text-transform: uppercase; color: var(--pink); font-weight: 700; }
+  .yours { font-family: var(--font-brush); font-size: 34px; line-height: 1.2; }
+  .blurb { font-size: 15px; line-height: 1.9; letter-spacing: .06em; color: var(--hand-muted); max-width: 30ch; }
+  .keep { border: 1.5px solid var(--ink); background: transparent; border-radius: var(--sloppy-btn); padding: 12px 26px; font-size: 18px; font-weight: 700; color: var(--ink); transition: background .25s, color .25s; }
+  .keep:hover { background: var(--ink); color: var(--paper); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .seal-badge .bv0 { opacity: 1; animation: none; }
+  }
+</style>
+
+<style is:global>
+  @keyframes gf-boil3-a { 0% { opacity: 1; } 33.3% { opacity: 0; } }
+  @keyframes gf-boil3-b { 33.3% { opacity: 1; } 66.6% { opacity: 0; } 0% { opacity: 0; } }
+  @keyframes gf-boil3-c { 66.6% { opacity: 1; } 100% { opacity: 0; } 0% { opacity: 0; } }
+</style>
+
+<script>
+  import { satchel } from '../lib/satchel';
+
+  function wire() {
+    const root = document.querySelector<HTMLElement>('[data-satchel]');
+    if (!root || root.dataset.wired) return;
+    root.dataset.wired = '1';
+    const P = JSON.parse(root.dataset.pieces || '{}') as Record<string, { name: string; kindShort: string; price: number; art: string }>;
+    const money = (n: number) => '$' + n;
+    const rowsEl = root.querySelector<HTMLElement>('[data-rows]')!;
+    const emptyEl = root.querySelector<HTMLElement>('[data-empty]')!;
+    const totalsEl = root.querySelector<HTMLElement>('[data-totals]')!;
+    const bagState = root.querySelector<HTMLElement>('[data-state-bag]')!;
+    const sealedState = root.querySelector<HTMLElement>('[data-state-sealed]')!;
+    let lastFocus: HTMLElement | null = null;
+
+    const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
+
+    const render = () => {
+      const rows = satchel.rows();
+      const count = rows.reduce((a, r) => a + r.qty, 0);
+      document.querySelectorAll('[data-cart-count]').forEach((el) => { el.textContent = String(count); });
+      emptyEl.hidden = rows.length > 0;
+      totalsEl.hidden = rows.length === 0;
+      rowsEl.innerHTML = rows.map((r) => {
+        const p = P[r.id];
+        if (!p) return '';
+        const sub = esc(p.kindShort) + (r.size ? ' · ' + esc(r.size) : '');
+        return `<div class="row" data-key="${esc(r.key)}">
+          <div class="thumb"><div style="background-image:url('${esc(p.art)}')" role="img" aria-label="${esc(p.name)}"></div></div>
+          <div class="info"><div class="name">${esc(p.name)}</div><div class="sub">${sub}</div></div>
+          <div class="qty"><button data-dec aria-label="one less">−</button><span>${r.qty}</span><button data-inc aria-label="one more">+</button></div>
+          <div class="price">${money(p.price * r.qty)}</div>
+          <button class="rm" data-rm title="Remove">✕</button>
+        </div>`;
+      }).join('');
+      const subtotal = rows.reduce((a, r) => a + (P[r.id]?.price || 0) * r.qty, 0);
+      root.querySelector('[data-subtotal]')!.textContent = money(subtotal);
+      root.querySelector('[data-total]')!.textContent = money(subtotal);
+    };
+
+    rowsEl.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const key = t.closest<HTMLElement>('.row')?.dataset.key;
+      if (!key) return;
+      if (t.matches('[data-inc]')) satchel.inc(key);
+      else if (t.matches('[data-dec]')) satchel.dec(key);
+      else if (t.matches('[data-rm]')) satchel.remove(key);
+    });
+
+    const open = () => {
+      lastFocus = document.activeElement as HTMLElement;
+      bagState.hidden = false; sealedState.hidden = true;
+      root.hidden = false;
+      render();
+      root.querySelector<HTMLElement>('.close')?.focus();
+    };
+    const close = () => {
+      root.hidden = true;
+      lastFocus?.focus();
+    };
+    const showSealed = () => { bagState.hidden = true; sealedState.hidden = false; };
+
+    addEventListener('gf:drawer', ((e: CustomEvent) => (e.detail === 'open' ? open() : close())) as EventListener);
+    addEventListener('gf:cart', render);
+    addEventListener('gf:sealed', () => { satchel.seal(); render(); showSealed(); });
+    root.querySelectorAll('[data-satchel-close]').forEach((el) => el.addEventListener('click', close));
+    root.querySelector('[data-keep-looking]')?.addEventListener('click', close);
+
+    document.addEventListener('keydown', (e) => {
+      if (root.hidden) return;
+      if (e.key === 'Escape') { close(); return; }
+      if (e.key !== 'Tab') return;
+      const focusables = [...root.querySelectorAll<HTMLElement>('button, a[href], input')].filter((el) => el.offsetParent !== null);
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
+    document.addEventListener('click', (e) => {
+      const t = (e.target as HTMLElement).closest('[data-open-satchel]');
+      if (t) open();
+    });
+
+    render();
+  }
+  document.addEventListener('astro:page-load', wire);
+</script>

@@ -1,72 +1,61 @@
 ---
-// Site nav (§6): alien mark + wordmark → home, Shop, About, live cart button (opens drawer).
-const { pathname } = Astro.url;
-const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
+// v3 header — wordmark, The Drop / The Vault, Bag pill (design lines 54-69; hand-drawn skin:
+// brush-stroke bottom edge instead of a border, -0.25deg lean).
 ---
-<header class="site-header">
-  <nav aria-label="Main">
-    <a href="/" class="logo" aria-label="GoteFigure home" id="logo-mark">
-      <img src="/favicon.svg" alt="" width="34" height="28" class="logo-alien" />
-      <span class="logo-word">GoteFigure</span>
+<header class="gf-header">
+  <div class="bar">
+    <a href="/" class="logo" title="GoteFigure">
+      <img src="/art/v3/wordmark.png" alt="Gote Figure" width="1046" height="492" />
     </a>
-    <div class="links">
-      <a href="/" class="squiggle" aria-current={pathname === '/' ? 'page' : undefined}>Shop</a>
-      <a href="/about" class="squiggle" aria-current={isActive('/about') ? 'page' : undefined}>About</a>
-      <button type="button" class="cart-btn mono" aria-label="Cart, 0 items" id="cart-open">
-        Cart <span class="cart-count" data-cart-count aria-hidden="true">0</span>
-      </button>
-    </div>
-  </nav>
+    <nav aria-label="Store">
+      <a href="/#shop" class="navlink">The Drop</a>
+      <a href="/vault/" class="navlink">The Vault</a>
+    </nav>
+    <button class="bag" data-open-satchel type="button">
+      <span>Bag</span>
+      <span class="count" data-cart-count aria-label="items in bag">0</span>
+    </button>
+  </div>
 </header>
 
-<script>
-  function wire() {
-    const btn = document.getElementById('cart-open');
-    if (btn && !btn.dataset.wired) {
-      btn.dataset.wired = 'true';
-      btn.addEventListener('click', () => document.dispatchEvent(new CustomEvent('gf:open-cart')));
-    }
-  }
-  wire();
-  document.addEventListener('astro:page-load', wire);
-</script>
-
 <style>
-  .site-header {
-    padding: var(--s-3) var(--s-6);
-    border-bottom: 2px solid var(--ink);
-    position: sticky; top: 0; z-index: var(--z-nav);
-    background: color-mix(in srgb, var(--paper) 92%, transparent);
-    backdrop-filter: blur(6px);
+  .gf-header {
+    position: sticky; top: 0; z-index: var(--z-header);
+    background-color: rgba(247, 245, 240, .86);
+    backdrop-filter: blur(10px);
+    rotate: -0.25deg;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1400 10%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M0 5.8 C 120 3.2 300 4.0 520 4.6 C 760 5.2 960 3.4 1140 4.4 C 1260 5.0 1350 4.4 1400 5.2 L 1400 6.0 C 1310 7.4 1180 6.2 1000 7.0 C 800 7.9 600 6.4 420 7.2 C 260 7.9 120 6.8 0 7.4 Z%27 fill=%27%2316130F%27 fill-opacity=%27.9%27/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: left bottom;
+    background-size: 100% 9px;
   }
-  nav { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); }
-  .logo { display: flex; align-items: center; gap: var(--s-2); font-weight: 700; font-size: var(--text-lg); text-decoration: none; }
-  .logo-alien { transition: transform var(--dur-quick) var(--ease-arrive); }
-  .logo:hover .logo-alien { transform: rotate(-8deg) translateY(-1px); }
-  .logo-word { letter-spacing: -0.02em; }
-  .links { display: flex; align-items: center; gap: var(--s-6); }
-  .links a[aria-current='page'] { font-weight: 600; }
-  .cart-btn {
-    background: none; border: 2px solid var(--ink); padding: var(--s-2) var(--s-3);
-    min-height: 44px; font-size: var(--text-sm); /* WCAG touch target */
-    border-radius: 2px; display: flex; gap: var(--s-2); align-items: center;
-    transition: transform var(--dur-quick) var(--ease-arrive), background var(--dur-quick) var(--ease-arrive);
+  .bar {
+    max-width: 1320px; margin: 0 auto; padding: 0 28px; height: 76px;
+    display: flex; align-items: center; gap: 44px;
   }
-  .cart-btn:hover { transform: scale(1.04); background: var(--amber); }
-  .cart-count {
-    font-variant-numeric: tabular-nums; background: var(--ink); color: var(--paper);
-    border-radius: 999px; min-width: 20px; height: 20px; display: grid; place-items: center;
-    font-size: 0.72rem; padding: 0 5px;
+  .logo { display: flex; align-items: center; padding: 6px 0; margin-right: auto; }
+  .logo img { height: 52px; width: auto; }
+  nav { display: flex; gap: 38px; align-items: center; font-size: 19px; letter-spacing: .04em; text-transform: uppercase; }
+  .navlink {
+    color: var(--ink); text-decoration: none; padding: 6px 0;
+    background-image: linear-gradient(var(--ink), var(--ink));
+    background-repeat: no-repeat; background-position: 0 100%; background-size: 0% 1.5px;
+    transition: background-size .3s;
   }
-  @media (max-width: 480px) {
-    .site-header { padding-inline: var(--s-4); }
-    .links { gap: var(--s-4); }
-    .logo-word { font-size: var(--text-base); }
+  .navlink:hover, .navlink:focus-visible { background-size: 100% 1.5px; }
+  .bag {
+    border: 2px solid var(--ink); background: transparent; border-radius: 999px;
+    padding: 11px 24px; display: flex; align-items: center; gap: 10px;
+    font-size: 19px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink);
+    transition: background .25s, color .25s;
   }
-  @media (max-width: 360px) {
-    /* WCAG 1.4.10 reflow at 320px: shave the ~9px deficit */
-    .site-header { padding-inline: var(--s-2); }
-    .links { gap: var(--s-2); }
-    nav { gap: var(--s-2); }
+  .bag:hover, .bag:focus-visible { background: var(--ink); color: var(--paper); }
+  .count { font-family: var(--font-mono); font-weight: 700; color: var(--pink); }
+
+  @media (max-width: 640px) {
+    .bar { gap: 18px; padding: 0 16px; }
+    nav { gap: 16px; font-size: 17px; }
+    .logo img { height: 40px; }
+    .bag { padding: 9px 16px; font-size: 17px; }
   }
 </style>

@@ -1,236 +1,269 @@
-// After Hours — the dark salon. Torch + pull-cord + email capture.
-// 1:1 translation of the approved mock's DCLogic into an init()/destroy() module so it
-// survives ClientRouter (§7.6.6): bound on astro:page-load, fully torn down on astro:before-swap.
-// Torch/beam is a compositor-only rAF loop (background-position + opacity). Desktop-only;
-// mobile motion is owned by the parallel branch. Reduced-motion -> static LIT (content never gated, §7.6.1).
+// After Hours — the dark salon. ONE responsive page, ONE breakpoint-aware module:
+//   < 1024px  → the mobile (phone) salon: cqw stage, stage-relative torch (ported 1:1 from the
+//               approved "After Hours Phone.dc.html").
+//   ≥ 1024px  → the desktop (landscape) salon: a 1512×946 stage scaled to the viewport, viewport-
+//               space torch (ported 1:1 from "GoteFigure After Hours.dc.html").
+// Only the active block is wired; a media-query change tears down + re-mounts the other block.
+// Repo lifecycle via core (init on astro:page-load, cleanup on astro:before-swap; §7.6.6, animation.md #1).
+// Reduced-motion: starts lit + static in both (§7.6.2). No-ops on any page without [data-ah-block].
+import { defineModule } from './core';
 
-const BEAM = 180; // mock prop default (range 110-320)
+defineModule('after-hours', ({ reduced }) => {
+  const cs = getComputedStyle(document.documentElement);
+  const BEAM = cs.getPropertyValue('--ah-beam').trim() || '255, 214, 140';
+  const NIGHT = cs.getPropertyValue('--ah-night-rgb').trim() || '12, 9, 6';
 
-// Author preview gate: typing this code into the hidden corner button unlocks the closed store
-// (/store) for THIS browser (sets localStorage 'gf-preview'). It is a client-side soft gate — the
-// value ships in the bundle, so it keeps the public out of a not-yet-launched shop, it is not real
-// security. ← SET YOUR CODE HERE (Rotem):
-const ACCESS_CODE = 'CHANGE-ME';
-
-let raf = 0;
-let lit = false;
-let bx = 0, by = 0, tx = 0, ty = 0, lastMove = 0, t0 = 0;
-let bound = false;
-
-let onMove: ((e: PointerEvent | TouchEvent) => void) | null = null;
-let onResize: (() => void) | null = null;
-let onCord: (() => void) | null = null;
-let onSubmit: ((e: Event) => void) | null = null;
-let onGateToggle: (() => void) | null = null;
-let onGateSubmit: ((e: Event) => void) | null = null;
-
-const q = <T extends Element>(s: string) => document.querySelector<T>(s);
-const isDesktop = () => matchMedia('(min-width: 1024px)').matches;
-
-function paintBeam() {
-  const d = q<HTMLElement>('[data-dark]');
-  if (!d) return;
-  const R = BEAM;
-  const x = Math.round(bx), y = Math.round(by);
-  d.style.background =
-    `radial-gradient(circle ${Math.round(R * 2.1)}px at ${x}px ${y}px, ` +
-    `rgba(255,214,140,.09), rgba(12,9,6,0) ${Math.round(R * 0.42)}px, ` +
-    `rgba(12,9,6,.55) ${R}px, rgba(12,9,6,.987) ${Math.round(R * 1.92)}px)`;
-}
-
-function updateEyes() {
-  const eyes = q<HTMLElement>('[data-eyes]');
-  if (!eyes) return;
-  if (lit) { eyes.style.opacity = '0'; return; }
-  const r = eyes.getBoundingClientRect();
-  const dx = (r.left + r.width / 2) - bx, dy = (r.top + r.height / 2) - by;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const R = BEAM * 1.5;
-  eyes.style.opacity = String(Math.max(0, Math.min(1, (dist - R * 0.55) / (R * 0.6))));
-}
-
-// The stage is a fixed 1512x946 canvas scaled to the viewport (desktop only).
-function applyScale() {
-  const desktop = isDesktop();
-  const s = Math.min(window.innerWidth / 1512, window.innerHeight / 946);
-  (['[data-stage-back]', '[data-stage-front]'] as const).forEach((sel) => {
-    const el = q<HTMLElement>(sel);
-    if (el) el.style.transform = desktop ? `translate(-50%,-50%) scale(${s})` : '';
-  });
-}
-
-function setLit(on: boolean, instant: boolean) {
-  lit = on;
-  const d = q<HTMLElement>('[data-dark]');
-  const glow = q<HTMLElement>('[data-glow]');
-  if (d) {
-    d.style.animation = 'none';
-    if (on) {
-      if (instant) { d.style.opacity = '0'; }
-      else { void d.offsetWidth; d.style.animation = 'gfah-flickon .95s steps(1,end) forwards'; d.style.opacity = '0'; }
-    } else {
-      d.style.opacity = '1';
-      paintBeam();
+  // ---- shared author gate (single corner element, both breakpoints) ----
+  // Client-side soft gate to preview the not-yet-open store on production (not real security —
+  // the code ships in the bundle; the durable hard gate is a post-hosting Worker/middleware step).
+  const GATE_CODE = 'timnertimner';
+  const STORE_PATH = '/store';
+  const gateBtn = document.querySelector<HTMLElement>('[data-gate-btn]');
+  const gateForm = document.querySelector<HTMLFormElement>('[data-gate-form]');
+  const gateInput = document.querySelector<HTMLInputElement>('[data-gate-input]');
+  const storeUnlocked = () => { try { return localStorage.getItem('gf-store-open') === '1'; } catch { return false; } };
+  const onGateBtn = () => {
+    if (storeUnlocked()) { location.href = STORE_PATH; return; }
+    if (!gateForm) return;
+    const opening = gateForm.hasAttribute('hidden');
+    gateForm.toggleAttribute('hidden');
+    if (opening) gateInput?.focus();
+  };
+  const onGateSubmit = (e: Event) => {
+    e.preventDefault();
+    if ((gateInput?.value || '') === GATE_CODE) {
+      try { localStorage.setItem('gf-store-open', '1'); } catch { /* private mode */ }
+      location.href = STORE_PATH;
+    } else if (gateInput) {
+      gateInput.style.animation = 'none'; void gateInput.offsetWidth; gateInput.style.animation = 'gfahm-wob .4s ease';
     }
-  }
-  if (glow) glow.style.opacity = on ? '1' : '0';
-  if (on) { try { localStorage.setItem('gf-ah-found', '1'); } catch { /* private mode */ } }
+  };
+  gateBtn?.addEventListener('click', onGateBtn);
+  gateForm?.addEventListener('submit', onGateSubmit);
 
-  const show = (sel: string, vis: boolean) => { const el = q<HTMLElement>(sel); if (el) el.style.opacity = vis ? '1' : '0'; };
-  show('[data-h-dark]', !on); show('[data-h-lit]', on);
-  show('[data-s-dark]', !on); show('[data-s-lit]', on);
+  // ---- shared helpers ----
+  const show = (el: HTMLElement | null, vis: boolean) => { if (el) el.style.opacity = vis ? '1' : '0'; };
 
-  const wm = q<HTMLElement>('[data-wm]');
-  if (wm) wm.style.filter = on ? 'none' : 'invert(1) brightness(1.6)';
-  const tag = q<HTMLElement>('[data-tagline]');
-  if (tag) tag.style.color = on ? 'var(--ah-tag-lit)' : 'var(--ah-tag-dark)';
-  const hint = q<HTMLElement>('[data-hint]');
-  if (hint) {
-    hint.textContent = on ? 'soon. promise. · pull the cord to close up' : 'somewhere, a cord is hanging · pull it';
-    hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint-dark)';
-    hint.style.animation = on ? 'none' : '';
-  }
-  const cord = q<HTMLElement>('[data-cord-inner]');
-  if (cord && !instant) { cord.style.animation = 'none'; void cord.offsetWidth; cord.style.animation = 'gfah-sway .9s ease 2'; }
-}
+  // ---- MOBILE block (main's phone salon, stage-relative torch) ----
+  function mountMobile(root: HTMLElement) {
+    const q = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s);
+    const stage = q('[data-room-stage]'); if (!stage) return null;
+    const dark = q('[data-dark]'), glow = q('[data-glow]');
+    const cord = q<HTMLButtonElement>('[data-cord]'), cordInner = q('[data-cord-inner]'), eyes = q('[data-eyes]');
+    const wm = q<HTMLImageElement>('[data-wm]'), tagline = q('[data-tagline]'), hint = q('[data-hint]');
+    const form = q<HTMLFormElement>('[data-email-form]'), input = q<HTMLInputElement>('[data-email-input]');
+    const emailWrap = q('[data-email-wrap]'), emailDone = q('[data-email-done]');
 
-function toggleLights() { setLit(!lit, false); }
+    const BEAM_BASE = 135; // px on a 390-wide phone, scaled by stage width
+    let rect = stage.getBoundingClientRect();
+    const measure = () => { rect = stage.getBoundingClientRect(); };
+    const beamR = () => BEAM_BASE * ((rect.width || 390) / 390);
+    let lit = false, bx = rect.width / 2, by = rect.height * 0.45, tx = bx, ty = by, lastMove = 0, lastMeasure = 0, raf = 0;
+    const t0 = performance.now();
 
-function applyEmailPref() {
-  const card = q<HTMLElement>('[data-email-card]');
-  if (!card) return;
-  card.style.display = ''; // emailCapture default = true
-  let has = false;
-  try { has = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
-  const wrap = q<HTMLElement>('[data-email-wrap]');
-  const done = q<HTMLElement>('[data-email-done]');
-  if (wrap) wrap.style.display = has ? 'none' : '';
-  if (done) done.style.display = has ? 'block' : 'none';
-}
-
-function submitEmail(e: Event) {
-  e.preventDefault();
-  const inp = q<HTMLInputElement>('[data-email-input]');
-  const v = inp ? inp.value.trim() : '';
-  if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) {
-    if (inp) { inp.style.animation = 'none'; void inp.offsetWidth; inp.style.animation = 'gfah-wob .4s ease'; }
-    return;
-  }
-  // Provider seam: the real drops-list provider is an owner decision (§8.4). Until then we persist
-  // locally (matches the mock) — swap this line for the shared subscribe() when a provider is chosen.
-  try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
-  const wrap = q<HTMLElement>('[data-email-wrap]');
-  const done = q<HTMLElement>('[data-email-done]');
-  if (wrap) wrap.style.display = 'none';
-  if (done) { done.style.display = 'block'; done.style.animation = 'gfah-pop .5s ease both'; }
-}
-
-// Hidden corner button: reveal a code field; correct code unlocks /store for this browser.
-function initGate() {
-  const wrap = q<HTMLElement>('[data-gate]');
-  const toggle = q<HTMLButtonElement>('[data-gate-toggle]');
-  const form = q<HTMLFormElement>('[data-gate-form]');
-  const input = q<HTMLInputElement>('[data-gate-input]');
-  if (toggle && form) {
-    onGateToggle = () => {
-      if (form.hasAttribute('hidden')) { form.removeAttribute('hidden'); wrap?.setAttribute('data-open', ''); input?.focus(); }
-      else { form.setAttribute('hidden', ''); wrap?.removeAttribute('data-open'); }
+    const paintBeam = () => {
+      if (!dark) return;
+      const R = beamR(), x = Math.round(bx), y = Math.round(by);
+      dark.style.background =
+        `radial-gradient(circle ${Math.round(R * 2.1)}px at ${x}px ${y}px, ` +
+        `rgba(${BEAM},.09), rgba(${NIGHT},0) ${Math.round(R * 0.42)}px, ` +
+        `rgba(${NIGHT},.55) ${Math.round(R)}px, rgba(${NIGHT},.987) ${Math.round(R * 1.92)}px)`;
     };
-    toggle.addEventListener('click', onGateToggle);
-  }
-  if (form) {
-    onGateSubmit = (e: Event) => {
+    const updateEyes = () => {
+      if (!eyes) return;
+      if (lit) { eyes.style.opacity = '0'; return; }
+      const r = eyes.getBoundingClientRect();
+      const ex = (r.left + r.width / 2) - rect.left, ey = (r.top + r.height / 2) - rect.top;
+      const dist = Math.hypot(ex - bx, ey - by), R = beamR() * 1.5;
+      eyes.style.opacity = String(Math.max(0, Math.min(1, (dist - R * 0.55) / (R * 0.6))));
+    };
+    const setLit = (on: boolean, instant: boolean) => {
+      lit = on;
+      if (dark) {
+        dark.style.animation = 'none';
+        if (on) { if (instant) dark.style.opacity = '0'; else { void dark.offsetWidth; dark.style.animation = 'gfahm-flickon .95s steps(1,end) forwards'; dark.style.opacity = '0'; } }
+        else { dark.style.opacity = '1'; paintBeam(); }
+      }
+      if (glow) glow.style.opacity = on ? '1' : '0';
+      if (on) { try { localStorage.setItem('gf-ah-found', '1'); } catch { /* private mode */ } }
+      show(q('[data-h-dark]'), !on); show(q('[data-h-lit]'), on);
+      show(q('[data-s-dark]'), !on); show(q('[data-s-lit]'), on);
+      if (wm) wm.style.filter = on ? 'none' : 'invert(1) brightness(1.6)';
+      if (tagline) tagline.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-tagline)';
+      if (hint) {
+        hint.textContent = on ? 'soon. promise. · pull the cord to close up' : 'drag your thumb · a cord hangs somewhere';
+        hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint)';
+        hint.style.animation = on ? 'none' : '';
+      }
+      if (cordInner && !instant) { cordInner.style.animation = 'none'; void cordInner.offsetWidth; cordInner.style.animation = 'gfahm-sway .9s ease 2'; }
+    };
+    const onMove = (e: PointerEvent | TouchEvent) => {
+      const p = (e as TouchEvent).touches?.[0] || (e as PointerEvent);
+      tx = p.clientX - rect.left; ty = p.clientY - rect.top; lastMove = performance.now();
+    };
+    const onToggle = () => { setLit(!lit, false); try { (navigator as Navigator & { vibrate?: (n: number) => void }).vibrate?.(12); } catch { /* no haptics */ } };
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const now = performance.now();
+      if (now - lastMeasure > 500) { lastMeasure = now; measure(); }
+      const W = rect.width || 390, H = rect.height || 844;
+      if (now - lastMove > 4200) { const t = now - t0; tx = W * (0.5 + 0.36 * Math.sin(t * 0.00023) + 0.08 * Math.sin(t * 0.00061)); ty = H * (0.5 + 0.3 * Math.sin(t * 0.00017 + 1.7)); }
+      bx += (tx - bx) * 0.11; by += (ty - by) * 0.11;
+      if (!lit) paintBeam();
+      updateEyes();
+    };
+    const applyEmailPref = () => {
+      let has = false; try { has = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
+      if (emailWrap) emailWrap.style.display = has ? 'none' : '';
+      if (emailDone) emailDone.style.display = has ? 'block' : 'none';
+    };
+    const onSubmit = (e: Event) => {
       e.preventDefault();
       const v = (input?.value || '').trim();
-      if (v && v === ACCESS_CODE) {
-        try { localStorage.setItem('gf-preview', '1'); } catch { /* private mode */ }
-        window.location.href = '/store';
-      } else if (input) {
-        input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfah-wob .4s ease'; input.value = '';
-      }
+      if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) { if (input) { input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfahm-wob .4s ease'; } return; }
+      try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
+      if (emailWrap) emailWrap.style.display = 'none';
+      if (emailDone) { emailDone.style.display = 'block'; emailDone.style.animation = 'gfahm-pop .5s ease both'; }
     };
-    form.addEventListener('submit', onGateSubmit);
-  }
-}
 
-export function initAfterHours() {
-  const root = q('#ah-root');
-  if (!root || bound) return;
-  bound = true;
-
-  initGate(); // works on every breakpoint, independent of the torch/stage
-
-  // Shared across breakpoints: email capture (the linchpin) + the pull-cord.
-  applyEmailPref();
-  const form = q<HTMLFormElement>('[data-email-form]');
-  if (form) { onSubmit = submitEmail; form.addEventListener('submit', onSubmit); }
-  const cordBtn = q<HTMLButtonElement>('[data-cord]');
-  if (cordBtn) { onCord = toggleLights; cordBtn.addEventListener('click', onCord); }
-
-  applyScale();
-  onResize = applyScale;
-  window.addEventListener('resize', onResize);
-
-  // Mobile: the room shows flat/lit via CSS; the torch is desktop-only (parallel branch owns mobile motion).
-  if (!isDesktop()) return;
-
-  lit = false;
-  bx = window.innerWidth / 2; by = window.innerHeight * 0.42; tx = bx; ty = by;
-  lastMove = 0; t0 = performance.now();
-
-  // Reduced-motion: start LIT, no torch chase — art + email always reachable (§7.6.1, §7.6.2).
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    setLit(true, true);
-    root.setAttribute('data-lit', 'reduced');
-    return;
-  }
-
-  // startMode "remember" (mock default): stay lit if the room was found before.
-  let found = false;
-  try { found = localStorage.getItem('gf-ah-found') === '1'; } catch { /* private mode */ }
-  if (found) setLit(true, true);
-
-  onMove = (e: any) => {
-    const p = (e.touches && e.touches[0]) || e;
-    tx = p.clientX; ty = p.clientY; lastMove = performance.now();
-  };
-  window.addEventListener('pointermove', onMove as EventListener, { passive: true });
-  window.addEventListener('pointerdown', onMove as EventListener, { passive: true });
-  window.addEventListener('touchmove', onMove as EventListener, { passive: true });
-
-  const loop = () => {
-    raf = requestAnimationFrame(loop);
-    const now = performance.now();
-    if (now - lastMove > 5200) { // idle: the torch wanders on its own
-      const t = now - t0;
-      tx = window.innerWidth * (0.5 + 0.34 * Math.sin(t * 0.00021) + 0.09 * Math.sin(t * 0.00059));
-      ty = window.innerHeight * (0.44 + 0.30 * Math.sin(t * 0.00017 + 1.7));
+    cord?.addEventListener('click', onToggle);
+    form?.addEventListener('submit', onSubmit);
+    applyEmailPref();
+    let found = false; try { found = localStorage.getItem('gf-ah-found') === '1'; } catch { /* private mode */ }
+    const moveEvents = ['pointermove', 'pointerdown', 'touchmove', 'touchstart'] as const;
+    if (reduced) { setLit(true, true); }
+    else {
+      if (found) setLit(true, true); else paintBeam();
+      addEventListener('resize', measure, { passive: true });
+      moveEvents.forEach((ev) => window.addEventListener(ev, onMove as EventListener, { passive: true }));
+      raf = requestAnimationFrame(loop);
     }
-    bx += (tx - bx) * 0.09;
-    by += (ty - by) * 0.09;
-    if (!lit) paintBeam();
-    updateEyes();
-  };
-  raf = requestAnimationFrame(loop);
-}
-
-export function destroyAfterHours() {
-  if (!bound) return;
-  bound = false;
-  cancelAnimationFrame(raf); raf = 0;
-  if (onResize) window.removeEventListener('resize', onResize);
-  if (onMove) {
-    window.removeEventListener('pointermove', onMove as EventListener);
-    window.removeEventListener('pointerdown', onMove as EventListener);
-    window.removeEventListener('touchmove', onMove as EventListener);
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      removeEventListener('resize', measure);
+      moveEvents.forEach((ev) => window.removeEventListener(ev, onMove as EventListener));
+      cord?.removeEventListener('click', onToggle);
+      form?.removeEventListener('submit', onSubmit);
+    };
   }
-  const form = q<HTMLFormElement>('[data-email-form]');
-  if (form && onSubmit) form.removeEventListener('submit', onSubmit);
-  const cordBtn = q<HTMLButtonElement>('[data-cord]');
-  if (cordBtn && onCord) cordBtn.removeEventListener('click', onCord);
-  const gateToggle = q<HTMLButtonElement>('[data-gate-toggle]');
-  if (gateToggle && onGateToggle) gateToggle.removeEventListener('click', onGateToggle);
-  const gateForm = q<HTMLFormElement>('[data-gate-form]');
-  if (gateForm && onGateSubmit) gateForm.removeEventListener('submit', onGateSubmit);
-  onResize = onMove = onCord = onSubmit = onGateToggle = onGateSubmit = null;
-}
+
+  // ---- DESKTOP block (landscape 1512×946 stage scaled to viewport, viewport-space torch) ----
+  function mountDesktop(root: HTMLElement) {
+    const q = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s);
+    if (!q('[data-room-stage]')) return null;
+    const dark = q('[data-dark]'), glow = q('[data-glow]');
+    const cord = q<HTMLButtonElement>('[data-cord]'), cordInner = q('[data-cord-inner]'), eyes = q('[data-eyes]');
+    const wm = q<HTMLImageElement>('[data-wm]'), tagline = q('[data-tagline]'), hint = q('[data-hint]');
+    const form = q<HTMLFormElement>('[data-email-form]'), input = q<HTMLInputElement>('[data-email-input]');
+    const emailWrap = q('[data-email-wrap]'), emailDone = q('[data-email-done]');
+
+    const BEAM = 180; // px in the 1512-space, painted in viewport coords
+    let lit = false, bx = innerWidth / 2, by = innerHeight * 0.42, tx = bx, ty = by, lastMove = 0, raf = 0;
+    const t0 = performance.now();
+    const BEAM_RGB = cs.getPropertyValue('--ah-beam').trim() || '255, 214, 140';
+    const NIGHT_RGB = cs.getPropertyValue('--ah-night-rgb').trim() || '12, 9, 6';
+
+    const applyScale = () => {
+      const s = Math.min(innerWidth / 1512, innerHeight / 946);
+      (['[data-stage-back]', '[data-stage-front]'] as const).forEach((sel) => { const el = q(sel); if (el) el.style.transform = `translate(-50%,-50%) scale(${s})`; });
+    };
+    const paintBeam = () => {
+      if (!dark) return;
+      const R = BEAM, x = Math.round(bx), y = Math.round(by);
+      dark.style.background =
+        `radial-gradient(circle ${Math.round(R * 2.1)}px at ${x}px ${y}px, ` +
+        `rgba(${BEAM_RGB},.09), rgba(${NIGHT_RGB},0) ${Math.round(R * 0.42)}px, ` +
+        `rgba(${NIGHT_RGB},.55) ${R}px, rgba(${NIGHT_RGB},.987) ${Math.round(R * 1.92)}px)`;
+    };
+    const updateEyes = () => {
+      if (!eyes) return;
+      if (lit) { eyes.style.opacity = '0'; return; }
+      const r = eyes.getBoundingClientRect();
+      const dist = Math.hypot((r.left + r.width / 2) - bx, (r.top + r.height / 2) - by), R = BEAM * 1.5;
+      eyes.style.opacity = String(Math.max(0, Math.min(1, (dist - R * 0.55) / (R * 0.6))));
+    };
+    const setLit = (on: boolean, instant: boolean) => {
+      lit = on;
+      if (dark) {
+        dark.style.animation = 'none';
+        if (on) { if (instant) dark.style.opacity = '0'; else { void dark.offsetWidth; dark.style.animation = 'gfahm-flickon .95s steps(1,end) forwards'; dark.style.opacity = '0'; } }
+        else { dark.style.opacity = '1'; paintBeam(); }
+      }
+      if (glow) glow.style.opacity = on ? '1' : '0';
+      if (on) { try { localStorage.setItem('gf-ah-found', '1'); } catch { /* private mode */ } }
+      show(q('[data-h-dark]'), !on); show(q('[data-h-lit]'), on);
+      show(q('[data-s-dark]'), !on); show(q('[data-s-lit]'), on);
+      if (wm) wm.style.filter = on ? 'none' : 'invert(1) brightness(1.6)';
+      if (tagline) tagline.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-tagline)';
+      if (hint) {
+        hint.textContent = on ? 'soon. promise. · pull the cord to close up' : 'somewhere, a cord is hanging · pull it';
+        hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint)';
+        hint.style.animation = on ? 'none' : '';
+      }
+      if (cordInner && !instant) { cordInner.style.animation = 'none'; void cordInner.offsetWidth; cordInner.style.animation = 'gfahm-sway .9s ease 2'; }
+    };
+    const onMove = (e: PointerEvent | TouchEvent) => { const p = (e as TouchEvent).touches?.[0] || (e as PointerEvent); tx = p.clientX; ty = p.clientY; lastMove = performance.now(); };
+    const onToggle = () => setLit(!lit, false);
+    const onResize = () => applyScale();
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const now = performance.now();
+      if (now - lastMove > 5200) { const t = now - t0; tx = innerWidth * (0.5 + 0.34 * Math.sin(t * 0.00021) + 0.09 * Math.sin(t * 0.00059)); ty = innerHeight * (0.44 + 0.30 * Math.sin(t * 0.00017 + 1.7)); }
+      bx += (tx - bx) * 0.09; by += (ty - by) * 0.09;
+      if (!lit) paintBeam();
+      updateEyes();
+    };
+    const applyEmailPref = () => {
+      let has = false; try { has = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
+      if (emailWrap) emailWrap.style.display = has ? 'none' : '';
+      if (emailDone) emailDone.style.display = has ? 'block' : 'none';
+    };
+    const onSubmit = (e: Event) => {
+      e.preventDefault();
+      const v = (input?.value || '').trim();
+      if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) { if (input) { input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfahm-wob .4s ease'; } return; }
+      try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
+      if (emailWrap) emailWrap.style.display = 'none';
+      if (emailDone) { emailDone.style.display = 'block'; emailDone.style.animation = 'gfahm-pop .5s ease both'; }
+    };
+
+    cord?.addEventListener('click', onToggle);
+    form?.addEventListener('submit', onSubmit);
+    applyEmailPref();
+    applyScale();
+    addEventListener('resize', onResize, { passive: true });
+    let found = false; try { found = localStorage.getItem('gf-ah-found') === '1'; } catch { /* private mode */ }
+    const moveEvents = ['pointermove', 'pointerdown', 'touchmove'] as const;
+    if (reduced) { setLit(true, true); }
+    else {
+      if (found) setLit(true, true); else paintBeam();
+      moveEvents.forEach((ev) => window.addEventListener(ev, onMove as EventListener, { passive: true }));
+      raf = requestAnimationFrame(loop);
+    }
+    return () => {
+      if (raf) cancelAnimationFrame(raf);
+      removeEventListener('resize', onResize);
+      moveEvents.forEach((ev) => window.removeEventListener(ev, onMove as EventListener));
+      cord?.removeEventListener('click', onToggle);
+      form?.removeEventListener('submit', onSubmit);
+    };
+  }
+
+  // ---- activate the block for the current breakpoint; re-mount on breakpoint change ----
+  const mq = matchMedia('(min-width: 1024px)');
+  const mount = () => {
+    const root = document.querySelector<HTMLElement>(mq.matches ? '[data-ah-block="desktop"]' : '[data-ah-block="mobile"]');
+    if (!root) return null;
+    return mq.matches ? mountDesktop(root) : mountMobile(root);
+  };
+  let dispose = mount();
+  const onMq = () => { dispose?.(); dispose = mount(); };
+  mq.addEventListener('change', onMq);
+
+  return () => {
+    dispose?.();
+    mq.removeEventListener('change', onMq);
+    gateBtn?.removeEventListener('click', onGateBtn);
+    gateForm?.removeEventListener('submit', onGateSubmit);
+  };
+});
