@@ -44,4 +44,37 @@
   --z-nav: 50;
   --z-drawer: 80;
   --z-intro: 100;
+
+  /* After Hours page fonts (self-hosted latin subsets; extracted from the approved mock).
+     Distinct display registers used only by /after-hours; the store keeps Shantell + Space Grotesk. */
+  --font-brush: 'Nanum Brush Script', cursive;      /* the two H1s */
+  --font-marker: 'Reenie Beanie', cursive;          /* handwritten captions/subhead/email */
+  --font-typewriter: 'Space Mono', ui-monospace, monospace; /* catalog #s, hint, notify, labels */
+
+  /* After Hours palette — a distinct dark-salon context (not the daytime store).
+     --og-pink stays reserved (§3.1); these are new named tokens, matched to the mock. */
+  --ah-black: #0C0906;        /* darkness / page base */
+  --ah-ink: #16130F;          /* warm near-black ink/text */
+  --ah-wall: #E9E2D3;         /* salon wall */
+  --ah-mat: #F9F7F1;          /* frame mat */
+  --ah-mat-inner: #FFFFFF;    /* inner mat behind the art (paper white) */
+  --ah-card: #F7F5F0;         /* email card / ::selection */
+  --ah-floor: #CDC3AC;        /* floor band */
+  --ah-rail: #F2EDE0;         /* chair rail */
+  --ah-pink: #DA7285;         /* accent / hover (notify, links) */
+  --ah-pink-mat: #F0A3AE;     /* "the hare" frame mat */
+  --ah-gray: #8A8478;         /* mono caption gray */
+  --ah-placeholder: #B4AC9C;  /* input placeholder */
+  --ah-eyes: #FFE9A8;         /* eyes glow */
+  --ah-h-dark: #EFE9DB;       /* headline, lights off */
+  --ah-sub-dark: #9C9585;     /* subhead, lights off */
+  --ah-hint-dark: #7E7869;    /* hint, lights off */
+  --ah-h-lit: #16130F;        /* headline, lights on */
+  --ah-sub-lit: #6E675B;      /* subhead, lights on */
+  --ah-hint-lit: #A8A192;     /* hint, lights on */
+  --ah-tag-dark: #B9B2A2;     /* tagline, lights off */
+  --ah-tag-lit: #6E675B;      /* tagline, lights on */
+  --ah-cord-string: #4A4336;  /* light-cord string */
+  --ah-cord-knob-1: #A8814C;  /* cord knob gradient top */
+  --ah-cord-knob-2: #7A5C33;  /* cord knob gradient bottom */
 }

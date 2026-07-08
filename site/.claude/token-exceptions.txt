@@ -1,0 +1,16 @@
+# token-exceptions.txt — justified raw-value patterns for check-tokens.mjs (--allow).
+# One JS regex per line; a hit whose file:line OR line text matches is counted "allowed".
+# All PALETTE colors still resolve to --ah-*/tokens; hex is NOT allowed here, so a stray
+# un-tokenized color still fails the gate. Only the categories below are exempt.
+
+# After Hours is a fixed 1512x946 "stage" scaled to the viewport (transform: scale). Its
+# interior px/positions are CANVAS GEOMETRY (like an SVG viewBox / path coords), not spacing
+# tokens — tokenizing every coordinate would be noise. Scoped to the After Hours files.
+px\b   # stage geometry (canvas coordinates, sizes, blur/offset lengths)
+
+# Torch beam + room lighting + drop shadows are semi-transparent LIGHTING values
+# (warm ambers / ink shadows at varying alpha), not palette colors.
+rgba\(   # lighting + shadow, not a palette color
+
+# <meta name="theme-color"> must be a color literal; it cannot reference a CSS variable.
+theme-color
