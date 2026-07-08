@@ -1,0 +1,338 @@
+---
+// HOME — the drop (1:1 port of GoteFigure Store.dc.html home screen, locked props:
+// handDrawn=level 2, liveArt=off, dripStyle=straight; dropState from content/drop.json).
+import Layout from '../layouts/Layout.astro';
+import InkButton from '../components/InkButton.astro';
+import ProductTile from '../components/ProductTile.astro';
+import {
+  drop, isLive, isBetween, pieces, vaultStrip, SIZES, money, pieceById,
+} from '../lib/drop';
+
+const tee = pieceById('tee')!;
+const tileDelays = [0, 90, 180, 0, 90];
+
+// SSR countdown seed (client ticks live)
+const target = Date.parse(drop.nextDropDate) || Date.now();
+const diff = Math.max(0, target - Date.now());
+const two = (n: number) => String(n).padStart(2, '0');
+const dd0 = two(Math.floor(diff / 864e5));
+const hh0 = two(Math.floor(diff / 36e5) % 24);
+const mm0 = two(Math.floor(diff / 6e4) % 60);
+const ss0 = two(Math.floor(diff / 1e3) % 60);
+---
+<Layout title="GoteFigure — hand-drawn ink, one drop a month" description="Hand-drawn ink art by Rotem. One drop a month — limited, never reprinted, vaulted forever.">
+
+  <!-- ============ ARRIVAL — one drop of ink (plays once per session; gated pre-paint) ============ -->
+  <div class="gf-arrival" data-arrival-root aria-hidden="true">
+    <div class="paper" data-arrival-paper></div>
+    <div class="dot" data-arrival-dot></div>
+    <img class="wm" data-arrival-wm src="/art/v3/wordmark.png" alt="" width="1046" height="492" />
+    <button class="skip mono" data-arrival-skip type="button">skip →</button>
+  </div>
+
+  <div data-home-main data-next-drop={drop.nextDropDate} style="position:relative">
+
+    <!-- the scroll-drawn brush stroke -->
+    <svg id="gf-line" aria-hidden="true" style="position:absolute;left:0;top:0;z-index:1;pointer-events:none;overflow:visible">
+      <path id="gf-line-guide" d="" fill="none" stroke="none"></path>
+      <path id="gf-line-ribbon" d="" fill="#16130F"></path>
+      <path id="gf-line-streak" d="" fill="#F7F5F0" style="opacity:.55"></path>
+      <path id="gf-line-streak2" d="" fill="#F7F5F0" style="opacity:.3"></path>
+      <clipPath id="gf-word-clip"><rect id="gf-word-cliprect" x="0" y="0" width="0" height="0"></rect></clipPath>
+      <image id="gf-word" href="/art/v3/gote.png" clip-path="url(#gf-word-clip)" opacity="0" preserveAspectRatio="xMinYMin meet"></image>
+      <g id="gf-splats"></g>
+      <g id="gf-inkdrips"></g>
+    </svg>
+    <svg id="gf-liveart" aria-hidden="true" style="position:absolute;left:0;top:0;z-index:3;pointer-events:none;overflow:visible"></svg>
+
+    <!-- ——— HERO ——— -->
+    <section class="hero" data-doodle="900">
+      {isLive && (
+        <>
+          <div class="hero-art">
+            <img data-rv="soak" src={tee.art} alt={`${tee.name} — this month's drawing`} width="1600" height="1200" />
+          </div>
+          <h1 class="brush hero-title">{tee.name}</h1>
+          <div class="sizes" data-sizes data-rv-stagger>
+            {SIZES.map((s) => <button type="button" data-size={s}>{s}</button>)}
+          </div>
+          <div class="size-error" data-size-error hidden>Pick a size first.</div>
+          <div class="hero-cta">
+            <InkButton label={`Add to bag — ${money(tee.price)}`} add="hero" size="lg" />
+          </div>
+        </>
+      )}
+
+      {isBetween && (
+        <>
+          <div class="drying mono">
+            <span class="pulse-dot"></span>
+            <span>Drop 02 — drying on the desk</span>
+          </div>
+          <div class="facedown">
+            <img src={tee.art} alt="" aria-hidden="true" />
+            <span class="brush">face-down till the flip</span>
+          </div>
+          <h1 class="brush lands">The next one lands in</h1>
+          <div class="count mono" data-countdown>
+            <span class="unit"><span class="n" data-count-dd>{dd0}</span><span class="l">DAYS</span></span>
+            <span class="sep">:</span>
+            <span class="unit"><span class="n" data-count-hh>{hh0}</span><span class="l">HRS</span></span>
+            <span class="sep">:</span>
+            <span class="unit"><span class="n" data-count-mm>{mm0}</span><span class="l">MIN</span></span>
+            <span class="sep">:</span>
+            <span class="unit"><span class="n pink" data-count-ss>{ss0}</span><span class="l">SEC</span></span>
+          </div>
+          <form class="notify" data-notify>
+            <input type="email" required placeholder="you@somewhere.ink" aria-label="email for the drop knock" />
+            <InkButton label="Get the knock" submit size="sm" />
+          </form>
+          <div class="notified brush" data-notified hidden>✶ you'll get one email. that's the whole thing.</div>
+        </>
+      )}
+    </section>
+
+    <!-- ——— THE DROP — grid ——— -->
+    <section id="shop" data-sec="shop" class="shop">
+      <div data-la="1" data-la-splat aria-hidden="true" class="la-anchor" style="left:-20px;top:250px"></div>
+      <div class="shop-head">
+        <h2 class="brush">This month's ink</h2>
+        <div class="tabs" data-tabs>
+          <button type="button" data-tab="wear">wearables</button>
+          <button type="button" data-tab="paper">prints &amp; stickers</button>
+        </div>
+      </div>
+
+      <div class="grid" data-grid>
+        {pieces.map((p, i) => (
+          <div class="cell" data-cat={p.category}>
+            {p.hero
+              ? <div class="tee-anchor-wrap"><div data-la="2" aria-hidden="true" class="la-anchor" style="left:50%;top:38%"></div><ProductTile piece={p} delay={tileDelays[i]} /></div>
+              : <ProductTile piece={p} delay={tileDelays[i]} />}
+          </div>
+        ))}
+
+        <!-- NEXT DROP teaser -->
+        <article class="teaser" data-rv="fade" data-rv-d="180">
+          <div class="t-label mono">next drop</div>
+          <div class="t-count mono"><span data-count-dd>{dd0}</span><span class="dim">:</span><span data-count-hh>{hh0}</span><span class="dim">:</span><span data-count-mm>{mm0}</span><span class="dim">:</span><span class="pink" data-count-ss>{ss0}</span></div>
+          <div class="t-note brush">one a month. when this one's gone, it's gone.</div>
+        </article>
+      </div>
+    </section>
+
+    <div data-la="3" data-la-splat aria-hidden="true" class="la-anchor" style="position:relative;margin:110px 0 0 93%"></div>
+
+    <!-- ——— ROTEM ——— -->
+    <section class="rotem" data-doodle="720">
+      <div data-la="4" data-la-ring data-la-splat aria-hidden="true" class="la-anchor"></div>
+      <div id="rotem-portrait"><img src="/art/v3/rotem-portrait.png" alt="Rotem — the one hand behind every line" width="770" height="770" /></div>
+      <p data-rv="fade" class="statement brush">every piece here starts as pen on paper — drawn by me, once.</p>
+      <img data-rv="fade" data-rv-d="150" src="/art/v3/signature.png" alt="Rotem — signature" class="sig" width="1554" height="1146" />
+    </section>
+
+    <!-- ——— VAULT STRIP ——— -->
+    <section class="vaultstrip" data-doodle="840" data-doodle-ink="#F7F5F0">
+      <svg id="gf-vault-splash" aria-hidden="true"><g id="gf-vault-line-g"><path id="gf-line-ribbon2" d="" fill="#F7F5F0"></path><path id="gf-line-streak3" d="" fill="#16130F" style="opacity:.45"></path></g><g id="gf-vault-splash-g"></g></svg>
+      <div class="vs-inner">
+        <h2 class="brush">The Vault</h2>
+        <div class="polaroids">
+          {vaultStrip.map((v, i) => (
+            <div data-rv="fade" data-rv-d={50 + i * 70} class="polaroid"><img src={v.img} alt={`Vaulted piece — ${v.name}`} width="276" height="276" loading="lazy" /></div>
+          ))}
+        </div>
+        <div class="vs-note mono">every drop retires here · sold out, forever</div>
+        <InkButton label="Enter the vault" nav="/vault/" dark size="md" />
+      </div>
+    </section>
+
+    <!-- ——— FOOTER ——— -->
+    <footer class="gf-footer" data-doodle="620">
+      <img src="/art/v3/signature.png" alt="Rotem" class="big-sig" width="1554" height="1146" />
+      <form class="subscribe" data-subscribe>
+        <input type="email" required placeholder="one email per drop — that's it" aria-label="newsletter email" />
+        <InkButton label="Knock →" submit size="sm" />
+      </form>
+      <div class="subscribed brush" data-subscribed hidden>✶ you're in. one email per drop.</div>
+      <div class="trust mono">
+        <span data-ink-obstacle>free US shipping</span><span data-ink-obstacle>30-day size swaps</span><span data-ink-obstacle>secure checkout</span>
+      </div>
+      <div class="copyright mono">© 2026 gotefigure — every line drawn by one hand</div>
+    </footer>
+
+  </div>
+</Layout>
+
+<style>
+  .brush { font-family: var(--font-brush); font-weight: 400; }
+
+  /* ——— arrival ——— */
+  .gf-arrival { display: none; }
+  :global(html[data-arrival]) .gf-arrival { display: block; }
+  .gf-arrival .paper { position: fixed; inset: 0; z-index: 9980; background: var(--paper); }
+  .gf-arrival .dot {
+    position: fixed; left: 50%; top: -4vh; z-index: 9992; width: 17px; height: 22px; margin-left: -8px;
+    background: var(--ink); border-radius: 46% 54% 58% 42% / 38% 40% 62% 60%; opacity: 0;
+  }
+  .gf-arrival .wm {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 9995;
+    width: min(430px, 74vw); height: auto; filter: invert(.93) brightness(1.06);
+    opacity: 0; transition: opacity .4s ease;
+  }
+  .gf-arrival .skip {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%); z-index: 9996;
+    border: none; background: none; font-size: 15px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--hand-muted); padding: 10px;
+  }
+
+  .la-anchor { position: absolute; width: 2px; height: 2px; }
+
+  /* hand-drawn skin: inside main everything goes handwritten — mono never survives here
+     (verified against the design ground truth; the drawer aside is the mono surface) */
+  .drying, .count, .count .l, .t-count, .t-label, .vs-note, .trust, .copyright {
+    font-family: var(--font-scrawl);
+  }
+
+  /* ——— hero ——— */
+  .hero {
+    position: relative; z-index: 2; min-height: calc(100vh - 76px);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 44px 28px 32px;
+  }
+  .hero-art { height: min(44vh, 420px); display: flex; align-items: center; justify-content: center; margin: 34px 0 10px; }
+  .hero-art img {
+    max-height: 100%; max-width: min(700px, 80vw); width: auto; object-fit: contain;
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1.5s var(--ease-soak) .25s;
+  }
+  .hero-title { font-size: clamp(52px, 6vw, 84px); line-height: 1; margin: 0 0 28px; animation: gf-rise .8s ease .5s backwards; }
+  .sizes { display: flex; align-items: center; gap: 8px; margin-bottom: 26px; animation: gf-rise .8s ease .75s backwards; }
+  .sizes button {
+    position: relative; border: none; background: none;
+    font-family: var(--font-mono); font-size: 17px; font-weight: 700;
+    padding: 10px 14px; letter-spacing: .08em; color: var(--size-idle);
+    border-bottom: 5px solid transparent;
+    transition: color .2s, border-color .2s;
+  }
+  .sizes button[aria-pressed="true"] { border-bottom-color: var(--pink); color: var(--ink); }
+  .size-error { font-size: 16px; font-weight: 700; color: var(--pink); margin: -14px 0 16px; }
+  .hero-cta { position: relative; z-index: 5; animation: gf-rise .8s ease .85s backwards; }
+
+  /* between */
+  .drying { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); }
+  .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); display: inline-block; animation: gf-pulse 2s ease-in-out infinite; }
+  .facedown {
+    position: relative; height: min(38vh, 360px); aspect-ratio: 1.3; max-width: 86vw; margin: 36px 0 14px;
+    background: var(--card); border: 1px solid rgba(22, 19, 15, .14); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .facedown img { width: 82%; object-fit: contain; transform: scaleX(-1); opacity: .07; filter: blur(1px) grayscale(1); }
+  .facedown span { position: absolute; font-size: clamp(26px, 3vw, 36px); transform: rotate(-3.5deg); color: var(--ink); opacity: .8; }
+  .lands { font-size: clamp(44px, 5vw, 68px); line-height: 1; margin: 0 0 30px; }
+  .count { display: flex; align-items: baseline; gap: 18px; margin-bottom: 34px; }
+  .count .unit { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .count .n { font-size: clamp(40px, 4.6vw, 62px); font-weight: 700; line-height: 1; }
+  .count .n.pink { color: var(--pink); }
+  .count .l { font-size: 15px; font-weight: 700; letter-spacing: .09em; color: var(--hand-muted); }
+  .count .sep { font-size: clamp(28px, 3vw, 40px); color: var(--muted-3); transform: translateY(-10px); }
+  .notify { display: flex; align-items: center; gap: 14px; }
+  .notify input, .subscribe input {
+    font-family: var(--font-mono); width: min(300px, 60vw);
+    border: none; border-bottom: 2px dashed rgba(22, 19, 15, .6); background: transparent;
+    padding: 12px 2px; font-size: 19px; color: var(--ink); outline: none;
+  }
+  .notified, .subscribed { font-size: 27px; color: var(--ink); }
+
+  /* ——— shop ——— */
+  .shop { position: relative; z-index: 2; max-width: 1220px; margin: -36px auto 0; padding: 0 28px 30px; }
+  .shop-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; margin-bottom: 30px; }
+  .shop-head h2 { font-size: clamp(38px, 4vw, 54px); line-height: 1; margin: 0; }
+  .tabs { display: flex; gap: 8px; }
+  .tabs button {
+    border: 1.5px solid rgba(22, 19, 15, .28); background: transparent; border-radius: var(--sloppy-btn);
+    padding: 9px 18px; font-size: 17px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--hand-muted); transition: all .25s;
+  }
+  .tabs button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .cell { display: contents; }
+  .tee-anchor-wrap { position: relative; display: contents; }
+  .cell[data-cat][hidden] { display: none; }
+
+  /* alternating tile lean (hand-drawn skin: css2 3n/3n+1 beats css1 odd/even) */
+  .grid :global([data-tile]) { rotate: -0.7deg; }
+  .grid .cell:nth-of-type(even) :global([data-tile]) { rotate: 0.6deg; }
+  .grid .cell:nth-of-type(3n) :global([data-tile]) { rotate: 1deg; }
+  .grid .cell:nth-of-type(3n+1) :global([data-tile]) { rotate: -1.1deg; }
+
+  .teaser {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .7s ease, transform .7s var(--ease-tile);
+    position: relative; border: 1.5px dashed rgba(22, 19, 15, .3); border-radius: 4px;
+    padding: 34px 26px 26px; min-height: 380px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 14px;
+  }
+  .t-label { font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); }
+  .t-count { font-size: 30px; font-weight: 700; letter-spacing: .04em; }
+  .t-count .dim { color: var(--muted-3); }
+  .t-count .pink { color: var(--pink); }
+  .t-note { font-size: 26px; color: var(--muted-dark); transform: rotate(-2deg); max-width: 22ch; line-height: 1.3; }
+
+  /* ——— rotem ——— */
+  .rotem {
+    position: relative; z-index: 2; padding: 130px 28px 120px;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 22px;
+  }
+  #rotem-portrait {
+    width: 280px; height: 280px; margin-bottom: 64px;
+    border-radius: 47% 53% 55% 45% / 44% 57% 43% 56%;
+    overflow: hidden; rotate: -1.8deg;
+  }
+  #rotem-portrait img { width: 100%; height: 100%; object-fit: cover; }
+  .statement {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .8s ease, transform .8s var(--ease-tile);
+    font-size: clamp(34px, 3.8vw, 48px); line-height: 1.3; max-width: 24ch; margin: 0;
+  }
+  .sig {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity .8s ease, transform .8s var(--ease-tile);
+    height: 88px; width: auto; margin-top: 10px;
+  }
+
+  /* ——— vault strip ——— */
+  .vaultstrip { position: relative; z-index: 2; background: var(--ink); color: var(--paper); padding: 90px 28px; overflow: hidden; }
+  #gf-vault-splash { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+  .vs-inner { position: relative; max-width: 1220px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 30px; text-align: center; }
+  .vs-inner h2 { font-size: clamp(38px, 4vw, 54px); line-height: 1; margin: 0; }
+  .polaroids { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+  .polaroid { opacity: 0; transform: translateY(18px); transition: opacity .7s ease, transform .7s var(--ease-tile); background: var(--paper); padding: 7px; border-radius: 2px; }
+  .polaroid img { height: 138px; width: 138px; object-fit: cover; }
+  .vs-note { font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--dark-muted); }
+
+  /* ——— footer ——— */
+  .gf-footer {
+    position: relative; z-index: 2; padding: 120px 28px 90px;
+    display: flex; flex-direction: column; align-items: center; gap: 30px; text-align: center;
+    border-top: 2px dashed rgba(22, 19, 15, .35);
+  }
+  .big-sig { height: min(190px, 30vw); width: auto; margin: 0 auto 18px; }
+  .subscribe { position: relative; z-index: 5; display: flex; align-items: center; gap: 12px; }
+  .subscribe input { width: min(300px, 64vw); padding: 11px 2px; font-size: 18px; }
+  .trust { font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; }
+  .copyright { font-size: 15px; letter-spacing: .09em; color: var(--hand-muted); }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px) {
+    .grid { grid-template-columns: 1fr; }
+    .shop-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .count { gap: 10px; }
+    .notify, .subscribe { flex-direction: column; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-art img { clip-path: none; }
+    :global([data-rv]) { opacity: 1 !important; transform: none !important; }
+  }
+</style>

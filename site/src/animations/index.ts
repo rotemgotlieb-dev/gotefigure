@@ -12,6 +12,7 @@ import './reveals';
 import './tiles';
 import './countdown';
 import './store-ui';
+import './after-hours'; // no-ops unless the page has [data-room-stage] (the After Hours salon)
 
 startMotion();
 initFloodNav();
