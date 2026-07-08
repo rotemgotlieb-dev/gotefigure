@@ -31,7 +31,7 @@ This is the global context document for all GoteFigure build sprints. Every codi
 | Accessibility | `prefers-reduced-motion` fully honored; shopping never requires interaction tricks |
 | Timeline | ~2 weeks of sprints |
 | Token economy | The standing Token Optimization Protocol applies to every sprint (§12) |
-| Hosting ToS | Vercel free tier prohibits commercial use (verified 2026-06) — **do not deploy there**. Cloudflare free tier (Workers static assets) allows commerce |
+| Hosting ToS | **AMENDED 2026-07-02 (owner decision):** pre-commercial phase hosts on **Vercel Hobby** (site is private/non-commercial until launch: checkout disabled, no sales — consolidates with the owner's other Vercel projects). Vercel Hobby prohibits *commercial* use (verified 2026-06), so **the day checkout goes live this must move** — either Vercel Pro (~$20/mo) or back to Cloudflare Workers static assets (free tier allows commerce; config retained in repo: `site/wrangler.jsonc` + `.github/workflows/deploy.yml`). Decide at commercialization (§13) |
 
 ## 3. Brand & design language — "Ink on paper, alive"
 
@@ -182,7 +182,7 @@ Cursor-tracked googly pupils (one eye lags ~80ms — the deranged charm; clamped
 | Framework | **Astro 6** (6.4.x, stable since 2026-03) | Static-first, zero default JS — JS budget goes to art; Content Layer for catalog; islands for cart; ClientRouter view transitions |
 | Animation | **GSAP** (Webflow acquired GSAP 2024-10; everything incl. ScrollTrigger, DrawSVG, MorphSVG, SplitText free since 2025-04; license forbids only competing no-code animation tools) | The exact toolset for hand-drawn SVG motion |
 | Commerce | **Fourthwall** ($0/mo, 0% platform fee on physical, ~2.9%+30¢ processing pass-through) via **Storefront API** (free, all creators; read products/collections, cart create/manage; checkout = hosted redirect via cart token) | Mixed fulfillment per-product (POD + ship-from-home + 3PL coexist); creator/YouTube-native; MIT reference template exists (FourthwallHQ/vercel-commerce) |
-| Hosting | **Cloudflare Workers static assets** free tier (commercial allowed; static requests unlimited; the 100k/day cap applies only to Worker/Function invocations, which this site doesn't use). Conscious choice: Cloudflare Pages has been in maintenance mode since 2025-04 — Workers static assets is the recommended successor and Astro 6's Cloudflare adapter is Workers-first; Pages remains an acceptable fallback | Vercel Hobby prohibits commerce; Netlify free is credit-metered |
+| Hosting | **Vercel Hobby** during the pre-commercial phase (AMENDED 2026-07-02, see §2 — owner hosts all projects there; site is static output, host-agnostic). At commercialization: Vercel Pro or **Cloudflare Workers static assets** free tier (commercial allowed; config retained in repo). Cloudflare Pages in maintenance mode since 2025-04 — Workers static assets is its successor | Vercel Hobby prohibits commerce (the move-at-launch trigger); Netlify free is credit-metered |
 | Styling | Vanilla CSS with design tokens (§3.1) + scoped Astro styles | No framework tax; tokens are the theme |
 | Cart island | One hydrated island (vanilla TS or preact-class tiny lib — build-sprint pick), localStorage-persisted Fourthwall cart token | Single point of interactivity |
 | Analytics | Cloudflare Web Analytics (free, cookieless) | Privacy-friendly, zero config |
@@ -298,6 +298,7 @@ The owner's Token Optimization Protocol (2026-06-10) is standing law for this re
 | Per-SKU art fallback (mockup render vs defer) for §5 ⚠️ rows | Rotem | Phase 3, at Fourthwall setup |
 | OG-image template design | build sprint | Phase 6 |
 | Crochet bucket hat SKU | Rotem | whenever |
+| Hosting at commercialization: Vercel Pro (~$20/mo, one platform) vs move back to Cloudflare (free, config retained) | Rotem | the day checkout goes live — this is a launch-checklist gate, not optional |
 | Process-moments content (sketch photos available vs skip at launch) | Rotem | Phase 5 |
 
 ## 14. Reference library (validated 2026-06)

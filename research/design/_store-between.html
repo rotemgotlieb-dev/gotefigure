@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&family=Kalam:wght@300;400;700&family=Reenie+Beanie&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:#F7F5F0;color:#16130F;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  ::selection{background:#16130F;color:#F7F5F0}
+  img{display:block}
+  input{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
+  input::placeholder{color:#A29B8D}
+  @keyframes gf-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.72)}}
+  @keyframes gf-fadein{from{opacity:0}to{opacity:1}}
+  @keyframes gf-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  @keyframes gf-slidein{from{transform:translateX(104%)}to{transform:none}}
+  @keyframes gf-drift{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1.4deg)}}
+  @media (prefers-reduced-motion: reduce){*{animation:none !important;transition:none !important}}
+</style>
+<script src="./assets/image-slot.js"></script>
+</helmet>
+
+<svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+  <defs>
+    <filter id="boil" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="2" result="t"><animate attributeName="seed" values="2;5;9;13" dur="0.62s" calcMode="discrete" repeatCount="indefinite"></animate></feTurbulence>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="4.5" xChannelSelector="R" yChannelSelector="G"></feDisplacementMap>
+    </filter>
+  </defs>
+</svg>
+
+<div aria-hidden="true" style="position:fixed;inset:0;z-index:10500;pointer-events:none;mix-blend-mode:multiply;opacity:.3;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E&quot;)"></div>
+
+<!-- ============ ARRIVAL — one drop of ink ============ -->
+<sc-if value="{{ intro }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Arrival">
+    <div id="gf-intro-paper" style="position:fixed;inset:0;z-index:9980;background:#F7F5F0"></div>
+    <div id="gf-intro-dot" aria-hidden="true" style="position:fixed;left:50%;top:-4vh;z-index:9992;width:17px;height:22px;margin-left:-8px;background:#16130F;border-radius:46% 54% 58% 42%/38% 40% 62% 60%;opacity:0"></div>
+    <img id="gf-intro-wm" src="assets/wordmark.png" alt="Gote Figure" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:9995;width:min(430px,74vw);height:auto;filter:invert(.93) brightness(1.06);opacity:0;transition:opacity .4s ease">
+    <button id="gf-intro-skip" onClick="{{ skip }}" style="position:fixed;left:50%;bottom:34px;transform:translateX(-50%);z-index:9996;border:none;background:none;cursor:pointer;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:#8A8478;padding:10px">skip →</button>
+  </div>
+</sc-if>
+
+<!-- ============ HEADER ============ -->
+<header style="position:sticky;top:0;z-index:5000;background:rgba(247,245,240,.86);backdrop-filter:blur(10px);border-bottom:1px solid rgba(22,19,15,.12)">
+  <div style="max-width:1320px;margin:0 auto;padding:0 28px;height:76px;display:flex;align-items:center;gap:44px">
+    <button onClick="{{ goHome }}" title="GoteFigure" style="border:none;background:none;cursor:pointer;padding:6px 0;margin-right:auto;display:flex;align-items:center">
+      <img src="assets/wordmark.png" alt="Gote Figure" style="height:52px;width:auto">
+    </button>
+    <nav style="display:flex;gap:38px;align-items:center;font-size:13.5px;letter-spacing:.22em;text-transform:uppercase">
+      <a onClick="{{ navShop }}" style="cursor:pointer;color:#16130F;text-decoration:none;background-image:linear-gradient(#16130F,#16130F);background-repeat:no-repeat;background-position:0 100%;background-size:0% 1.5px;transition:background-size .3s;padding:6px 0" style-hover="background-size:100% 1.5px">The Drop</a>
+      <a onClick="{{ navVault }}" style="cursor:pointer;color:#16130F;text-decoration:none;background-image:linear-gradient(#16130F,#16130F);background-repeat:no-repeat;background-position:0 100%;background-size:0% 1.5px;transition:background-size .3s;padding:6px 0" style-hover="background-size:100% 1.5px">The Vault</a>
+    </nav>
+    <button onClick="{{ openDrawer }}" style="border:2px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:11px 24px;display:flex;align-items:center;gap:10px;font-size:13.5px;letter-spacing:.18em;text-transform:uppercase;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0">
+      <span>Bag</span>
+      <span style="font-family:'Space Mono',monospace;font-weight:700;font-size:13.5px;color:#DA7285">{{ satchelCount }}</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============ HOME ============ -->
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<main data-home-main data-screen-label="Home" style="position:relative">
+
+  <svg id="gf-line" aria-hidden="true" style="position:absolute;left:0;top:0;z-index:1;pointer-events:none;overflow:visible">
+    <path id="gf-line-guide" d="" fill="none" stroke="none"></path>
+    <path id="gf-line-ribbon" d="" fill="#16130F"></path>
+    <path id="gf-line-streak" d="" fill="#F7F5F0" style="opacity:.55"></path>
+    <path id="gf-line-streak2" d="" fill="#F7F5F0" style="opacity:.3"></path>
+    <clipPath id="gf-word-clip"><rect id="gf-word-cliprect" x="0" y="0" width="0" height="0"></rect></clipPath>
+    <image id="gf-word" href="assets/gote.png" clip-path="url(#gf-word-clip)" opacity="0" preserveAspectRatio="xMinYMin meet"></image>
+    <g id="gf-splats"></g>
+    <g id="gf-inkdrips"></g>
+  </svg>
+
+  <svg id="gf-liveart" aria-hidden="true" style="position:absolute;left:0;top:0;z-index:3;pointer-events:none;overflow:visible"></svg>
+
+  <!-- ——— HERO ——— -->
+  <section data-doodle="900" style="position:relative;z-index:2;min-height:calc(100vh - 76px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:44px 28px 32px">
+
+    <sc-if value="{{ isLive }}" hint-placeholder-val="{{ true }}">
+      <div style="height:min(44vh,420px);display:flex;align-items:center;justify-content:center;margin:34px 0 10px">
+        <img data-rv="soak" src="assets/trippy.png" alt="Trippy 1.1 — this month's drawing" style="max-height:100%;max-width:min(700px,80vw);object-fit:contain;clip-path:inset(0 0 100% 0);transition:clip-path 1.5s cubic-bezier(.55,.05,.3,1) .25s">
+      </div>
+      <h1 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(52px,6vw,84px);line-height:1;margin:0 0 28px;animation:gf-rise .8s ease .5s backwards">Trippy 1.1</h1>
+
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:26px;animation:gf-rise .8s ease .75s backwards">
+        <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="5">
+          <button onClick="{{ s.sel }}" style="{{ s.style }}">{{ s.label }}</button>
+        </sc-for>
+      </div>
+      <sc-if value="{{ sizeError }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12px;color:#DA7285;margin:-14px 0 16px">Pick a size first.</div>
+      </sc-if>
+
+      <div style="position:relative;z-index:5;animation:gf-rise .8s ease .85s backwards">
+        <button data-ink-btn data-add="hero" type="button" style="position:relative;overflow:visible;isolation:isolate;border:2px solid #16130F;background:transparent;border-radius:999px;padding:18px 46px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.02em;color:#16130F;outline-offset:4px">
+          <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#16130F"></path></svg></span>
+          <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#16130F;pointer-events:none">Add to bag — $34</span>
+          <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F7F5F0;pointer-events:none;text-shadow:0 0 1px rgba(22,19,15,.35)">Add to bag — $34</span>
+          <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Add to bag — $34</span>
+          <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+        </button>
+      </div>
+
+    </sc-if>
+
+    <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.3em;text-transform:uppercase;color:#8A8478">
+        <span style="width:7px;height:7px;border-radius:50%;background:#8A8478;display:inline-block;animation:gf-pulse 2s ease-in-out infinite"></span>
+        <span>Drop 02 — drying on the desk</span>
+      </div>
+      <div style="position:relative;height:min(38vh,360px);aspect-ratio:1.3;max-width:86vw;margin:36px 0 14px;background:#FCFBF6;border:1px solid rgba(22,19,15,.14);border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden">
+        <img src="assets/trippy.png" alt="" aria-hidden="true" style="width:82%;object-fit:contain;transform:scaleX(-1);opacity:.07;filter:blur(1px) grayscale(1)">
+        <span style="position:absolute;font-family:'Nanum Brush Script',cursive;font-size:clamp(26px,3vw,36px);transform:rotate(-3.5deg);color:#16130F;opacity:.8">face-down till the flip</span>
+      </div>
+      <h1 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(44px,5vw,68px);line-height:1;margin:0 0 30px">The next one lands in</h1>
+      <div style="display:flex;align-items:baseline;gap:18px;font-family:'Space Mono',monospace;margin-bottom:34px">
+        <span style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font-size:clamp(40px,4.6vw,62px);font-weight:700;line-height:1">{{ dd }}</span><span style="font-size:9.5px;letter-spacing:.3em;color:#8A8478">DAYS</span></span>
+        <span style="font-size:clamp(28px,3vw,40px);color:#C9C2B4;transform:translateY(-10px)">:</span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font-size:clamp(40px,4.6vw,62px);font-weight:700;line-height:1">{{ hh }}</span><span style="font-size:9.5px;letter-spacing:.3em;color:#8A8478">HRS</span></span>
+        <span style="font-size:clamp(28px,3vw,40px);color:#C9C2B4;transform:translateY(-10px)">:</span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font-size:clamp(40px,4.6vw,62px);font-weight:700;line-height:1">{{ mm }}</span><span style="font-size:9.5px;letter-spacing:.3em;color:#8A8478">MIN</span></span>
+        <span style="font-size:clamp(28px,3vw,40px);color:#C9C2B4;transform:translateY(-10px)">:</span>
+        <span style="display:flex;flex-direction:column;align-items:center;gap:8px"><span style="font-size:clamp(40px,4.6vw,62px);font-weight:700;line-height:1;color:#DA7285">{{ ss }}</span><span style="font-size:9.5px;letter-spacing:.3em;color:#8A8478">SEC</span></span>
+      </div>
+      <sc-if value="{{ notNotified }}" hint-placeholder-val="{{ true }}">
+        <form onSubmit="{{ notify }}" style="display:flex;align-items:center;gap:14px">
+          <input type="email" required placeholder="you@somewhere.ink" style="font-family:'Space Mono',monospace;width:min(300px,60vw);border:none;border-bottom:1.5px solid rgba(22,19,15,.4);background:transparent;padding:12px 2px;font-size:14px;color:#16130F;outline:none">
+          <button data-ink-btn data-submit type="submit" style="position:relative;overflow:visible;isolation:isolate;border:2px solid #16130F;background:transparent;border-radius:999px;padding:13px 26px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:12.5px;color:#16130F;outline-offset:4px">
+            <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#16130F"></path></svg></span>
+            <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#16130F;pointer-events:none">Get the knock</span>
+            <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F7F5F0;pointer-events:none;text-shadow:0 0 1px rgba(22,19,15,.35)">Get the knock</span>
+            <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Get the knock</span>
+            <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+          </button>
+        </form>
+      </sc-if>
+      <sc-if value="{{ notified }}" hint-placeholder-val="{{ false }}">
+        <div style="font-family:'Nanum Brush Script',cursive;font-size:27px;color:#16130F">✶ you'll get one email. that's the whole thing.</div>
+      </sc-if>
+    </sc-if>
+
+    <div aria-hidden="true" style="height:2px;width:2px;margin:8px 0 0 46%"></div>
+  </section>
+
+  <!-- ——— THE DROP — grid ——— -->
+  <section data-sec="shop" style="position:relative;z-index:2;max-width:1220px;margin:-36px auto 0;padding:0 28px 30px">
+    <div data-la="1" data-la-splat aria-hidden="true" style="position:absolute;left:-20px;top:250px;width:2px;height:2px"></div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;margin-bottom:30px">
+      <h2 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(38px,4vw,54px);line-height:1;margin:0">This month's ink</h2>
+      <div style="display:flex;gap:8px">
+        <button onClick="{{ tabWear }}" style="{{ tabWearStyle }}">wearables</button>
+        <button onClick="{{ tabPaper }}" style="{{ tabPaperStyle }}">prints &amp; stickers</button>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+
+      <!-- STICKER -->
+      <sc-if value="{{ showPaper }}" hint-placeholder-val="{{ true }}">
+      <article data-tile onClick="{{ openSticker }}" data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1),box-shadow .5s;cursor:pointer;position:relative;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center" style-hover="box-shadow:0 26px 48px -32px rgba(22,19,15,.4)">
+        <div style="height:230px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:24px"><img data-tart src="assets/rabbit-ink.png" alt="Goggle Rabbit" style="max-height:96%;max-width:42%;object-fit:contain;transition:transform .5s cubic-bezier(.2,.7,.25,1)"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#8A8478;margin-bottom:8px">die-cut sticker</div>
+        <div style="display:inline-block;position:relative">
+          <h3 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:29px;line-height:1;margin:0">Goggle Rabbit</h3>
+          <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:7px;display:block;margin-top:4px"><path data-u d="M2 4.5 C 28 1.5, 62 6, 98 3" pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset .5s ease"></path></svg><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;top:86%;left:0;width:100%;height:12px;overflow:visible;pointer-events:none"><path data-dr d="M9.8 0.4 C10.2 2.8 10.1 5.4 9.8 7.6 C9.6 9.1 8.9 9.2 8.7 7.7 C8.5 5.2 8.6 2.6 8.9 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:9px 0px;transition:transform .8s cubic-bezier(.25,.6,.3,1) .35s"></path><path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px">$6</div>
+        <button data-quickadd="sticker" type="button" style="margin-top:16px;position:relative;overflow:hidden;border:1.5px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:9px 20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0"><span data-qa-lbl style="position:relative;z-index:1;pointer-events:none">+ Quick add</span><span data-qa-pool aria-hidden="true" style="position:absolute;left:-6px;right:-6px;bottom:-4px;height:0;background:#DA7285;opacity:.95;border-radius:55% 45% 0 0 / 100% 85% 0 0;pointer-events:none;transition:height 1.8s cubic-bezier(.22,.55,.3,1)"></span></button>
+        <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(247,245,240,.72);display:flex;align-items:center;justify-content:center;border-radius:4px"><span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#16130F;border:1.5px solid #16130F;border-radius:999px;padding:8px 18px;transform:rotate(-8deg);background:#F7F5F0">vaulted</span></div>
+        </sc-if>
+      </article>
+      </sc-if>
+
+      <!-- PRINT -->
+      <sc-if value="{{ showPaper }}" hint-placeholder-val="{{ true }}">
+      <article data-tile onClick="{{ openPrint }}" data-rv="fade" data-rv-d="90" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1),box-shadow .5s;cursor:pointer;position:relative;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center" style-hover="box-shadow:0 26px 48px -32px rgba(22,19,15,.4)">
+        <div style="height:230px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:24px"><img data-tart src="assets/kaleido.png" alt="Kaleido Plate" style="max-height:88%;max-width:62%;object-fit:contain;transition:transform .5s cubic-bezier(.2,.7,.25,1)"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#8A8478;margin-bottom:8px">A3 print · numbered</div>
+        <div style="display:inline-block;position:relative">
+          <h3 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:29px;line-height:1;margin:0">Kaleido Plate</h3>
+          <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:7px;display:block;margin-top:4px"><path data-u d="M2 3 C 34 6, 66 1.5, 98 4.5" pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset .5s ease"></path></svg><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;top:86%;left:0;width:100%;height:12px;overflow:visible;pointer-events:none"><path data-dr d="M9.8 0.4 C10.2 2.8 10.1 5.4 9.8 7.6 C9.6 9.1 8.9 9.2 8.7 7.7 C8.5 5.2 8.6 2.6 8.9 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:9px 0px;transition:transform .8s cubic-bezier(.25,.6,.3,1) .35s"></path><path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px">$28</div>
+        <button data-quickadd="print" type="button" style="margin-top:16px;position:relative;overflow:hidden;border:1.5px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:9px 20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0"><span data-qa-lbl style="position:relative;z-index:1;pointer-events:none">+ Quick add</span><span data-qa-pool aria-hidden="true" style="position:absolute;left:-6px;right:-6px;bottom:-4px;height:0;background:#DA7285;opacity:.95;border-radius:55% 45% 0 0 / 100% 85% 0 0;pointer-events:none;transition:height 1.8s cubic-bezier(.22,.55,.3,1)"></span></button>
+        <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(247,245,240,.72);display:flex;align-items:center;justify-content:center;border-radius:4px"><span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#16130F;border:1.5px solid #16130F;border-radius:999px;padding:8px 18px;transform:rotate(-8deg);background:#F7F5F0">vaulted</span></div>
+        </sc-if>
+      </article>
+      </sc-if>
+
+      <!-- TEE -->
+      <sc-if value="{{ showWear }}" hint-placeholder-val="{{ true }}">
+      <article data-tile onClick="{{ openTee }}" data-rv="fade" data-rv-d="180" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1),box-shadow .5s;cursor:pointer;position:relative;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center" style-hover="box-shadow:0 26px 48px -32px rgba(22,19,15,.4)">
+        <div data-la="2" aria-hidden="true" style="position:absolute;left:50%;top:38%;width:2px;height:2px"></div>
+        <span style="position:absolute;top:14px;right:14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#DA7285">{{ dropLeftShort }}</span>
+        <div style="height:230px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:24px"><img data-tart src="assets/trippy.png" alt="Trippy 1.1" style="max-height:88%;max-width:84%;object-fit:contain;transition:transform .5s cubic-bezier(.2,.7,.25,1)"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#8A8478;margin-bottom:8px">heavyweight tee</div>
+        <div style="display:inline-block;position:relative">
+          <h3 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:29px;line-height:1;margin:0">Trippy 1.1</h3>
+          <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:7px;display:block;margin-top:4px"><path data-u d="M2 4 C 30 6.5, 58 1, 98 3.5" pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset .5s ease"></path></svg><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;top:86%;left:0;width:100%;height:12px;overflow:visible;pointer-events:none"><path data-dr d="M9.8 0.4 C10.2 2.8 10.1 5.4 9.8 7.6 C9.6 9.1 8.9 9.2 8.7 7.7 C8.5 5.2 8.6 2.6 8.9 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:9px 0px;transition:transform .8s cubic-bezier(.25,.6,.3,1) .35s"></path><path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px">$34</div>
+        <button data-quickadd="tee" type="button" style="margin-top:16px;position:relative;overflow:hidden;border:1.5px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:9px 20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0"><span data-qa-lbl style="position:relative;z-index:1;pointer-events:none">+ Quick add</span><span data-qa-pool aria-hidden="true" style="position:absolute;left:-6px;right:-6px;bottom:-4px;height:0;background:#DA7285;opacity:.95;border-radius:55% 45% 0 0 / 100% 85% 0 0;pointer-events:none;transition:height 1.8s cubic-bezier(.22,.55,.3,1)"></span></button>
+        <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(247,245,240,.72);display:flex;align-items:center;justify-content:center;border-radius:4px"><span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#16130F;border:1.5px solid #16130F;border-radius:999px;padding:8px 18px;transform:rotate(-8deg);background:#F7F5F0">vaulted</span></div>
+        </sc-if>
+      </article>
+      </sc-if>
+
+      <!-- SWEAT -->
+      <sc-if value="{{ showWear }}" hint-placeholder-val="{{ true }}">
+      <article data-tile onClick="{{ openSweat }}" data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1),box-shadow .5s;cursor:pointer;position:relative;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center" style-hover="box-shadow:0 26px 48px -32px rgba(22,19,15,.4)">
+        <div style="height:230px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:24px"><img data-tart src="assets/rabbit-pink.png" alt="Pink Rabbit" style="max-height:90%;max-width:46%;object-fit:contain;transition:transform .5s cubic-bezier(.2,.7,.25,1)"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#8A8478;margin-bottom:8px">midweight sweatshirt</div>
+        <div style="display:inline-block;position:relative">
+          <h3 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:29px;line-height:1;margin:0">Pink Rabbit</h3>
+          <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:7px;display:block;margin-top:4px"><path data-u d="M2 4.5 C 26 2, 70 6.5, 98 2.5" pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset .5s ease"></path></svg><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;top:86%;left:0;width:100%;height:12px;overflow:visible;pointer-events:none"><path data-dr d="M9.8 0.4 C10.2 2.8 10.1 5.4 9.8 7.6 C9.6 9.1 8.9 9.2 8.7 7.7 C8.5 5.2 8.6 2.6 8.9 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:9px 0px;transition:transform .8s cubic-bezier(.25,.6,.3,1) .35s"></path><path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px">$58</div>
+        <button data-quickadd="sweat" type="button" style="margin-top:16px;position:relative;overflow:hidden;border:1.5px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:9px 20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0"><span data-qa-lbl style="position:relative;z-index:1;pointer-events:none">+ Quick add</span><span data-qa-pool aria-hidden="true" style="position:absolute;left:-6px;right:-6px;bottom:-4px;height:0;background:#DA7285;opacity:.95;border-radius:55% 45% 0 0 / 100% 85% 0 0;pointer-events:none;transition:height 1.8s cubic-bezier(.22,.55,.3,1)"></span></button>
+        <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(247,245,240,.72);display:flex;align-items:center;justify-content:center;border-radius:4px"><span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#16130F;border:1.5px solid #16130F;border-radius:999px;padding:8px 18px;transform:rotate(-8deg);background:#F7F5F0">vaulted</span></div>
+        </sc-if>
+      </article>
+      </sc-if>
+
+      <!-- ORIGINAL -->
+      <sc-if value="{{ showPaper }}" hint-placeholder-val="{{ true }}">
+      <article data-tile onClick="{{ openOriginal }}" data-rv="fade" data-rv-d="90" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1),box-shadow .5s;cursor:pointer;position:relative;background:#16130F;border:1px solid #16130F;border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;text-align:center" style-hover="box-shadow:0 26px 48px -30px rgba(22,19,15,.55)">
+        <span style="position:absolute;top:14px;right:14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#DA7285">1 of 1</span>
+        <div style="height:230px;width:100%;display:flex;align-items:center;justify-content:center;margin-bottom:24px;background:#FCFBF6;border-radius:2px"><img data-tart src="assets/blob-maze.png" alt="Bloom Study no.4" style="max-height:82%;max-width:64%;object-fit:contain;transition:transform .5s cubic-bezier(.2,.7,.25,1)"></div>
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:#A29B8D;margin-bottom:8px">original drawing</div>
+        <div style="display:inline-block;position:relative">
+          <h3 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:29px;line-height:1;margin:0;color:#F7F5F0">Bloom Study no.4</h3>
+          <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" style="width:100%;height:7px;display:block;margin-top:4px"><path data-u d="M2 3.5 C 36 1, 64 6.5, 98 3" pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1" style="transition:stroke-dashoffset .5s ease"></path></svg><svg viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true" style="position:absolute;top:86%;left:0;width:100%;height:12px;overflow:visible;pointer-events:none"><path data-dr d="M9.8 0.4 C10.2 2.8 10.1 5.4 9.8 7.6 C9.6 9.1 8.9 9.2 8.7 7.7 C8.5 5.2 8.6 2.6 8.9 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:9px 0px;transition:transform .8s cubic-bezier(.25,.6,.3,1) .35s"></path><path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path></svg>
+        </div>
+        <div style="font-size:14px;font-weight:700;margin-top:10px;color:#F7F5F0">$420</div>
+        <button data-quickadd="original" type="button" style="margin-top:16px;position:relative;overflow:hidden;border:1.5px solid #F7F5F0;background:transparent;border-radius:999px;cursor:pointer;padding:9px 20px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.06em;color:#F7F5F0;transition:background .25s,color .25s" style-hover="background:#F7F5F0;color:#16130F"><span data-qa-lbl style="position:relative;z-index:1;pointer-events:none">+ Quick add</span><span data-qa-pool aria-hidden="true" style="position:absolute;left:-6px;right:-6px;bottom:-4px;height:0;background:#DA7285;opacity:.95;border-radius:55% 45% 0 0 / 100% 85% 0 0;pointer-events:none;transition:height 1.8s cubic-bezier(.22,.55,.3,1)"></span></button>
+        <div style="margin-top:16px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8A8478">the actual paper →</div>
+        <sc-if value="{{ isBetween }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute;inset:0;background:rgba(22,19,15,.78);display:flex;align-items:center;justify-content:center;border-radius:4px"><span style="font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#F7F5F0;border:1.5px solid #F7F5F0;border-radius:999px;padding:8px 18px;transform:rotate(-8deg)">sold · vaulted</span></div>
+        </sc-if>
+      </article>
+      </sc-if>
+
+      <!-- NEXT DROP teaser -->
+      <article data-rv="fade" data-rv-d="180" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1);position:relative;border:1.5px dashed rgba(22,19,15,.3);border-radius:4px;padding:34px 26px 26px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px;min-height:380px">
+        <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.3em;text-transform:uppercase;color:#8A8478">next drop</div>
+        <div style="font-family:'Space Mono',monospace;font-size:30px;font-weight:700;letter-spacing:.04em">{{ dd }}<span style="color:#C9C2B4">:</span>{{ hh }}<span style="color:#C9C2B4">:</span>{{ mm }}<span style="color:#C9C2B4">:</span><span style="color:#DA7285">{{ ss }}</span></div>
+        <div style="font-family:'Nanum Brush Script',cursive;font-size:26px;color:#5C564A;transform:rotate(-2deg);max-width:22ch;line-height:1.3">one a month. when this one's gone, it's gone.</div>
+      </article>
+
+    </div>
+  </section>
+
+  <div data-la="3" data-la-splat aria-hidden="true" style="height:2px;width:2px;margin:110px 0 0 93%"></div>
+
+  <!-- ——— ROTEM ——— -->
+  <section data-doodle="720" style="position:relative;z-index:2;padding:130px 28px 120px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:22px">
+    <div data-la="4" data-la-ring data-la-splat aria-hidden="true" style="height:2px;width:2px"></div>
+    <image-slot id="rotem-portrait" shape="circle" src="assets/rotem-portrait.png" placeholder="ROTEM — drop your portrait here" fit="cover" style="display:block;width:280px;height:280px;flex:none;margin-bottom:64px"></image-slot>
+    <p data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.25,1);font-family:'Nanum Brush Script',cursive;font-size:clamp(34px,3.8vw,48px);line-height:1.3;max-width:24ch;margin:0">every piece here starts as pen on paper — drawn by me, once.</p>
+    <img data-rv="fade" data-rv-d="150" src="assets/signature.png" alt="Rotem — signature" style="opacity:0;transform:translateY(18px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.25,1);height:88px;width:auto;margin-top:10px">
+  </section>
+
+  <!-- ——— VAULT STRIP ——— -->
+  <section data-doodle="840" data-doodle-ink="#F7F5F0" style="position:relative;z-index:2;background:#16130F;color:#F7F5F0;padding:90px 28px;overflow:hidden">
+    <svg id="gf-vault-splash" aria-hidden="true" style="position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible"><g id="gf-vault-line-g"><path id="gf-line-ribbon2" d="" fill="#F7F5F0"></path><path id="gf-line-streak3" d="" fill="#16130F" style="opacity:.45"></path></g><g id="gf-vault-splash-g"></g></svg>
+    <div aria-hidden="true" style="height:2px;width:2px;margin:0 0 26px 76%"></div>
+    <div style="position:relative;max-width:1220px;margin:0 auto;display:flex;flex-direction:column;align-items:center;gap:30px;text-align:center">
+      <h2 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(38px,4vw,54px);line-height:1;margin:0">The Vault</h2>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+        <div data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease .05s,transform .7s cubic-bezier(.2,.7,.25,1) .05s;background:#F7F5F0;padding:7px;border-radius:2px;transform-origin:center"><img src="assets/og/og1.jpg" alt="Vaulted piece" style="height:138px;width:138px;object-fit:cover"></div>
+        <div data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease .12s,transform .7s cubic-bezier(.2,.7,.25,1) .12s;background:#F7F5F0;padding:7px;border-radius:2px"><img src="assets/og/og4.jpg" alt="Vaulted piece" style="height:138px;width:138px;object-fit:cover"></div>
+        <div data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease .19s,transform .7s cubic-bezier(.2,.7,.25,1) .19s;background:#F7F5F0;padding:7px;border-radius:2px"><img src="assets/og/og5.jpg" alt="Vaulted piece" style="height:138px;width:138px;object-fit:cover"></div>
+        <div data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease .26s,transform .7s cubic-bezier(.2,.7,.25,1) .26s;background:#F7F5F0;padding:7px;border-radius:2px"><img src="assets/og/og8.jpg" alt="Vaulted piece" style="height:138px;width:138px;object-fit:cover"></div>
+        <div data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease .33s,transform .7s cubic-bezier(.2,.7,.25,1) .33s;background:#F7F5F0;padding:7px;border-radius:2px"><img src="assets/og/og11.jpg" alt="Vaulted piece" style="height:138px;width:138px;object-fit:cover"></div>
+      </div>
+      <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#8A8478">every drop retires here · sold out, forever</div>
+      <button data-ink-btn data-nav="vault" data-ink-color="#F7F5F0" data-flood="#F7F5F0" type="button" style="position:relative;overflow:visible;isolation:isolate;border:2px solid #F7F5F0;background:transparent;border-radius:999px;padding:16px 38px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.02em;color:#F7F5F0;outline-offset:4px">
+        <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#F7F5F0"></path></svg></span>
+        <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#F7F5F0;pointer-events:none">Enter the vault</span>
+        <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#16130F;pointer-events:none">Enter the vault</span>
+        <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Enter the vault</span>
+        <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- ——— FOOTER ——— -->
+  <footer data-doodle="620" style="position:relative;z-index:2;padding:120px 28px 90px;display:flex;flex-direction:column;align-items:center;gap:30px;text-align:center">
+    <div aria-hidden="true" style="height:2px;width:2px"></div>
+    <img src="assets/signature.png" alt="Rotem" style="height:min(190px,30vw);width:auto;opacity:1;display:block;margin:0 auto 18px">
+    <sc-if value="{{ notSubscribed }}" hint-placeholder-val="{{ true }}">
+      <form onSubmit="{{ subscribe }}" style="position:relative;z-index:5;display:flex;align-items:center;gap:12px">
+        <input type="email" required placeholder="one email per drop — that's it" style="font-family:'Space Mono',monospace;width:min(300px,64vw);border:none;border-bottom:1.5px solid rgba(22,19,15,.4);background:transparent;padding:11px 2px;font-size:13.5px;color:#16130F;outline:none">
+        <button data-ink-btn data-submit type="submit" style="position:relative;overflow:visible;isolation:isolate;border:2px solid #16130F;background:transparent;border-radius:999px;padding:12px 24px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:12px;color:#16130F;outline-offset:4px">
+          <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#16130F"></path></svg></span>
+          <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#16130F;pointer-events:none">Knock →</span>
+          <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F7F5F0;pointer-events:none">Knock →</span>
+          <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Knock →</span>
+          <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+        </button>
+      </form>
+    </sc-if>
+    <sc-if value="{{ subscribed }}" hint-placeholder-val="{{ false }}">
+      <div style="font-family:'Nanum Brush Script',cursive;font-size:26px;color:#16130F">✶ you're in. one email per drop.</div>
+    </sc-if>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#A29B8D;display:flex;gap:22px;flex-wrap:wrap;justify-content:center">
+      <span data-ink-obstacle>free US shipping</span><span data-ink-obstacle>30-day size swaps</span><span data-ink-obstacle>secure checkout</span>
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.14em;color:#A29B8D">© 2026 gotefigure — every line drawn by one hand</div>
+  </footer>
+</main>
+</sc-if>
+
+<!-- ============ PIECE (PDP) ============ -->
+<sc-if value="{{ isPdp }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="Piece" style="max-width:1120px;margin:0 auto;padding:34px 28px 100px;animation:gf-fadein .4s ease">
+  <a onClick="{{ backToShop }}" style="cursor:pointer;display:inline-block;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#8A8478;text-decoration:none;padding:6px 0;margin-bottom:26px;transition:color .25s" style-hover="color:#16130F">← the drop</a>
+
+  <div style="display:grid;grid-template-columns:minmax(320px,1.04fr) minmax(300px,.96fr);gap:clamp(34px,5vw,72px);align-items:start">
+
+    <div>
+      <div style="position:relative;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:4px;aspect-ratio:4/4.6;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:34px">
+        <sc-if value="{{ showArt }}" hint-placeholder-val="{{ false }}">
+          <div role="img" aria-label="{{ pdpName }}" style="width:{{ pdpArtW }};height:100%;background-image:url('{{ pdpArt }}');background-position:center;background-size:contain;background-repeat:no-repeat;animation:gf-fadein .45s ease"></div>
+        </sc-if>
+        <sc-if value="{{ showBody }}" hint-placeholder-val="{{ false }}">
+          <image-slot id="{{ pdpSlotId }}" shape="rect" placeholder="ON-BODY / IN-ROOM PHOTO — drag the real shot here" fit="cover" style="position:absolute;inset:0;display:block;width:100%;height:100%"></image-slot>
+        </sc-if>
+        <sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+          <div role="img" aria-label="detail view" style="position:absolute;inset:0;background-image:url('{{ pdpArt }}');background-position:center;background-size:190% auto;background-repeat:no-repeat;animation:gf-fadein .45s ease"></div>
+        </sc-if>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onClick="{{ selArt }}" style="{{ thumbArtStyle }}">art</button>
+        <button onClick="{{ selBody }}" style="{{ thumbBodyStyle }}">worn</button>
+        <button onClick="{{ selDetail }}" style="{{ thumbDetailStyle }}">detail</button>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#8A8478;margin-bottom:14px">{{ pdpKind }}</div>
+      <h1 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(44px,4.6vw,62px);line-height:1;margin:0 0 10px">{{ pdpName }}</h1>
+      <div style="font-size:19px;font-weight:700;margin-bottom:22px">{{ pdpPrice }}</div>
+      <p style="font-size:14px;line-height:1.7;color:#3E3A31;margin:0 0 26px;max-width:44ch">{{ pdpDesc }}</p>
+
+      <sc-if value="{{ pdpHasSize }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <sc-for list="{{ sizes }}" as="s" hint-placeholder-count="5">
+            <button onClick="{{ s.sel }}" style="{{ s.style }}">{{ s.label }}</button>
+          </sc-for>
+        </div>
+        <sc-if value="{{ sizeError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12px;color:#DA7285;margin-bottom:8px">Pick a size first.</div>
+        </sc-if>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;gap:9px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.12em;color:{{ dropLeftColor }};margin:14px 0 18px">
+        <span style="width:7px;height:7px;border-radius:50%;background:#DA7285;display:inline-block;flex-shrink:0;animation:gf-pulse 1.6s ease-in-out infinite"></span>{{ pdpScarcity }}
+      </div>
+
+      <sc-if value="{{ pdpBuyable }}" hint-placeholder-val="{{ true }}">
+        <button data-ink-btn data-add="pdp" type="button" style="position:relative;z-index:5;overflow:visible;isolation:isolate;width:100%;border:2px solid #16130F;background:transparent;border-radius:999px;padding:18px 34px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;letter-spacing:.02em;color:#16130F;outline-offset:4px;margin-bottom:14px">
+          <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#16130F"></path></svg></span>
+          <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#16130F;pointer-events:none">{{ pdpCta }}</span>
+          <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F7F5F0;pointer-events:none;text-shadow:0 0 1px rgba(22,19,15,.35)">{{ pdpCta }}</span>
+          <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">{{ pdpCta }}</span>
+          <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+        </button>
+      </sc-if>
+      <sc-if value="{{ pdpVaulted }}" hint-placeholder-val="{{ false }}">
+        <div style="width:100%;border:2px solid rgba(22,19,15,.25);border-radius:999px;padding:18px 34px;text-align:center;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#A29B8D;margin-bottom:14px">Vaulted — gone for good</div>
+      </sc-if>
+
+      <div data-ink-obstacle style="font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#A29B8D;margin-bottom:30px;width:fit-content">free US shipping · 30-day size swaps · secure checkout</div>
+
+      <div style="border-top:1px solid rgba(22,19,15,.14);padding:18px 2px 0;display:flex;flex-direction:column;gap:8px;margin-bottom:26px">
+        <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.8;color:#5C564A">{{ pdpMeta }}</div>
+        <sc-if value="{{ pdpHasSize }}" hint-placeholder-val="{{ true }}">
+          <details style="font-size:12.5px;color:#5C564A">
+            <summary style="cursor:pointer;font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:#8A8478;padding:6px 0">measurements ▾</summary>
+            <div style="font-family:'Space Mono',monospace;font-size:11.5px;line-height:2;padding-top:8px;color:#5C564A">XS 18" · S 19.5" · M 21" · L 23" · XL 25" — chest, laid flat.<br>Cold wash inside-out, hang dry. The print ages with you.</div>
+          </details>
+        </sc-if>
+      </div>
+
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px">
+        <p style="font-family:'Nanum Brush Script',cursive;font-size:24px;line-height:1.4;color:#3E3A31;margin:0;max-width:24ch;transform:rotate(-1deg)">{{ pdpNote }}</p>
+        <img src="assets/signature.png" alt="Rotem" style="height:34px;width:auto;opacity:.85;flex-shrink:0">
+      </div>
+    </div>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ VAULT ============ -->
+<sc-if value="{{ isVault }}" hint-placeholder-val="{{ false }}">
+<main data-screen-label="The Vault" style="background:#16130F;min-height:100vh;color:#F7F5F0;padding:44px 28px 90px;animation:gf-fadein .4s ease">
+  <div style="max-width:1220px;margin:0 auto">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:8px">
+      <h1 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:clamp(46px,5vw,70px);line-height:1;margin:0">The Vault</h1>
+      <div style="font-family:'Space Mono',monospace;font-size:10.5px;letter-spacing:.26em;text-transform:uppercase;color:#8A8478">sold out · never reprinted · not for sale</div>
+    </div>
+    <p style="font-size:13.5px;line-height:1.7;color:#B5AE9F;max-width:52ch;margin:0 0 44px">Where every drop ends up. Once a piece sells through, it hangs here for good.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:22px">
+      <sc-for list="{{ vaultPieces }}" as="v" hint-placeholder-count="0">
+        <figure data-rv="fade" style="opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.25,1);margin:0;display:flex;flex-direction:column;gap:12px">
+          <div style="background:#F7F5F0;padding:9px;border-radius:2px"><div role="img" aria-label="{{ v.name }}" style="width:100%;aspect-ratio:1;background-image:url('{{ v.img }}');background-position:center;background-size:cover"></div></div>
+          <figcaption style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">
+            <span style="font-family:'Nanum Brush Script',cursive;font-size:21px;line-height:1">{{ v.name }}</span>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#8A8478;flex-shrink:0">{{ v.sub }}</span>
+          </figcaption>
+        </figure>
+      </sc-for>
+    </div>
+
+    <div style="display:flex;justify-content:center;margin-top:70px">
+      <button data-ink-btn data-nav="home" data-ink-color="#F7F5F0" data-flood="#F7F5F0" type="button" style="position:relative;overflow:visible;isolation:isolate;border:2px solid #F7F5F0;background:transparent;border-radius:999px;padding:16px 38px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:13px;letter-spacing:.02em;color:#F7F5F0;outline-offset:4px">
+        <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#F7F5F0"></path></svg></span>
+        <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#F7F5F0;pointer-events:none">Back to the living →</span>
+        <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#16130F;pointer-events:none">Back to the living →</span>
+        <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Back to the living →</span>
+        <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+      </button>
+    </div>
+  </div>
+</main>
+</sc-if>
+
+<!-- ============ SATCHEL ============ -->
+<sc-if value="{{ drawer }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Bag">
+    <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;z-index:8000;background:rgba(22,19,15,.42);animation:gf-fadein .3s ease"></div>
+    <aside style="position:fixed;top:0;right:0;bottom:0;z-index:8001;width:min(430px,94vw);background:#F7F5F0;border-left:1px solid rgba(22,19,15,.2);display:flex;flex-direction:column;animation:gf-slidein .45s cubic-bezier(.2,.75,.25,1)">
+
+      <sc-if value="{{ notSealed }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;padding:26px 26px 18px;border-bottom:1px solid rgba(22,19,15,.12)">
+          <h2 style="font-family:'Nanum Brush Script',cursive;font-weight:400;font-size:36px;line-height:1;margin:0">Your bag</h2>
+          <button onClick="{{ closeDrawer }}" style="border:none;background:none;cursor:pointer;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8A8478;padding:6px" style-hover="color:#16130F">close ✕</button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto;padding:10px 26px">
+          <sc-if value="{{ cartEmpty }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:70px 0;text-align:center">
+              <img src="assets/alien.png" alt="" style="width:74px;opacity:.5;animation:gf-drift 6s ease-in-out infinite">
+              <div style="font-family:'Nanum Brush Script',cursive;font-size:26px;color:#5C564A;transform:rotate(-1.5deg)">nothing yet — the ink dries fast.</div>
+            </div>
+          </sc-if>
+          <sc-for list="{{ cartRows }}" as="r" hint-placeholder-count="0">
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid rgba(22,19,15,.1)">
+              <div style="width:58px;height:58px;flex:none;background:#FCFBF6;border:1px solid rgba(22,19,15,.12);border-radius:3px;padding:7px"><div aria-hidden="true" style="width:100%;height:100%;background-image:url('{{ r.thumb }}');background-position:center;background-size:contain;background-repeat:no-repeat"></div></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-family:'Nanum Brush Script',cursive;font-size:21px;line-height:1.05">{{ r.name }}</div>
+                <div style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8478;margin-top:3px">{{ r.sub }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:12px">
+                <button onClick="{{ r.dec }}" style="width:24px;height:24px;border:1px solid rgba(22,19,15,.3);border-radius:50%;background:none;cursor:pointer;color:#16130F;line-height:1" style-hover="border-color:#16130F">−</button>
+                <span style="min-width:14px;text-align:center">{{ r.qty }}</span>
+                <button onClick="{{ r.inc }}" style="width:24px;height:24px;border:1px solid rgba(22,19,15,.3);border-radius:50%;background:none;cursor:pointer;color:#16130F;line-height:1" style-hover="border-color:#16130F">+</button>
+              </div>
+              <div style="font-size:13px;font-weight:700;min-width:44px;text-align:right">{{ r.price }}</div>
+              <button onClick="{{ r.rm }}" title="Remove" style="border:none;background:none;cursor:pointer;color:#A29B8D;font-size:13px;padding:4px" style-hover="color:#DA7285">✕</button>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ cartHasItems }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:20px 26px 26px;border-top:1.5px solid rgba(22,19,15,.16)">
+            <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11.5px;color:#5C564A;padding:3px 0"><span>subtotal</span><span>{{ cartSubtotal }}</span></div>
+            <div style="display:flex;justify-content:space-between;font-family:'Space Mono',monospace;font-size:11.5px;color:#5C564A;padding:3px 0 12px"><span>shipping</span><span>free (US)</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:700;padding:10px 0 18px;border-top:1px solid rgba(22,19,15,.12)"><span>Total</span><span>{{ cartTotal }}</span></div>
+            <button data-ink-btn data-seal type="button" style="position:relative;z-index:5;overflow:visible;isolation:isolate;width:100%;border:2px solid #16130F;background:transparent;border-radius:999px;padding:17px 30px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:14px;color:#16130F;outline-offset:4px">
+              <span class="gf-fillwrap" style="position:absolute;inset:0;border-radius:999px;overflow:hidden;z-index:1;pointer-events:none"><svg class="gf-fillsvg" width="100%" height="100%" preserveAspectRatio="none" style="position:absolute;inset:0;display:block"><path class="gf-fill" d="" fill="#16130F"></path></svg></span>
+              <span class="gf-lbl-ink" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2;color:#16130F;pointer-events:none">Seal the order — {{ cartTotal }}</span>
+              <span class="gf-lbl-paper" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;color:#F7F5F0;pointer-events:none;text-shadow:0 0 1px rgba(22,19,15,.35)">Seal the order — {{ cartTotal }}</span>
+              <span aria-hidden="true" style="visibility:hidden;white-space:nowrap">Seal the order — {{ cartTotal }}</span>
+              <svg class="gf-dripsvg" preserveAspectRatio="none" style="position:absolute;left:0;top:0;overflow:visible;z-index:4;pointer-events:none"><g class="gf-drips"></g></svg>
+            </button>
+            <div data-ink-obstacle style="font-family:'Space Mono',monospace;font-size:9.5px;letter-spacing:.14em;color:#A29B8D;text-align:center;margin-top:12px;width:fit-content;margin-left:auto;margin-right:auto">prototype — nothing is charged</div>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <sc-if value="{{ sealed }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:40px;text-align:center">
+          <div style="width:108px;height:108px;border:2.5px solid #DA7285;border-radius:50%;display:flex;align-items:center;justify-content:center;transform:rotate(-9deg);animation:gf-rise .5s cubic-bezier(.2,.75,.25,1)" style-before="content:'';position:absolute;width:108px;height:108px;border-radius:50%;filter:url(#boil)">
+            <span style="font-family:'Space Mono',monospace;font-size:12px;letter-spacing:.3em;text-transform:uppercase;color:#DA7285;font-weight:700">sealed</span>
+          </div>
+          <div style="font-family:'Nanum Brush Script',cursive;font-size:34px;line-height:1.2">it's yours.</div>
+          <div style="font-family:'Space Mono',monospace;font-size:11px;line-height:1.9;letter-spacing:.06em;color:#8A8478;max-width:30ch">order sealed in the book. you'll get the knock when it ships.</div>
+          <button onClick="{{ keepLooking }}" style="border:1.5px solid #16130F;background:transparent;border-radius:999px;cursor:pointer;padding:12px 26px;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:#16130F;transition:background .25s,color .25s" style-hover="background:#16130F;color:#F7F5F0">keep looking →</button>
+        </div>
+      </sc-if>
+
+    </aside>
+  </div>
+</sc-if>
+
+<!-- flood overlay -->
+<svg id="gf-flood" preserveAspectRatio="none" aria-hidden="true" style="position:fixed;inset:0;width:100vw;height:100dvh;z-index:9000;pointer-events:none;opacity:0;display:block"><path id="gf-flood-path" d="" fill="#16130F"></path></svg>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dropState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;live&quot;,&quot;between&quot;],&quot;default&quot;:&quot;between&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Drop state&quot;},&quot;editionSize&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:50,&quot;min&quot;:1,&quot;max&quot;:500,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Drop state&quot;},&quot;dropLeft&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:31,&quot;min&quot;:0,&quot;max&quot;:500,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Drop state&quot;},&quot;nextDropDate&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;2026-07-31T17:00:00&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Drop state&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;off&quot;,&quot;level 1&quot;,&quot;level 2&quot;],&quot;default&quot;:&quot;level 2&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Style&quot;},&quot;liveArt&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Experience&quot;},&quot;dripStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;straight&quot;,&quot;flow&quot;],&quot;default&quot;:&quot;straight&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Experience&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    let seen = false, cart = [];
+    try { seen = sessionStorage.getItem('gf3-intro') === '1'; } catch(e){}
+    try { const c = JSON.parse(localStorage.getItem('gf3-cart') || '[]'); if (Array.isArray(c)) cart = c; } catch(e){}
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.state = {
+      intro: !seen && !reduce,
+      screen: 'home', pdpId: 'tee', thumb: 0, filter: 'all',
+      drawer: false, sealed: false,
+      cart, sizeSel: null, sizeError: false,
+      notified: false, subscribed: false,
+      now: Date.now()
+    };
+  }
+
+  P = {
+    sticker:  { name:'Goggle Rabbit',   kind:'die-cut vinyl sticker',            price:6,   art:'assets/rabbit-ink.png',  artW:'44%', sized:false,
+                desc:'The easiest yes on the page. Ten centimetres of waterproof goggle rabbit, cut to the line.',
+                meta:'0.3mm pen · scanned once · matte waterproof vinyl', note:'he guards laptops.' },
+    print:    { name:'Kaleido Plate',   kind:'A3 gicl\u00e9e print \u00b7 numbered', price:28,  art:'assets/kaleido.png',     artW:'72%', sized:false,
+                desc:'One drawing, mirrored until it hums. Printed on cotton rag, numbered in pencil at the corner.',
+                meta:'india ink + watercolor · 310gsm cotton rag · numbered edition of 40', note:'stare until it moves.' },
+    tee:      { name:'Trippy 1.1',  kind:'heavyweight cotton tee',           price:34,  art:'assets/trippy.png',  artW:'86%', sized:true,
+                desc:'This month\u2019s drawing \u2014 one continuous pour of rose on crimson. Printed front and centre, once, never again.',
+                meta:'ink line, colored digitally · water-based print · 100% heavyweight cotton', note:'i let the line walk and followed it.' },
+    sweat:    { name:'Pink Rabbit',     kind:'midweight sweatshirt',             price:58,  art:'assets/rabbit-pink.png', artW:'50%', sized:true,
+                desc:'The rabbit gone rosy, chest-printed on brushed french terry. Soft enough to sleep in, loud enough not to.',
+                meta:'brush + ink, colored digitally · water-based print · french terry', note:'same rabbit, better mood.' },
+    original: { name:'Bloom Study no.4', kind:'original drawing \u00b7 1 of 1',   price:420, art:'assets/blob-maze.png',   artW:'70%', sized:false,
+                desc:'Not a print \u2014 the actual sheet of paper the ink touched. Signed, sleeved, shipped flat. One buyer, one wall.',
+                meta:'india ink + gouache on cold-press · 35\u00d735cm · signed original', note:'i can\u2019t make another. that\u2019s the point.' }
+  };
+
+  VAULT = [
+    { img:'assets/og/og1.jpg',  name:'OG Rabbit',      sub:'hood' },
+    { img:'assets/og/og2.jpg',  name:'Twin Figs',      sub:'tee' },
+    { img:'assets/og/og3.jpg',  name:'Street Walkers', sub:'tee' },
+    { img:'assets/og/og4.jpg',  name:'Fly Agaric',     sub:'tee' },
+    { img:'assets/og/og5.jpg',  name:'The Alien',      sub:'hood' },
+    { img:'assets/og/og6.jpg',  name:'Signed Blank',   sub:'hood' },
+    { img:'assets/og/og7.jpg',  name:'Golden Fig',     sub:'tee' },
+    { img:'assets/og/og8.jpg',  name:'One-Line Face',  sub:'tee' },
+    { img:'assets/og/og9.jpg',  name:'Walkers',        sub:'hood' },
+    { img:'assets/og/og10.jpg', name:'Two Heads',      sub:'tee' },
+    { img:'assets/og/og11.jpg', name:'Azrieli Cat',    sub:'tee' }
+  ];
+
+  // ===================== lifecycle =====================
+  componentDidMount(){
+    this.reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.canHover = matchMedia('(hover:hover) and (pointer:fine)').matches;
+    this.ctrls = [];
+    this.io = new IntersectionObserver(this._onIO, { threshold: 0.16 });
+    this.floodSvg = document.getElementById('gf-flood');
+    this.floodPath = document.getElementById('gf-flood-path');
+    this._sizeFlood = () => { this.fvW = innerWidth; this.fvH = innerHeight; if (this.floodSvg) this.floodSvg.setAttribute('viewBox', '0 0 ' + this.fvW + ' ' + this.fvH); };
+    this._sizeFlood();
+    addEventListener('resize', this._sizeFlood, { passive: true });
+    this._rvEls = new Set();
+    this._onScroll = () => { this._lineDirty = true; this._startLineRaf(); this._checkReveals(); };
+    addEventListener('scroll', this._onScroll, { passive: true });
+    this._lineRO = new ResizeObserver(() => { clearTimeout(this._lrT); this._lrT = setTimeout(() => this._buildLine(), 120); });
+    this._tickTimer = setInterval(() => { if ((this.props.dropState ?? 'live') === 'between' || this.state.screen === 'home') this.setState({ now: Date.now() }); }, 1000);
+    this._bindAll();
+    this._applyHandDrawn();
+    if (this.state.intro) this._runIntro();
+  }
+
+  componentDidUpdate(){
+    this._applyHandDrawn();
+    const snap = this.state.screen + '|' + this.state.drawer + '|' + this.state.intro + '|' + (this.props.dropState ?? 'live') + '|' + this.state.sealed + '|' + this.state.cart.length + '|' + this.state.thumb + '|' + this.state.filter + '|' + (this.props.liveArt === false ? 0 : 1);
+    if (snap !== this._snap) { this._snap = snap; requestAnimationFrame(() => this._bindAll()); }
+  }
+
+  componentWillUnmount(){
+    (this.ctrls || []).forEach(c => c.destroy());
+    if (this.io) this.io.disconnect();
+    if (this._lineRO) this._lineRO.disconnect();
+    clearInterval(this._tickTimer);
+    (this._introTimers || []).forEach(t => clearTimeout(t));
+    this._stopLiveArt();
+    cancelAnimationFrame(this._fRaf); cancelAnimationFrame(this._lineRaf);
+    removeEventListener('resize', this._sizeFlood);
+    removeEventListener('scroll', this._onScroll);
+  }
+
+  // ===================== bind dynamic DOM =====================
+  _bindAll(){
+    this.ctrls = (this.ctrls || []).filter(c => { if (!c.btn.isConnected) { c.destroy(); return false; } return true; });
+    document.querySelectorAll('[data-ink-btn]').forEach(btn => { if (!btn.__gfC) { const c = this._make(btn); btn.__gfC = c; this.ctrls.push(c); } });
+    document.querySelectorAll('[data-rv]').forEach(el => { if (!el.__gfRv) { el.__gfRv = 1; this.io.observe(el); this._rvEls.add(el); } });
+    this._checkReveals();
+    setTimeout(() => this._checkReveals(), 250);
+    document.querySelectorAll('[data-tile]').forEach(t => { if (!t.__gfT) { t.__gfT = 1; this._tileHover(t); } });
+    document.querySelectorAll('[data-quickadd]').forEach(b => { if (!b.__gfQ) { b.__gfQ = 1; b.addEventListener('click', e => { e.stopPropagation(); this._qaFx(b); this._add(b.getAttribute('data-quickadd')); }); b.addEventListener('pointerenter', () => this._qaPool(b, true)); b.addEventListener('pointerleave', () => this._qaPool(b, false)); } });
+    const main = document.querySelector('[data-home-main]');
+    if (main && main !== this._lineMain) { this._lineMain = main; this._lineRO.disconnect(); this._lineRO.observe(main); this._buildLine(); }
+    if (!main) { this._lineMain = null; }
+    this._syncLiveArt();
+  }
+
+  _onIO = (entries) => {
+    for (const en of entries) {
+      if (!en.isIntersecting) continue;
+      this._reveal(en.target);
+    }
+  };
+
+  _reveal(el){
+    if (el.__gfRvDone) return;
+    el.__gfRvDone = 1;
+    const kind = el.getAttribute('data-rv'), d = +(el.getAttribute('data-rv-d') || 0);
+    setTimeout(() => {
+      if (kind === 'soak') { el.style.clipPath = 'inset(-3% -3% -3% -3%)'; }
+      else { el.style.opacity = '1'; el.style.transform = 'none'; }
+    }, d);
+    this.io.unobserve(el);
+    if (this._rvEls) this._rvEls.delete(el);
+  }
+
+  _checkReveals(){
+    if (!this._rvEls || !this._rvEls.size) return;
+    const vh = innerHeight;
+    for (const el of [...this._rvEls]) {
+      if (!el.isConnected) { this._rvEls.delete(el); continue; }
+      const r = el.getBoundingClientRect();
+      if (r.top < vh * 0.88 && r.bottom > -40) this._reveal(el);
+    }
+  }
+
+  _splatter(tile, b){
+    if (tile.__splat) { tile.__splat.remove(); clearTimeout(tile.__splatT); tile.__splat = null; }
+    const tr2 = tile.getBoundingClientRect(), br = b.getBoundingClientRect();
+    const bx = br.left - tr2.left + br.width / 2, by = br.top - tr2.top + br.height / 2;
+    const ov = document.createElement('div');
+    ov.setAttribute('aria-hidden', 'true');
+    ov.style.cssText = 'position:absolute;inset:0;overflow:hidden;border-radius:inherit;pointer-events:none;z-index:6';
+    let html = '';
+    const N2 = 15 + Math.floor(Math.random() * 4);
+    for (let i = 0; i < N2; i++) {
+      const px = 6 + Math.random() * 88, py = i < 4 ? 6 + Math.random() * 48 : 4 + Math.random() * 62;
+      const xpx = px / 100 * tr2.width, ypx = py / 100 * tr2.height;
+      const dist = Math.hypot(xpx - bx, ypx - by);
+      const sz = i < 4 ? 30 + Math.random() * 36 : 7 + Math.random() * 22;
+      const del = Math.round(dist * 0.5 + Math.random() * 70);
+      const r1 = Math.round(38 + Math.random() * 24), r2 = Math.round(38 + Math.random() * 24), r3 = Math.round(38 + Math.random() * 24), r4 = Math.round(38 + Math.random() * 24);
+      html += '<span data-splat style="position:absolute;left:' + px.toFixed(1) + '%;top:' + py.toFixed(1) + '%;width:' + sz.toFixed(0) + 'px;height:' + (sz * (0.68 + Math.random() * 0.5)).toFixed(0) + 'px;background:#DA7285;border-radius:' + r1 + '% ' + (100 - r1) + '% ' + r2 + '% ' + (100 - r2) + '% / ' + r3 + '% ' + r4 + '% ' + (100 - r4) + '% ' + (100 - r3) + '%;transform:translate(-50%,-50%) rotate(' + Math.round(Math.random() * 360) + 'deg) scale(0);opacity:.92;transition:transform .5s cubic-bezier(.18,.89,.32,1.2) ' + del + 'ms;"></span>';
+    }
+    ov.innerHTML = html;
+    tile.appendChild(ov);
+    tile.__splat = ov;
+    requestAnimationFrame(() => { requestAnimationFrame(() => {
+      ov.querySelectorAll('[data-splat]').forEach(sp => { sp.style.transform = sp.style.transform.replace('scale(0)', 'scale(1)'); });
+    }); });
+    tile.__splatT = setTimeout(() => {
+      ov.querySelectorAll('[data-splat]').forEach((sp, i) => {
+        sp.style.transition = 'opacity .85s ease ' + (i * 26) + 'ms, transform .85s ease ' + (i * 26) + 'ms';
+        sp.style.opacity = '0';
+        sp.style.transform = sp.style.transform.replace('scale(1)', 'scale(.8)');
+      });
+      setTimeout(() => { ov.remove(); if (tile.__splat === ov) tile.__splat = null; }, 1700);
+    }, 1500);
+  }
+
+  _qaPool(b, on){
+    if (b.__qaBurst) return;
+    const pool = b.querySelector('[data-qa-pool]');
+    if (!pool) return;
+    clearTimeout(b.__qaFullT); clearInterval(b.__qaLeakI);
+    if (b.__qaAnim) { b.__qaAnim.cancel(); b.__qaAnim = null; }
+    if (on) {
+      pool.style.transition = 'height 5.2s cubic-bezier(.1,.62,.16,.99)';
+      pool.style.height = '140%';
+      b.__qaFullT = setTimeout(() => {
+        if (b.__qaBurst) return;
+        pool.style.transition = 'height 1.2s ease, border-radius 1.4s ease';
+        pool.style.borderRadius = '26% 20% 0 0 / 12% 9% 0 0';
+        try { b.__qaAnim = b.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.018)' }, { transform: 'scale(1)' }], { duration: 1150, iterations: Infinity, easing: 'ease-in-out' }); } catch (e) {}
+        const leak = () => {
+          if (b.__qaBurst || !document.body.contains(b)) return;
+          const br = b.getBoundingClientRect();
+          const sp = document.createElement('span');
+          const w2 = 1.8 + Math.random() * 1.4;
+          const lx = br.left + br.width * (0.18 + Math.random() * 0.64);
+          sp.style.cssText = 'position:fixed;left:' + lx.toFixed(0) + 'px;top:' + (br.bottom - 4).toFixed(0) + 'px;width:' + w2.toFixed(1) + 'px;height:4px;border-radius:40% 40% 55% 55% / 30% 30% 70% 70%;background:#DA7285;opacity:.8;pointer-events:none;z-index:10600;transition:height 1.2s cubic-bezier(.4,.2,.6,1),transform 1.2s cubic-bezier(.5,.1,.7,.6),opacity .5s ease .9s';
+          document.body.appendChild(sp);
+          requestAnimationFrame(() => {
+            sp.style.height = (8 + Math.random() * 8).toFixed(0) + 'px';
+            sp.style.transform = 'translateY(' + (7 + Math.random() * 10).toFixed(0) + 'px)';
+            sp.style.opacity = '0';
+          });
+          setTimeout(() => sp.remove(), 1500);
+        };
+        leak();
+        b.__qaLeakI = setInterval(leak, 950);
+      }, 5250);
+    } else {
+      pool.style.transition = 'height .45s ease';
+      pool.style.height = '0px';
+      pool.style.borderRadius = '55% 45% 0 0 / 100% 85% 0 0';
+    }
+  }
+
+  _qaFx(b){
+    const pool = b.querySelector('[data-qa-pool]');
+    const lbl = b.querySelector('[data-qa-lbl]');
+    clearTimeout(b.__qaT1); clearTimeout(b.__qaT2);
+    clearTimeout(b.__qaFullT); clearInterval(b.__qaLeakI);
+    if (b.__qaAnim) { b.__qaAnim.cancel(); b.__qaAnim = null; }
+    b.__qaBurst = true;
+    if (pool) { pool.style.transition = 'height .3s cubic-bezier(.2,.9,.25,1)'; pool.style.height = '130%'; }
+    b.style.transform = 'scale(.93)';
+    if (lbl) { if (!lbl.__orig) lbl.__orig = lbl.textContent; lbl.textContent = 'in the bag ✓'; }
+    const tile = b.closest('[data-tile]');
+    if (tile) this._splatter(tile, b);
+    b.__qaT1 = setTimeout(() => { b.style.transform = ''; }, 190);
+    b.__qaT2 = setTimeout(() => {
+      b.__qaBurst = false;
+      if (pool) { pool.style.transition = 'height .55s ease'; pool.style.height = '0px'; pool.style.borderRadius = '55% 45% 0 0 / 100% 85% 0 0'; }
+      if (lbl && lbl.__orig) lbl.textContent = lbl.__orig;
+      if (b.matches(':hover')) setTimeout(() => this._qaPool(b, true), 500);
+    }, 1050);
+  }
+
+  _tileHover(t){
+    const u = t.querySelector('[data-u]'), img = t.querySelector('[data-tart]');
+    const drs = t.querySelectorAll('[data-dr]');
+    t.addEventListener('pointerenter', () => { if (u) u.style.strokeDashoffset = '0'; if (img) img.style.transform = 'scale(1.045)'; drs.forEach(p => { p.style.transform = 'scaleY(1)'; }); });
+    t.addEventListener('pointerleave', () => { if (u) u.style.strokeDashoffset = '1'; if (img) img.style.transform = 'none'; drs.forEach(p => { p.style.transform = 'scaleY(0)'; }); });
+  }
+
+  // ===================== intro — one drop of ink =====================
+  _runIntro(){
+    const dot = document.getElementById('gf-intro-dot');
+    const wm = document.getElementById('gf-intro-wm');
+    const paper = document.getElementById('gf-intro-paper');
+    if (!dot || !this.floodSvg) { this._endIntro(); return; }
+    const T = this._introTimers = [];
+    const cx = innerWidth / 2, cy = innerHeight * 0.46;
+    dot.style.opacity = '1';
+    dot.style.transition = 'transform .62s cubic-bezier(.5,.05,.85,.5)';
+    T.push(setTimeout(() => { dot.style.transform = 'translateY(' + (cy + innerHeight * 0.04) + 'px) scaleY(1.25)'; }, 60));
+    T.push(setTimeout(() => {
+      dot.style.opacity = '0';
+      this.fOrigin = { x: cx, y: cy };
+      const W = this.fvW, H = this.fvH;
+      this.fRmax = Math.max(Math.hypot(cx, cy), Math.hypot(W - cx, cy), Math.hypot(cx, H - cy), Math.hypot(W - cx, H - cy)) + 90;
+      this.floodSvg.style.opacity = '1';
+      const t0 = performance.now(), dur = 760;
+      const ease = p => p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+      const step = (now) => {
+        let p = (now - t0) / dur; if (p > 1) p = 1;
+        this.floodPath.setAttribute('d', this._coverPath(ease(p), now));
+        if (p < 1) requestAnimationFrame(step);
+        else this.floodPath.setAttribute('d', 'M 0 0 L ' + W + ' 0 L ' + W + ' ' + H + ' L 0 ' + H + ' Z');
+      };
+      requestAnimationFrame(step);
+    }, 700));
+    T.push(setTimeout(() => { if (wm) wm.style.opacity = '1'; if (paper) paper.style.opacity = '0'; }, 1560));
+    T.push(setTimeout(() => { if (wm) wm.style.opacity = '0'; if (paper) paper.style.display = 'none'; }, 2660));
+    T.push(setTimeout(() => {
+      const t0 = performance.now(), dur = 800;
+      const ease = p => p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+      const step = (now) => {
+        let p = (now - t0) / dur; if (p > 1) p = 1;
+        this.floodPath.setAttribute('d', this._revealPath(ease(p), now));
+        if (p < 1) requestAnimationFrame(step);
+        else this._endIntro();
+      };
+      requestAnimationFrame(step);
+    }, 3000));
+  }
+
+  _endIntro(){
+    (this._introTimers || []).forEach(t => clearTimeout(t));
+    if (this.floodSvg) { this.floodSvg.style.opacity = '0'; this.floodPath.setAttribute('d', ''); }
+    try { sessionStorage.setItem('gf3-intro', '1'); } catch(e){}
+    this.setState({ intro: false });
+  }
+
+  // ===================== flood navigation =====================
+  _flood(target, btn, sec){
+    if (this.flooding) return;
+    const apply = () => {
+      if (target === 'vault') this.setState({ screen: 'vault' });
+      else if (target === 'home') this.setState({ screen: 'home' });
+      try { scrollTo(0, 0); } catch(e){}
+      if (sec) requestAnimationFrame(() => { const el = document.querySelector('[data-sec="' + sec + '"]'); if (el) { const y = el.getBoundingClientRect().top + scrollY - 74; try { window.scrollTo(0, y); } catch(e){} } });
+    };
+    if (this.reduce || !btn) { apply(); return; }
+    const ink = btn.getAttribute('data-flood') || (this.state.screen === 'vault' ? '#F7F5F0' : '#16130F');
+    this.floodPath.setAttribute('fill', ink);
+    const r = btn.getBoundingClientRect();
+    this.fOrigin = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    const W = this.fvW, H = this.fvH, o = this.fOrigin;
+    this.fRmax = Math.max(Math.hypot(o.x, o.y), Math.hypot(W - o.x, o.y), Math.hypot(o.x, H - o.y), Math.hypot(W - o.x, H - o.y)) + 90;
+    this.flooding = true;
+    this.floodSvg.style.opacity = '1';
+    const ease = p => p < 0.5 ? 4*p*p*p : 1 - Math.pow(-2*p+2,3)/2;
+    let phase = 'cover', t0 = performance.now();
+    const step = (now) => {
+      if (phase === 'cover') {
+        let p = (now - t0) / 620; if (p > 1) p = 1;
+        this.floodPath.setAttribute('d', this._coverPath(ease(p), now));
+        if (p >= 1) { apply(); phase = 'hold'; t0 = now; this.floodPath.setAttribute('d', 'M 0 0 L ' + W + ' 0 L ' + W + ' ' + H + ' L 0 ' + H + ' Z'); }
+      } else if (phase === 'hold') {
+        if (now - t0 >= 140) { phase = 'reveal'; t0 = now; }
+      } else {
+        let p = (now - t0) / 720; if (p > 1) p = 1;
+        this.floodPath.setAttribute('d', this._revealPath(ease(p), now));
+        if (p >= 1) { this.floodSvg.style.opacity = '0'; this.floodPath.setAttribute('d', ''); this.floodPath.setAttribute('fill', '#16130F'); this.flooding = false; return; }
+      }
+      this._fRaf = requestAnimationFrame(step);
+    };
+    this._fRaf = requestAnimationFrame(step);
+  }
+
+  _coverPath(e, now){
+    const o = this.fOrigin, R = e * this.fRmax;
+    const amp = 26 * Math.min(1, R / 40), et = now * 0.006, N = 56;
+    let d = '';
+    for (let i = 0; i <= N; i++) {
+      const a = i / N * Math.PI * 2;
+      const rr = R + amp * 0.7 * Math.sin(a * 5 + et) + amp * 0.4 * Math.sin(a * 9 - et * 1.3);
+      d += (i ? ' L ' : 'M ') + (o.x + rr * Math.cos(a)).toFixed(1) + ' ' + (o.y + rr * Math.sin(a)).toFixed(1);
+    }
+    return d + ' Z';
+  }
+
+  _revealPath(e, now){
+    const W = this.fvW, H = this.fvH, amp = 26, N = 48, et = now * 0.001;
+    const edge = x => amp * 0.6 * Math.sin(x * 0.012 + et * 4) + amp * 0.4 * Math.sin(x * 0.03 - et * 6);
+    const span = H + amp * 2 + 30;
+    const wy = e * span - amp;
+    if (wy >= H + amp + 5) return '';
+    let d = 'M 0 ' + H + ' L ' + W + ' ' + H;
+    for (let i = 0; i <= N; i++) { const x = W * (1 - i / N); d += ' L ' + x.toFixed(1) + ' ' + (wy + edge(x)).toFixed(1); }
+    return d + ' Z';
+  }
+
+  // ===================== hand-drawn mode =====================
+  _applyHandDrawn(){
+    const v = this.props.handDrawn ?? 'level 2';
+    const lvl = (v === false || v === 'off') ? 0 : (v === 'level 2' ? 2 : 1);
+    let el = document.getElementById('gf-handdrawn-css');
+    if (lvl === 0) { if (el) el.remove(); return; }
+    if (!el) {
+      el = document.createElement('style');
+      el.id = 'gf-handdrawn-css';
+      document.head.appendChild(el);
+    }
+    const gfKey = lvl + '|rb13';
+    if (el.__gfKey === gfKey) return;
+    el.__gfKey = gfKey;
+    // browsers serialize inline styles with a space after ':' — emit both variants of every [style*=] selector
+    const fx = (rule) => {
+      const i = rule.indexOf('{');
+      if (i < 0) return rule;
+      const sel = rule.slice(0, i), body = rule.slice(i);
+      const rawParts = [];
+      let cur = '', inQ = false;
+      for (const ch of sel) {
+        if (ch === "'") { inQ = !inQ; cur += ch; }
+        else if (ch === ',' && !inQ) { rawParts.push(cur); cur = ''; }
+        else cur += ch;
+      }
+      rawParts.push(cur);
+      const parts = rawParts.map(s => s.trim()).filter(Boolean);
+      const out = [];
+      for (const p of parts) {
+        out.push(p);
+        if (p.indexOf("[style*='") >= 0) {
+          const q = p.replace(/\[style\*='([^':]+):([^' ][^']*)'\]/g, "[style*='$1: $2']");
+          if (q !== p) out.push(q);
+        }
+      }
+      return out.join(', ') + body;
+    };
+    const css1 = [
+        "[data-home-main] span, [data-home-main] div, [data-home-main] p, [data-home-main] a, [data-home-main] button, [data-home-main] input, header span, header button, header a, footer span, footer div, footer button, footer input, main span, main div, main p, main button, main input, main a { font-family:'Kalam',cursive !important; }",
+        "[style*='Nanum Brush'] { font-family:'Nanum Brush Script',cursive !important; }",
+        "[style*='font-size:10'], [style*='font-size:9'] { font-size:15px !important; font-weight:700 !important; }",
+        "[style*='font-size:12'], [style*='font-size:13'] { font-size:16px !important; font-weight:700 !important; }",
+        "[style*='color:#8A8478'], [style*='138, 132, 120'] { color:#3E382C !important; }",
+        "[style*='color:#A29B8D'], [style*='162, 155, 141'] { color:#3E382C !important; }",
+        "[style*='color:#B5AE9F'], [style*='181, 174, 159'] { color:#554E3E !important; }",
+        "[style*='color:#C9C2B4'], [style*='201, 194, 180'] { color:#6B6557 !important; }",
+        "main[data-screen-label='The Vault'] [style*='138, 132, 120'], main[data-screen-label='The Vault'] [style*='color:#8A8478'], main[data-screen-label='The Vault'] [style*='162, 155, 141'], main[data-screen-label='The Vault'] [style*='color:#A29B8D'], main[data-screen-label='The Vault'] [style*='181, 174, 159'], main[data-screen-label='The Vault'] [style*='color:#B5AE9F'], [data-doodle-ink] [style*='138, 132, 120'], [data-doodle-ink] [style*='color:#8A8478'], [data-doodle-ink] [style*='162, 155, 141'], [data-doodle-ink] [style*='color:#A29B8D'] { color:#E6E1D4 !important; }",
+        "[data-tile][style*='background: rgb(22, 19, 15)'] [style*='138, 132, 120'], [data-tile][style*='background:#16130F'] [style*='138, 132, 120'], [data-tile][style*='background: rgb(22, 19, 15)'] [style*='162, 155, 141'], [data-tile][style*='background:#16130F'] [style*='162, 155, 141'] { color:#D8D2C4 !important; }",
+        "[style*='color:#DA7285'], [style*='218, 114, 133'] { font-weight:700 !important; }",
+        "[style*='font-size:14px'] { font-size:17px !important; }",
+        "[style*='font-size:29px'] { -webkit-text-stroke:.6px currentColor; }",
+        "[data-tile] span, [data-tile] div { font-size:16px !important; font-weight:700 !important; }",
+        "[data-ink-btn] { border-width:3px !important; box-shadow:4px 4px 0 currentColor; }",
+        "[data-ink-btn] span { font-size:21px !important; font-weight:700 !important; }",
+        "[data-quickadd] { background:#16130F !important; color:#F7F5F0 !important; font-size:20px !important; font-weight:700 !important; padding:14px 28px !important; border:none !important; border-radius:18px 8px 16px 9px !important; box-shadow:3px 3px 0 rgba(22,19,15,.35); }",
+        "[data-quickadd='original'] { background:#F7F5F0 !important; color:#16130F !important; }",
+        "[data-tile] h3 { font-size:38px !important; -webkit-text-stroke:1px currentColor; }",
+        "[data-tile] div[style*='font-weight:700'] { font-size:26px !important; }",
+        "[style*='letter-spacing:0.3em'], [style*='letter-spacing:0.26em'], [style*='letter-spacing:0.22em'], [style*='letter-spacing:0.18em'], [style*='letter-spacing:0.16em'], [style*='letter-spacing:0.14em'] { letter-spacing:.09em !important; }",
+        "[data-ink-btn], [data-ink-btn] .gf-fillwrap { border-radius:255px 22px 225px 28px / 28px 225px 22px 255px !important; }",
+        "[data-ink-btn] { rotate:-0.8deg; }",
+        "main section button { border-radius:14px 32px 16px 30px / 30px 16px 32px 14px; }",
+        "[data-tile] { border-radius:18px 225px 22px 255px / 255px 22px 225px 18px !important; border:2px solid #16130F !important; box-shadow:4px 5px 0 rgba(22,19,15,.85) !important; }",
+        "[data-tile]:nth-of-type(odd) { rotate:-0.7deg; }",
+        "[data-tile]:nth-of-type(even) { rotate:0.6deg; }",
+        "header { border-bottom:none !important; background-image:url(\"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 1400 10%27 preserveAspectRatio=%27none%27%3E%3Cpath d=%27M0 5.8 C 120 3.2 300 4.0 520 4.6 C 760 5.2 960 3.4 1140 4.4 C 1260 5.0 1350 4.4 1400 5.2 L 1400 6.0 C 1310 7.4 1180 6.2 1000 7.0 C 800 7.9 600 6.4 420 7.2 C 260 7.9 120 6.8 0 7.4 Z%27 fill=%27%2316130F%27 fill-opacity=%27.9%27/%3E%3C/svg%3E\") !important; background-repeat:no-repeat !important; background-position:left bottom !important; background-size:100% 9px !important; }",
+        "input { border-bottom:2px dashed rgba(22,19,15,.6) !important; }",
+        "#rotem-portrait { border-radius:47% 53% 55% 45% / 44% 57% 43% 56%; overflow:hidden; rotate:-1deg; }",
+        "footer { border-top:2px dashed rgba(22,19,15,.35); }"
+      ].map(fx).join('\n');
+      const css2 = [
+        "main span, main div, main p, main a, main button, main input, [data-home-main] span, [data-home-main] div, [data-home-main] p, [data-home-main] a, [data-home-main] button, [data-home-main] input, header span, header button, header a, footer span, footer div, footer button, footer input { font-family:'Reenie Beanie',cursive !important; }",
+        "[style*='Nanum Brush'] { font-family:'Nanum Brush Script',cursive !important; }",
+        "[style*='font-size:14px'] { font-size:20px !important; }",
+        "[style*='font-size:13'] { font-size:19px !important; }",
+        "[style*='font-size:12'] { font-size:18px !important; }",
+        "[style*='font-size:11'], [style*='font-size:10'], [style*='font-size:9'] { font-size:17px !important; font-weight:700 !important; }",
+        "[data-tile] span, [data-tile] div { font-size:20px !important; }",
+        "[data-tile] h3 { font-size:44px !important; }",
+        "[data-tile] div[style*='font-weight:700'] { font-size:32px !important; }",
+        "[data-ink-btn] span { font-size:26px !important; }",
+        "[data-quickadd] { font-size:23px !important; font-family:'Kalam',cursive !important; }",
+        "main p, [data-home-main] p { font-family:'Kalam',cursive !important; font-size:18px !important; line-height:1.5 !important; }",
+        "input { font-size:19px !important; }",
+        "[style*='letter-spacing:0.3em'], [style*='letter-spacing:0.26em'], [style*='letter-spacing:0.22em'], [style*='letter-spacing:0.18em'], [style*='letter-spacing:0.16em'], [style*='letter-spacing:0.14em'] { letter-spacing:.04em !important; }",
+        "[data-tile] { overflow:visible !important; }",
+        "[data-tile]::after { content:''; position:absolute; inset:-6px; border:1.6px solid rgba(22,19,15,.75); border-radius:230px 24px 250px 20px / 20px 250px 24px 230px; rotate:.6deg; pointer-events:none; }",
+        "[data-ink-btn]::after { content:''; position:absolute; inset:-5px; border:1.6px solid currentColor; opacity:.7; border-radius:250px 26px 238px 32px / 32px 238px 26px 250px; rotate:-1.1deg; pointer-events:none; }",
+        "[data-tile]:nth-of-type(3n) { rotate:1deg; }",
+        "[data-tile]:nth-of-type(3n+1) { rotate:-1.1deg; }",
+        "header { rotate:-0.25deg; }",
+        "#rotem-portrait { rotate:-1.8deg; }"
+      ].map(fx).join('\n');
+      el.textContent = lvl === 2 ? css1 + '\n' + css2 : css1;
+  }
+
+  // ===================== the scroll-drawn brush stroke =====================
+  _buildLine(){
+    const main = document.querySelector('[data-home-main]');
+    const svg = document.getElementById('gf-line');
+    const guide = document.getElementById('gf-line-guide');
+    const ribbon = document.getElementById('gf-line-ribbon');
+    const ribbon2 = document.getElementById('gf-line-ribbon2');
+    const streak = document.getElementById('gf-line-streak');
+    const streak2 = document.getElementById('gf-line-streak2');
+    const streak3 = document.getElementById('gf-line-streak3');
+    const splatsG = document.getElementById('gf-splats');
+    const dripsG = document.getElementById('gf-inkdrips');
+    if (!main || !svg || !guide || !ribbon) { this._L = null; return; }
+    const mr = main.getBoundingClientRect();
+    const W = Math.round(mr.width), H = Math.round(mr.height);
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.style.width = W + 'px'; svg.style.height = H + 'px';
+    const laSvg = document.getElementById('gf-liveart');
+    if (laSvg) { laSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); laSvg.style.width = W + 'px'; laSvg.style.height = H + 'px'; }
+    const els = [...main.querySelectorAll('[data-la]')].sort((a, b) => (+a.getAttribute('data-la')) - (+b.getAttribute('data-la')));
+    if (els.length < 2) { this._L = null; ribbon.setAttribute('d', ''); if (ribbon2) ribbon2.setAttribute('d', ''); return; }
+    const pts = els.map(el => { const r = el.getBoundingClientRect(); return { x: r.left - mr.left + 1, y: r.top - mr.top + 1, swirl: +(el.getAttribute('data-la-swirl') || 0), ring: el.hasAttribute('data-la-ring'), word: el.hasAttribute('data-la-word'), splat: el.hasAttribute('data-la-splat') }; });
+    let bandTop = -9e9, bandBot = -9e9;
+    const bandEl = main.querySelector('[data-doodle-ink]');
+    if (bandEl) {
+      const br2 = bandEl.getBoundingClientRect();
+      bandTop = br2.top - mr.top; bandBot = br2.bottom - mr.top;
+      const vlg = document.getElementById('gf-vault-line-g');
+      if (vlg) { vlg.setAttribute('transform', 'translate(' + (-(br2.left - mr.left)).toFixed(1) + ',' + (-(br2.top - mr.top)).toFixed(1) + ')'); vlg.style.transition = 'opacity .55s ease .12s'; }
+    }
+    // ---- opening: write "Gote" in one continuous stroke ----
+    const heroSec = main.querySelector('section');
+    const hrc = heroSec ? heroSec.getBoundingClientRect() : null;
+    const heroTop = hrc ? hrc.top - mr.top : 0, heroH = hrc ? hrc.height : innerHeight;
+    let word = null;
+    const logoBtn = document.querySelector('header button');
+    let x0 = W * 0.06;
+    if (logoBtn) { const lb = logoBtn.getBoundingClientRect(); x0 = Math.max(30, lb.left - mr.left + lb.width * 0.4); }
+    const y0 = 4;
+    let d = 'M ' + x0.toFixed(1) + ' ' + y0.toFixed(1);
+    const ck = [{ y: 0, len: 0 }];
+    const lens = []; let side = -1; let sdir = 1;
+    let from = { x: x0, y: y0 };
+    // ---- write "Gote" top-left, beside the hero art ----
+    const wt = document.getElementById('gf-word');
+    if (wt) {
+      const shopSec = main.querySelector('[data-sec="shop"]');
+      const h2El = shopSec ? shopSec.querySelector('h2') : null;
+      const chipsEl = h2El ? h2El.parentElement.lastElementChild : null;
+      let wWidth = 142, wx0, wBase, wH;
+      if (h2El && chipsEl && chipsEl !== h2El) {
+        const hr2 = h2El.getBoundingClientRect(), cr3 = chipsEl.getBoundingClientRect();
+        const gl = hr2.right - mr.left, gr = cr3.left - mr.left;
+        wWidth = Math.max(92, Math.min(118, gr - gl - 120));
+        wH = wWidth / 1.331;
+        wx0 = (gl + gr) / 2 - wWidth / 2;
+        wBase = hr2.bottom - mr.top - 6;
+      } else {
+        wH = wWidth / 1.331;
+        wx0 = W / 2 - wWidth / 2;
+        wBase = heroTop + heroH + 120;
+      }
+      const wTop = wBase - wH * 0.9;
+      wt.setAttribute('x', wx0.toFixed(1)); wt.setAttribute('y', wTop.toFixed(1));
+      wt.setAttribute('width', wWidth.toFixed(1)); wt.setAttribute('height', wH.toFixed(1));
+      const wcr = document.getElementById('gf-word-cliprect');
+      if (wcr) { wcr.setAttribute('x', (wx0 - 12).toFixed(1)); wcr.setAttribute('y', (wTop - 12).toFixed(1)); wcr.setAttribute('height', (wH + 24).toFixed(1)); wcr.setAttribute('width', '0'); }
+      let droopY = wBase + 60, h2cx = Math.max(140, wx0 - 300), chTop = wTop - 20, chRight = wx0 + wWidth + 200;
+      let gridTopY = wBase + 120;
+      if (h2El && chipsEl) {
+        const hb2 = h2El.getBoundingClientRect(), cb3 = chipsEl.getBoundingClientRect();
+        droopY = hb2.bottom - mr.top + 8;
+        h2cx = hb2.right - mr.left - 26;
+        chTop = cb3.top - mr.top;
+        chRight = cb3.right - mr.left;
+      }
+      const shopTile0 = shopSec ? shopSec.querySelector('[data-tile]') : null;
+      if (shopTile0) gridTopY = shopTile0.getBoundingClientRect().top - mr.top;
+      // in from the left, dropping LEFT of the heading, then sliding under it
+      let h2L = h2cx - 240;
+      if (h2El) h2L = h2El.getBoundingClientRect().left - mr.left;
+      const dropX = Math.max(22, h2L - 58);
+      d += ' C ' + (x0 - 115).toFixed(1) + ' ' + (droopY * 0.48).toFixed(1) + ' ' + Math.max(6, h2L - 170).toFixed(1) + ' ' + (droopY - 120).toFixed(1) + ' ' + dropX.toFixed(1) + ' ' + (droopY - 18).toFixed(1);
+      d += ' C ' + (dropX + 36).toFixed(1) + ' ' + (droopY + 4).toFixed(1) + ' ' + (h2cx - 150).toFixed(1) + ' ' + (droopY + 9).toFixed(1) + ' ' + h2cx.toFixed(1) + ' ' + droopY.toFixed(1);
+      // back up into the underline
+      d += ' C ' + (h2cx + 130).toFixed(1) + ' ' + (droopY + 6).toFixed(1) + ' ' + (wx0 - 110).toFixed(1) + ' ' + (wBase + 34).toFixed(1) + ' ' + (wx0 - 16).toFixed(1) + ' ' + (wBase + 15).toFixed(1);
+      guide.setAttribute('d', d);
+      const lenA = guide.getTotalLength();
+      // underline — flat, just below the logo's ink
+      d += ' C ' + (wx0 + wWidth * 0.3).toFixed(1) + ' ' + (wBase + 21).toFixed(1) + ' ' + (wx0 + wWidth * 0.7).toFixed(1) + ' ' + (wBase + 15).toFixed(1) + ' ' + (wx0 + wWidth + 30).toFixed(1) + ' ' + (wBase + 9).toFixed(1);
+      guide.setAttribute('d', d);
+      const lenB = guide.getTotalLength();
+      // up past the chips, easing into the turn well before the right wall
+      const wallX = W - 34, wallY = chTop - 48;
+      d += ' C ' + (wx0 + wWidth + 170).toFixed(1) + ' ' + (wBase - 40).toFixed(1) + ' ' + (chRight - (chRight - wx0 - wWidth) * 0.42).toFixed(1) + ' ' + (chTop - 36).toFixed(1) + ' ' + (wallX - 52).toFixed(1) + ' ' + wallY.toFixed(1);
+      guide.setAttribute('d', d);
+      const lenC = guide.getTotalLength();
+      word = { lenA, lenB, lenC, w: wWidth, mids: [[wallX, wallY + 84], [W - 74, gridTopY + 130], [wx0 + wWidth * 0.4, gridTopY + 205]] };
+      ck.push({ y: Math.max(wTop - 40, innerHeight * 0.74), len: lenA });
+      ck.push({ y: Math.max(wBase + 40, innerHeight * 1.0), len: lenB });
+      ck.push({ y: Math.max(wBase + 90, innerHeight * 1.12), len: lenC });
+      from = { x: wallX, y: wallY };
+    }
+    const route = [{ x: from.x, y: from.y }];
+    if (word && word.mids) {
+      for (const m of word.mids) route.push({ x: m[0], y: m[1], mid: 1 });
+    }
+    for (let i = 0; i < pts.length; i++) {
+      const A = route[route.length - 1], B = pts[i];
+      const dx = B.x - A.x, dyR = B.y - A.y, segL = Math.hypot(dx, dyR) || 1;
+      if (!(i === 0 && word)) {
+        const bow = Math.min(220, Math.max(90, segL * 0.26)) * side;
+        let mbx = (A.x + B.x) / 2 - (dyR / segL) * bow, mby = (A.y + B.y) / 2 + (dx / segL) * bow;
+        if (mby < Math.min(A.y, B.y) - 24) { mbx = (A.x + B.x) / 2 + (dyR / segL) * bow; mby = (A.y + B.y) / 2 - (dx / segL) * bow; }
+        route.push({ x: mbx, y: mby, mid: 1 });
+      }
+      route.push({ x: B.x, y: B.y });
+      side = -side;
+    }
+    for (let r = 0; r < route.length - 1; r++) {
+      const p0 = route[Math.max(0, r - 1)], p1 = route[r], p2 = route[r + 1], p3 = route[Math.min(route.length - 1, r + 2)];
+      d += ' C ' + (p1.x + (p2.x - p0.x) / 6).toFixed(1) + ' ' + (p1.y + (p2.y - p0.y) / 6).toFixed(1) + ' ' + (p2.x - (p3.x - p1.x) / 6).toFixed(1) + ' ' + (p2.y - (p3.y - p1.y) / 6).toFixed(1) + ' ' + p2.x.toFixed(1) + ' ' + p2.y.toFixed(1);
+      if (!p2.mid) {
+        guide.setAttribute('d', d);
+        const gl = guide.getTotalLength();
+        lens.push(gl); ck.push({ y: p2.y, len: gl });
+        from = { x: p2.x, y: p2.y };
+      }
+    }
+    let ringZone = null;
+    if (pts.length && pts[pts.length - 1].ring) {
+      const host = document.getElementById('rotem-portrait');
+      if (host) {
+        guide.setAttribute('d', d);
+        const ringS = guide.getTotalLength();
+        ringZone = [ringS, ringS];
+        const hb = host.getBoundingClientRect();
+        const rcx = hb.left - mr.left + hb.width / 2, rcy = hb.top - mr.top + hb.height / 2;
+        const RR = Math.max(hb.width, hb.height) / 2 + 30;
+        const ra0 = Math.atan2(from.y - rcy, from.x - rcx);
+        const nR = 24, swp = Math.PI * 2 * 1.22, rp = [];
+        for (let q = 0; q <= nR; q++) {
+          const a = ra0 + (q / nR) * swp;
+          const wob = 1 + Math.sin(a * 2.6 + 1.2) * 0.045 + (q / nR) * 0.06;
+          rp.push([rcx + Math.cos(a) * RR * wob, rcy + Math.sin(a) * RR * wob * 0.965]);
+        }
+        for (let q = 0; q < rp.length - 1; q++) { const mx = (rp[q][0] + rp[q + 1][0]) / 2, my = (rp[q][1] + rp[q + 1][1]) / 2; d += ' Q ' + rp[q][0].toFixed(1) + ' ' + rp[q][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1); }
+        guide.setAttribute('d', d);
+        if (ringZone) ringZone[1] = guide.getTotalLength();
+        const rl = rp[rp.length - 1];
+        d += ' C ' + (rl[0] + 26).toFixed(1) + ' ' + (rl[1] + 44).toFixed(1) + ' ' + (rl[0] + 16).toFixed(1) + ' ' + (rl[1] + 96).toFixed(1) + ' ' + (rl[0] - 12).toFixed(1) + ' ' + (rl[1] + 128).toFixed(1);
+        guide.setAttribute('d', d);
+        from = { x: rl[0] - 12, y: rl[1] + 128 };
+        ck.push({ y: rcy + RR + 60, len: guide.getTotalLength() });
+      }
+    }
+    const vBtn = main.querySelector('[data-nav="vault"]');
+    let vaultSplash = null;
+    if (vBtn) {
+      const vb = vBtn.getBoundingClientRect();
+      const vbx = vb.left - mr.left + vb.width / 2, vby = vb.top - mr.top + vb.height / 2;
+      d += ' C ' + (from.x - 46).toFixed(1) + ' ' + (from.y + 64).toFixed(1) + ' ' + (vbx + 120).toFixed(1) + ' ' + (vby - 150).toFixed(1) + ' ' + vbx.toFixed(1) + ' ' + vby.toFixed(1);
+      guide.setAttribute('d', d);
+      ck.push({ y: vby - 110, len: guide.getTotalLength() });
+    }
+    const total = guide.getTotalLength();
+    const STEP = 7, N = Math.max(2, Math.floor(total / STEP));
+    const P = [], LF = [], RF = [], SL = [], SR = [], SL2 = [], SR2 = [], HW = [], CI = [];
+    for (let i = 0; i <= N; i++) { const p = guide.getPointAtLength(Math.min(total, i * STEP)); P.push([p.x, p.y]); }
+    for (let i = 0; i <= N; i++) {
+      const a = P[Math.max(0, i - 1)], b = P[Math.min(N, i + 1)];
+      let tx = b[0] - a[0], ty = b[1] - a[1]; const tl = Math.hypot(tx, ty) || 1; tx /= tl; ty /= tl;
+      const s = i * STEP;
+      let hw = 4.4 + 4.4 * (0.5 + 0.5 * Math.sin(s * 0.006 + 1.7)) + 2.4 * (0.5 + 0.5 * Math.sin(s * 0.019 + 0.4));
+      hw *= Math.min(1, 0.2 + s / 110);
+      const sm3 = (t) => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
+      const zoneF = (a, b, mf, ramp) => {
+        if (s < a - ramp || s > b + ramp) return 1;
+        if (s < a) return 1 - (1 - mf) * sm3((s - (a - ramp)) / ramp);
+        if (s > b) return mf + (1 - mf) * sm3((s - b) / ramp);
+        return mf;
+      };
+      if (word) {
+        hw *= zoneF(-1e8, (word.lenC || word.lenB) + 80, 0.72, 260);
+        hw *= zoneF(word.lenA - 10, word.lenB + 16, 0.66, 130);
+      }
+
+      HW.push(hw);
+      const jl = Math.max(0.7, hw + (Math.random() - 0.5) * 1.3), jr = Math.max(0.7, hw + (Math.random() - 0.5) * 1.3);
+      LF.push((P[i][0] - ty * jl).toFixed(1) + ' ' + (P[i][1] + tx * jl).toFixed(1));
+      RF.push((P[i][0] + ty * jr).toFixed(1) + ' ' + (P[i][1] - tx * jr).toFixed(1));
+      const off = hw * 0.5, w2 = Math.max(0.05, (hw - 4.6) * 0.22);
+      SL.push((P[i][0] - ty * (off - w2)).toFixed(1) + ' ' + (P[i][1] + tx * (off - w2)).toFixed(1));
+      SR.push((P[i][0] - ty * (off + w2)).toFixed(1) + ' ' + (P[i][1] + tx * (off + w2)).toFixed(1));
+      const of2 = -hw * 0.36, wb = Math.max(0.04, (hw - 5.4) * 0.24);
+      SL2.push((P[i][0] - ty * (of2 - wb)).toFixed(1) + ' ' + (P[i][1] + tx * (of2 - wb)).toFixed(1));
+      SR2.push((P[i][0] - ty * (of2 + wb)).toFixed(1) + ' ' + (P[i][1] + tx * (of2 + wb)).toFixed(1));
+      CI.push(P[i][1] >= bandTop && P[i][1] <= bandBot ? 1 : 0);
+    }
+    const segs = []; let sa = 0;
+    for (let i = 1; i <= N; i++) { if (CI[i] !== CI[sa]) { segs.push({ a: sa, b: i - 1, c: CI[sa] }); sa = i; } }
+    segs.push({ a: sa, b: N, c: CI[sa] });
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    splatsG.innerHTML = ''; dripsG.innerHTML = '';
+    const splats = [], drips = [];
+    const colAt = idx => (CI[Math.max(0, Math.min(N, idx))] ? '#F7F5F0' : '#16130F');
+    const addDrip = (s, ox) => {
+      const idx = Math.max(0, Math.min(N, Math.round(s / STEP)));
+      if (CI[idx]) return;
+      const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', colAt(idx)); dripsG.appendChild(el);
+      drips.push({ s, x: P[idx][0] + (ox || 0), y: P[idx][1], el, len: 0, drawn: -1, maxLen: 46 + Math.random() * 96, rate: 5 + Math.random() * 9 });
+    };
+    const blobD = (r) => {
+      const nB = 9, bp = [];
+      for (let q = 0; q <= nB; q++) { const a = (q / nB) * Math.PI * 2; const rr = r * (0.72 + Math.random() * 0.5); bp.push([Math.cos(a) * rr, Math.sin(a) * rr]); }
+      bp[nB] = bp[0].slice();
+      let bd = 'M ' + bp[0][0].toFixed(1) + ' ' + bp[0][1].toFixed(1);
+      for (let q = 1; q < nB; q++) { const mx = (bp[q][0] + bp[q + 1][0]) / 2, my = (bp[q][1] + bp[q + 1][1]) / 2; bd += ' Q ' + bp[q][0].toFixed(1) + ' ' + bp[q][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1); }
+      return bd + ' Z';
+    };
+    for (let i = 1; i < pts.length; i++) {
+      if (!pts[i].splat) continue;
+      const idx = Math.round(lens[i] / STEP);
+      const col = colAt(idx);
+      const g = document.createElementNS(SVGNS, 'g');
+      const axis = Math.random() * Math.PI * 2;
+      let inner = '<path d="' + blobD(6.5 + Math.random() * 3.5) + '" fill="' + col + '"></path>';
+      const nB = 6 + Math.floor(Math.random() * 4);
+      for (let k2 = 0; k2 < nB; k2++) {
+        const ang = Math.random() * Math.PI * 2;
+        const dist = (10 + Math.random() * 26) * (1 + 0.5 * Math.cos(ang - axis));
+        const ex = (Math.cos(ang) * dist).toFixed(1), ey = (Math.sin(ang) * dist).toFixed(1);
+        if (Math.random() < 0.55) { const rr2 = (1.1 + Math.random() * 1.9).toFixed(1); inner += '<circle cx="' + ex + '" cy="' + ey + '" r="' + rr2 + '" fill="' + col + '"></circle>'; }
+        else { const rx = 1.8 + Math.random() * 2.8, ry = rx * (0.36 + Math.random() * 0.3); inner += '<ellipse cx="' + ex + '" cy="' + ey + '" rx="' + rx.toFixed(1) + '" ry="' + ry.toFixed(1) + '" transform="rotate(' + Math.round(ang * 57.3) + ' ' + ex + ' ' + ey + ')" fill="' + col + '"></ellipse>'; }
+      }
+      g.innerHTML = inner;
+      const tr = 'translate(' + pts[i].x.toFixed(1) + 'px,' + pts[i].y.toFixed(1) + 'px)';
+      g.style.transform = tr + ' scale(0)';
+      g.style.transition = 'transform .34s cubic-bezier(.2,1.55,.4,1)';
+      splatsG.appendChild(g);
+      splats.push({ len: lens[i], el: g, tr, on: false });
+      addDrip(lens[i] - 2, -9 + Math.random() * 4);
+      addDrip(lens[i] - 2, 7 + Math.random() * 4);
+    }
+    const vg = document.getElementById('gf-vault-splash-g');
+    if (vBtn && vg) {
+      const sec5 = vBtn.closest('section');
+      const sr5 = sec5.getBoundingClientRect();
+      const vb2 = vBtn.getBoundingClientRect();
+      const sx = vb2.left - sr5.left + vb2.width / 2, sy = vb2.top - sr5.top + vb2.height / 2;
+      const NS2 = 'http://www.w3.org/2000/svg';
+      vg.innerHTML = '';
+      vg.style.transform = 'translate(' + sx.toFixed(1) + 'px,' + sy.toFixed(1) + 'px)';
+      vg.style.transition = 'opacity .6s ease';
+      vg.style.opacity = '1';
+      const parts = [];
+      const core = document.createElementNS(NS2, 'path');
+      core.setAttribute('d', blobD(22 + Math.random() * 6));
+      core.setAttribute('fill', '#F7F5F0');
+      core.style.transform = 'scale(0)';
+      core.style.transition = 'transform .42s cubic-bezier(.2,1.7,.4,1)';
+      vg.appendChild(core);
+      parts.push({ el: core, tr: 'scale(1) rotate(' + Math.round(Math.random() * 40 - 20) + 'deg)', rst: 'scale(0)' });
+      const nV = 16;
+      for (let k3 = 0; k3 < nV; k3++) {
+        const ang = (k3 / nV) * Math.PI * 2 + Math.random() * 0.5;
+        const dist = 36 + Math.random() * 116;
+        const dxV = Math.cos(ang) * dist, dyV = Math.sin(ang) * dist * 0.62;
+        const g2 = document.createElementNS(NS2, 'g');
+        let shp;
+        if (Math.random() < 0.45) {
+          shp = document.createElementNS(NS2, 'circle');
+          shp.setAttribute('r', (1.5 + Math.random() * 2.9).toFixed(1));
+        } else {
+          shp = document.createElementNS(NS2, 'ellipse');
+          const rx = 3 + Math.random() * 5.5;
+          shp.setAttribute('rx', rx.toFixed(1));
+          shp.setAttribute('ry', (rx * (0.3 + Math.random() * 0.25)).toFixed(1));
+          shp.setAttribute('transform', 'rotate(' + Math.round(Math.atan2(dyV, dxV) * 57.3) + ')');
+        }
+        shp.setAttribute('fill', '#F7F5F0');
+        g2.appendChild(shp);
+        g2.style.transform = 'translate(0px,0px) scale(0)';
+        g2.style.transition = 'transform .5s cubic-bezier(.16,1.4,.3,1) ' + Math.round(k3 * 14 + Math.random() * 40) + 'ms';
+        vg.appendChild(g2);
+        parts.push({ el: g2, tr: 'translate(' + dxV.toFixed(1) + 'px,' + dyV.toFixed(1) + 'px) scale(1)', rst: 'translate(0px,0px) scale(0)' });
+      }
+      for (let k4 = 0; k4 < 8; k4++) {
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 125 + Math.random() * 95;
+        const g3 = document.createElementNS(NS2, 'g');
+        const c3 = document.createElementNS(NS2, 'circle');
+        c3.setAttribute('r', (0.8 + Math.random() * 1.5).toFixed(1));
+        c3.setAttribute('fill', '#F7F5F0');
+        g3.appendChild(c3);
+        g3.style.transform = 'translate(0px,0px) scale(0)';
+        g3.style.transition = 'transform .62s cubic-bezier(.16,1.2,.3,1) ' + Math.round(90 + Math.random() * 130) + 'ms';
+        vg.appendChild(g3);
+        parts.push({ el: g3, tr: 'translate(' + (Math.cos(ang) * dist).toFixed(1) + 'px,' + (Math.sin(ang) * dist * 0.55).toFixed(1) + 'px) scale(1)', rst: 'translate(0px,0px) scale(0)' });
+      }
+      vaultSplash = { el: vg, parts, on: false };
+    }
+    for (let s = 320 + Math.random() * 200; s < total - 120; s += 400 + Math.random() * 320) addDrip(s, 0);
+    const mTop = mr.top + scrollY;
+    for (let i = 1; i < ck.length; i++) ck[i].y = Math.max(ck[i].y, ck[i - 1].y + 2);
+    const Y = ck.map(c => c.y + mTop);
+    Y.push(Y[Y.length - 1] + 300);
+    const ckLens = ck.map(c => c.len); ckLens.push(total);
+    this._L = { total, STEP, N, P, LF, RF, SL, SR, SL2, SR2, HW, word, vaultSplash, segs, Y, lens: ckLens, ribbon, ribbon2, streak, streak2, streak3, splats, drips };
+    this._lineHead = Math.min(this._lineHead || 0, total);
+    this._lineTs = 0; this._lineDirty = true;
+    if (document.fonts && !this._fontsKick) { this._fontsKick = 1; document.fonts.ready.then(() => this._buildLine()); }
+    this._startLineRaf();
+  }
+
+  _startLineRaf(){
+    if (this._lineRaf) return;
+    const step = (ts) => {
+      this._lineRaf = 0;
+      const L = this._L;
+      if (!L || !L.ribbon.isConnected) return;
+      const dt = this._lineTs ? Math.min(0.06, (ts - this._lineTs) / 1000) : 0.016;
+      this._lineTs = ts;
+      const focus = scrollY < 6 ? -1e9 : scrollY + innerHeight * 0.68;
+      const Y = L.Y, LN = L.lens;
+      let target = 0;
+      if (focus <= Y[0]) target = 0;
+      else if (focus >= Y[Y.length - 1]) target = L.total;
+      else { for (let i = 1; i < Y.length; i++) { if (focus < Y[i]) { target = LN[i - 1] + (focus - Y[i - 1]) / (Y[i] - Y[i - 1]) * (LN[i] - LN[i - 1]); break; } } }
+      const cur = this._lineHead;
+      const head = Math.abs(target - cur) < 0.5 ? target : cur + (target - cur) * 0.16;
+      this._lineHead = head;
+      const k = Math.max(0, Math.min(L.N, Math.floor(head / L.STEP)));
+      let dInk = '', dCream = '', sInk = '', sCream = '', s3 = '';
+      if (k >= 2) {
+        for (const sg of L.segs) {
+          if (sg.a > k) break;
+          const a0 = Math.max(0, sg.a - 2), hi = Math.min(sg.b + 2, k);
+          if (hi - a0 < 2) continue;
+          let sub = 'M ' + L.LF[a0] + ' L ' + L.LF.slice(a0 + 1, hi + 1).join(' L ');
+          const cr = ((L.HW && L.HW[hi]) || 3.2).toFixed(1); sub += ' A ' + cr + ' ' + cr + ' 0 0 1 ' + L.RF[hi];
+          sub += ' L ' + L.RF.slice(a0, hi).reverse().join(' L ') + ' Z ';
+          let st = 'M ' + L.SL[a0] + ' L ' + L.SL.slice(a0 + 1, hi + 1).join(' L ');
+          st += ' L ' + L.SR.slice(a0, hi + 1).reverse().join(' L ') + ' Z ';
+          let st2 = 'M ' + L.SL2[a0] + ' L ' + L.SL2.slice(a0 + 1, hi + 1).join(' L ');
+          st2 += ' L ' + L.SR2.slice(a0, hi + 1).reverse().join(' L ') + ' Z ';
+          if (sg.c) { dCream += sub; s3 += st; } else { dInk += sub; sInk += st; sCream += st2; }
+        }
+      }
+      L.ribbon.setAttribute('d', dInk);
+      if (L.ribbon2) L.ribbon2.setAttribute('d', dCream);
+      if (L.streak) L.streak.setAttribute('d', sInk);
+      if (L.streak2) L.streak2.setAttribute('d', sCream);
+      if (L.streak3) L.streak3.setAttribute('d', s3);
+      for (const sp of L.splats) {
+        const on = head >= sp.len - 2;
+        if (on !== sp.on) { sp.on = on; sp.el.style.transform = sp.tr + ' scale(' + (on ? 1 : 0) + ')'; }
+      }
+      if (L.word) {
+        const wt2 = document.getElementById('gf-word'), wcr2 = document.getElementById('gf-word-cliprect');
+        if (wt2 && wcr2) {
+          const tw = Math.max(0, Math.min(1, (head - L.word.lenA) / Math.max(1, L.word.lenB - L.word.lenA)));
+          const LB = [0, 0.40, 0.58, 0.78, 1];
+          const qL = Math.min(3, Math.floor(tw * 4)), fL = tw * 4 - qL;
+          const ssL = fL * fL * (3 - 2 * fL);
+          const twS = LB[qL] + (LB[qL + 1] - LB[qL]) * ssL;
+          wt2.setAttribute('opacity', tw > 0.01 ? '1' : '0');
+          wcr2.setAttribute('width', ((L.word.w + 48) * twS).toFixed(1));
+        }
+      }
+      if (L.vaultSplash) {
+        const onV = head >= L.total - 6;
+        if (onV !== L.vaultSplash.on) {
+          const vs = L.vaultSplash;
+          vs.on = onV;
+          clearTimeout(this._vaultFadeT);
+          const vlg2 = document.getElementById('gf-vault-line-g');
+          if (vlg2) vlg2.style.opacity = onV ? '0' : '1';
+          if (onV) {
+            vs.el.style.opacity = '1';
+            for (const p of vs.parts) p.el.style.transform = p.tr;
+            this._vaultFadeT = setTimeout(() => { vs.el.style.opacity = '0'; }, 1300);
+          } else {
+            vs.el.style.opacity = '0';
+            this._vaultFadeT = setTimeout(() => { for (const p of vs.parts) p.el.style.transform = p.rst; }, 320);
+          }
+        }
+      }
+      let dripBusy = false;
+      for (const dr of L.drips) {
+        const active = head >= dr.s + 4;
+        if (active && dr.len < dr.maxLen) { dr.len = Math.min(dr.maxLen, dr.len + dr.rate * dt); dripBusy = true; }
+        else if (!active && dr.len > 0) { dr.len = Math.max(0, dr.len - 300 * dt); dripBusy = true; }
+        if (Math.abs(dr.len - dr.drawn) > 0.35) {
+          dr.drawn = dr.len;
+          if (dr.len < 1.2) dr.el.setAttribute('d', '');
+          else {
+            const x = dr.x, y0 = dr.y, tip = y0 + dr.len, hw = 2.9, hr = 2.6;
+            const xl = (x - hw).toFixed(1), xr = (x + hw).toFixed(1), il = (x - hr).toFixed(1), ir = (x + hr).toFixed(1);
+            const my = (y0 + dr.len * 0.45).toFixed(1), py = (tip - hr * 1.5).toFixed(1), ty = tip.toFixed(1), by = y0.toFixed(1);
+            dr.el.setAttribute('d', 'M ' + xl + ' ' + by + ' C ' + xl + ' ' + my + ' ' + il + ' ' + py + ' ' + il + ' ' + ty + ' A ' + hr + ' ' + hr + ' 0 0 0 ' + ir + ' ' + ty + ' C ' + ir + ' ' + py + ' ' + xr + ' ' + my + ' ' + xr + ' ' + by + ' Z');
+          }
+        }
+      }
+      if (head !== target || dripBusy || this._lineDirty) { this._lineDirty = false; this._lineRaf = requestAnimationFrame(step); }
+      else this._lineTs = 0;
+    };
+    this._lineRaf = requestAnimationFrame(step);
+  }
+
+  // ===================== live art — doodles drawing themselves =====================
+  _syncLiveArt(){
+    const want = (this.props.liveArt ?? true) && this.state.screen === 'home' && !this.reduce && !!document.getElementById('gf-liveart');
+    if (want && !this._laOn) this._startLiveArt();
+    else if (!want && this._laOn) this._stopLiveArt();
+  }
+
+  _startLiveArt(){
+    this._laOn = true; this._laBusy = false; this._laKeep = this._laKeep || [];
+    const loop = () => { if (!this._laOn) return; if (!this._laBusy && !document.hidden) this._spawnDoodle(); this._laT = setTimeout(loop, 4500 + Math.random() * 4500); };
+    this._laT = setTimeout(loop, 1100);
+  }
+
+  _stopLiveArt(){
+    this._laOn = false; clearTimeout(this._laT);
+    const g = document.getElementById('gf-liveart');
+    if (g) g.innerHTML = '';
+    this._laBusy = false; this._laKeep = [];
+  }
+
+  _spawnDoodle(){
+    const svg = document.getElementById('gf-liveart');
+    const main = document.querySelector('[data-home-main]');
+    if (!svg || !main) return;
+    const mr = main.getBoundingClientRect();
+    const zones = [];
+    main.querySelectorAll('[data-doodle]').forEach(sec => {
+      const r = sec.getBoundingClientRect();
+      const vTop = Math.max(r.top, 92), vBot = Math.min(r.bottom, innerHeight - 50);
+      if (vBot - vTop < 220) return;
+      const inner = +sec.getAttribute('data-doodle') || 800;
+      const pocket = (r.width - inner) / 2;
+      if (pocket < 150) return;
+      const ink = sec.getAttribute('data-doodle-ink') || '#16130F';
+      zones.push({ x0: r.left - mr.left + 26, x1: r.left - mr.left + pocket - 26, yTop: vTop - mr.top, yBot: vBot - mr.top, ink });
+      zones.push({ x0: r.right - mr.left - pocket + 26, x1: r.right - mr.left - 26, yTop: vTop - mr.top, yBot: vBot - mr.top, ink });
+    });
+    if (!zones.length) return;
+    const z = zones[Math.floor(Math.random() * zones.length)];
+    const pw = z.x1 - z.x0, phh = z.yBot - z.yTop;
+    const isFace = Math.random() < 0.7;
+    const S = isFace ? Math.min(220, Math.max(140, pw * 0.95)) : Math.min(160, Math.max(100, pw * 0.8));
+    if (pw < 130 || phh < S + 30) return;
+    const cx = z.x0 + pw / 2 + (Math.random() - 0.5) * Math.max(0, pw - S) * 0.6;
+    const cy = z.yTop + S / 2 + 14 + Math.random() * Math.max(1, phh - S - 30);
+    const spec = isFace ? this._genFace(cx, cy + S * 0.1, S * 0.6, z.ink) : this._genBlob(cx, cy, S, z.ink);
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const g = document.createElementNS(SVGNS, 'g');
+    svg.appendChild(g);
+    const dot = document.createElementNS(SVGNS, 'circle');
+    dot.setAttribute('r', '3.2');
+    const drawPath = (p, speed, done) => {
+      const el = document.createElementNS(SVGNS, 'path');
+      el.setAttribute('d', p.d); el.setAttribute('fill', 'none');
+      el.setAttribute('stroke', p.stroke); el.setAttribute('stroke-width', p.w);
+      el.setAttribute('stroke-linecap', 'round'); el.setAttribute('stroke-linejoin', 'round');
+      g.appendChild(el);
+      let len = 0; try { len = el.getTotalLength(); } catch(e){}
+      if (!len) { if (done) done(el); return; }
+      el.style.strokeDasharray = len + ' ' + len;
+      el.style.strokeDashoffset = String(len);
+      dot.setAttribute('fill', p.stroke);
+      if (!dot.isConnected) g.appendChild(dot);
+      const t0 = performance.now(), dur = (len / speed) * 1000;
+      const anim = (now) => {
+        if (!this._laOn || !el.isConnected) { if (dot.isConnected) dot.remove(); return; }
+        let pr = (now - t0) / dur; if (pr > 1) pr = 1;
+        const at = len * pr;
+        el.style.strokeDashoffset = String(len - at);
+        try { const pt = el.getPointAtLength(at); dot.setAttribute('cx', pt.x); dot.setAttribute('cy', pt.y); } catch(e){}
+        if (pr < 1) requestAnimationFrame(anim);
+        else if (done) done(el);
+      };
+      requestAnimationFrame(anim);
+    };
+    this._laBusy = true;
+    drawPath(spec.main, isFace ? 290 + Math.random() * 90 : 200, (el) => {
+      if (spec.main.fill) {
+        el.setAttribute('fill', spec.main.fill);
+        el.style.fillOpacity = '0';
+        requestAnimationFrame(() => { el.style.transition = 'fill-opacity .9s ease'; el.style.fillOpacity = '0.88'; });
+      }
+      const next = (i) => {
+        if (i >= spec.after.length) {
+          if (dot.isConnected) dot.remove();
+          this._laBusy = false;
+          this._laKeep.push(g);
+          if (this._laKeep.length > 5) {
+            const old = this._laKeep.shift();
+            old.style.transition = 'opacity 1.4s ease'; old.style.opacity = '0';
+            setTimeout(() => old.remove(), 1500);
+          }
+          return;
+        }
+        drawPath(spec.after[i], 420, () => next(i + 1));
+      };
+      next(0);
+    });
+  }
+
+  // one-line face in the house style: oblong head, big ears, fringe, heavy brows, long nose, toothy mouth, antenna
+  _genFace(cx, cy, S, ink){
+    const rot = (Math.random() - 0.5) * 0.14, cosr = Math.cos(rot), sinr = Math.sin(rot);
+    const jj = a => (Math.random() - 0.5) * a;
+    let d = '', lx = 0, ly = 0;
+    const X = (x, y) => (cx + x * cosr - y * sinr).toFixed(1);
+    const Yc = (x, y) => (cy + x * sinr + y * cosr).toFixed(1);
+    const M = (x, y) => { lx = x; ly = y; d += 'M ' + X(x, y) + ' ' + Yc(x, y); };
+    const L = (x, y) => { lx = x; ly = y; d += ' L ' + X(x, y) + ' ' + Yc(x, y); };
+    const Q = (qx, qy, x, y) => { lx = x; ly = y; d += ' Q ' + X(qx, qy) + ' ' + Yc(qx, qy) + ' ' + X(x, y) + ' ' + Yc(x, y); };
+    const EL = (ex, ey, rx, ry, passes, drift) => {
+      const segs = Math.max(6, Math.round(passes * 7));
+      const a0 = Math.atan2((ly - ey) / Math.max(0.001, ry), (lx - ex) / Math.max(0.001, rx));
+      L(ex + Math.cos(a0) * rx, ey + Math.sin(a0) * ry);
+      const arc = passes * Math.PI * 2;
+      for (let i = 1; i <= segs; i++) {
+        const t = a0 + (i / segs) * arc;
+        const k = 1 + drift * (i / segs);
+        const tm = t - (arc / segs) / 2;
+        Q(ex + Math.cos(tm) * rx * k * 1.12 + jj(2), ey + Math.sin(tm) * ry * k * 1.12 + jj(2), ex + Math.cos(t) * rx * k + jj(1.6), ey + Math.sin(t) * ry * k + jj(1.6));
+      }
+    };
+    const hw = S * (0.3 + Math.random() * 0.06), hh = S * 0.5;
+    M(-hw * 0.55 + jj(4), -hh + jj(3));
+    Q(-hw * 1.02, -hh * 0.96, -hw + jj(3), -hh * 0.6 + jj(4));
+    Q(-hw * 1.04, -hh * 0.1, -hw * 0.96 + jj(3), hh * 0.42 + jj(5));
+    Q(-hw * 0.98, hh * 0.88, -hw * 0.42 + jj(4), hh * 0.97 + jj(3));
+    Q(jj(6), hh * 1.06, hw * 0.48 + jj(4), hh * 0.95 + jj(3));
+    Q(hw, hh * 0.84, hw * 0.97 + jj(3), hh * 0.38 + jj(5));
+    Q(hw * 1.05, -hh * 0.14, hw * 0.99 + jj(3), -hh * 0.62 + jj(4));
+    Q(hw, -hh * 0.98, hw * 0.5 + jj(4), -hh + jj(3));
+    Q(0, -hh * (1.04 + Math.random() * 0.04), -hw * 0.62 + jj(5), -hh * 0.97 + jj(3));
+    const earS = 0.7 + Math.random() * 1.1, eW = hw * 0.5 * earS, eT = -hh * 0.32, eB = hh * (0.05 + 0.2 * earS);
+    Q(-hw * 0.9, -hh * 0.7, -hw * 0.98, eT);
+    Q(-hw - eW * 1.25, eT - hh * 0.08, -hw - eW + jj(3), (eT + eB) / 2 + jj(3));
+    Q(-hw - eW * 1.1, eB + hh * 0.12, -hw * 0.94 + jj(2), eB + jj(3));
+    Q(-hw - eW * 0.72, (eT + eB) / 2, -hw * 0.96 + jj(2), eT * 0.72 + jj(3));
+    L(-hw * 0.6 + jj(2), -hh * 0.84 + jj(2));
+    const nF = 7 + Math.floor(Math.random() * 7), heavy = Math.random() < 0.25;
+    const fx0 = -hw * 0.58, fdx = (hw * 1.16) / nF;
+    for (let i2 = 0; i2 <= nF; i2++) {
+      const bx = fx0 + fdx * i2;
+      const fl = hh * ((heavy ? 0.34 : 0.16) + Math.random() * (heavy ? 0.3 : 0.2));
+      L(bx + jj(2.5), -hh * 0.84 + fl);
+      L(bx + fdx * 0.42 + jj(2.5), -hh * 0.86 + jj(2));
+    }
+    Q(hw * 0.9, -hh * 0.72, hw * 0.98 + jj(2), eT + jj(3));
+    Q(hw + eW * 1.25, eT - hh * 0.08, hw + eW + jj(3), (eT + eB) / 2 + jj(3));
+    Q(hw + eW * 1.1, eB + hh * 0.12, hw * 0.94 + jj(2), eB + jj(3));
+    Q(hw + eW * 0.72, (eT + eB) / 2, hw * 0.96 + jj(2), eT * 0.72 + jj(3));
+    const browY = -hh * 0.2, eyeY = -hh * 0.02, browR = hw * (0.24 + Math.random() * 0.1);
+    L(hw * 0.62, browY - 6);
+    EL(hw * 0.33, browY, browR, S * 0.028 + Math.random() * S * 0.02, 1.6 + Math.random() * 0.9, 0.12);
+    EL(hw * (0.3 + Math.random() * 0.06), eyeY, hw * (0.07 + Math.random() * 0.06), S * 0.03, 1.25, 0);
+    L(-hw * 0.05, browY - 4);
+    EL(-hw * 0.33, browY, browR, S * 0.028 + Math.random() * S * 0.02, 1.6 + Math.random() * 0.9, 0.12);
+    EL(-hw * (0.3 + Math.random() * 0.06), eyeY, hw * (0.07 + Math.random() * 0.06), S * 0.03, 1.25, 0);
+    L(-hw * 0.04 + jj(2), -hh * 0.16);
+    Q(jj(3), hh * 0.05, hw * 0.02 + jj(2), hh * (0.26 + Math.random() * 0.06));
+    EL(-hw * 0.06, hh * 0.3, hw * 0.055, S * 0.02, 1.1, 0);
+    L(hw * 0.07 + jj(1.5), hh * 0.3 + jj(1.5));
+    const mY = hh * (0.55 + Math.random() * 0.06), mR = hw * (0.3 + Math.random() * 0.15), mRy = S * (0.055 + Math.random() * 0.045);
+    L(0, mY - mRy * 1.4);
+    EL(0, mY, mR, mRy, 1.2, 0.06);
+    const nT = 3 + Math.floor(Math.random() * 4), tx0 = -mR * 0.62, tdx = (mR * 1.24) / nT;
+    L(tx0, mY - mRy * 0.5);
+    for (let i3 = 0; i3 < nT; i3++) { L(tx0 + tdx * i3 + tdx * 0.5 + jj(1.5), mY + mRy * 0.55 + jj(1.5)); L(tx0 + tdx * (i3 + 1) + jj(1.5), mY - mRy * 0.5 + jj(1.5)); }
+    L(hw * 0.08, mY - mRy * 1.3);
+    Q(hw * 0.12, hh * 0.05, hw * 0.04 + jj(2), -hh * 0.98);
+    const aH = hh * (0.3 + Math.random() * 0.5);
+    Q(hw * (0.02 + Math.random() * 0.12) - hw * 0.06, -hh - aH * 0.55, jj(4), -hh - aH);
+    EL(jj(2), -hh - aH - 4, 3.4 + Math.random() * 2.2, 3 + Math.random() * 2, 1.6, 0.25);
+    if (Math.random() < 0.4) {
+      L(hw * 0.12, -hh * 0.9);
+      Q(hw * 0.2, -hh - aH * 0.3, hw * (0.1 + Math.random() * 0.1), -hh - aH * 0.62);
+      EL(hw * 0.14, -hh - aH * 0.62 - 3, 2.8, 2.6, 1.4, 0.2);
+    }
+    return { main: { d, stroke: ink, w: (2.4 + Math.random() * 0.9).toFixed(1) }, after: [] };
+  }
+
+  // wiggly colored blob with quiver dashes, in the doodle-sheet style
+  _genBlob(cx, cy, S, ink){
+    const N = 30, R = S / 2, k = 2 + Math.floor(Math.random() * 3);
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      let r = R * (0.68 + 0.16 * Math.sin(a * k + 1) + 0.1 * Math.sin(a * (k + 3)));
+      if (Math.random() < 0.12) r *= 1.22;
+      pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+    }
+    pts[N] = pts[0].slice();
+    let d = 'M ' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+    for (let i = 1; i < N; i++) { const mx = (pts[i][0] + pts[i + 1][0]) / 2, my = (pts[i][1] + pts[i + 1][1]) / 2; d += ' Q ' + pts[i][0].toFixed(1) + ' ' + pts[i][1].toFixed(1) + ' ' + mx.toFixed(1) + ' ' + my.toFixed(1); }
+    d += ' Z';
+    const fills = ['#C9A7E8', '#6E9EBF', '#E8913C', '#F2BCD9', '#EFC93C', '#EFA5B8', '#9BB98F'];
+    let q = '';
+    const nq = 3 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < nq; i++) {
+      const a = Math.random() * Math.PI * 2, r1 = R * 1.14, arc = 0.5 + Math.random() * 0.5;
+      q += (q ? ' ' : '') + 'M ' + (cx + Math.cos(a) * r1).toFixed(1) + ' ' + (cy + Math.sin(a) * r1).toFixed(1);
+      const a2 = a + arc * 0.5, a3 = a + arc;
+      q += ' Q ' + (cx + Math.cos(a2) * r1 * 1.06).toFixed(1) + ' ' + (cy + Math.sin(a2) * r1 * 1.06).toFixed(1) + ' ' + (cx + Math.cos(a3) * r1).toFixed(1) + ' ' + (cy + Math.sin(a3) * r1).toFixed(1);
+    }
+    return { main: { d, stroke: ink, w: (2.8 + Math.random()).toFixed(1), fill: fills[Math.floor(Math.random() * fills.length)] }, after: [{ d: q, stroke: ink, w: '2.2' }] };
+  }
+
+  // ===================== ink-fill button (finalized brand animation) =====================
+  _make(btn){
+    const K = { FILL_MS: 880, SNAP_MS: 430, SNAP_OVERSHOOT: 1.7, DRIP_SPACING: 24, DRIP_MIN: 3, DRIP_MAX: 15, DRIP_MAX_LEN: 118, DRIP_GROW_PXPS: 44, DRIP_HEAD_R: 3.4, DRIP_TOPW: 7, DRIP_RETRACT_MS: 400, MENISCUS_H: 5, RIPPLE_AMP: 2.4, FALL_ZONE: 185, SEG: 40 };
+    const reduce = this.reduce, canHover = this.canHover;
+    const easeOutCubic = p => 1 - Math.pow(1 - p, 3);
+    const s = K.SNAP_OVERSHOOT, c3 = s + 1;
+    const easeOutBack = p => 1 + c3 * Math.pow(p - 1, 3) + s * Math.pow(p - 1, 2);
+    const fillSvg = btn.querySelector('.gf-fillsvg');
+    const fillPath = btn.querySelector('.gf-fill');
+    const paper = btn.querySelector('.gf-lbl-paper');
+    const dripSvg = btn.querySelector('.gf-dripsvg');
+    const dripG = btn.querySelector('.gf-drips');
+    const SVGNS = 'http://www.w3.org/2000/svg';
+    const inkCol = btn.getAttribute('data-ink-color') || '#16130F';
+    const navTarget = btn.getAttribute('data-nav');
+    const addWhat = btn.getAttribute('data-add');
+    const isSeal = btn.hasAttribute('data-seal');
+
+    let W = 0, H = 0; const FALL = K.FALL_ZONE;
+    let f = 0, anim = null, hovering = false, phase = 0;
+    let runs = [], pools = [], obsList = [], drops = [], beadEl = null, lastT = 0, running = false, rafId = 0, drainAt = 0, pendingSnapAt = 0;
+
+    const smin = (a, b, k) => { if (k <= 0) return Math.min(a, b); const h = Math.max(0, Math.min(1, 0.5 + 0.5 * (b - a) / k)); return b * (1 - h) + a * h - k * h * (1 - h); };
+    const smax = (a, b, k) => -smin(-a, -b, k);
+    const sstep = w => { w = Math.max(0, Math.min(1, w)); return w * w * (3 - 2 * w); };
+    const GAP = 5, SOFT = 16, LEADIN = 26;
+
+    const measure = () => {
+      W = btn.clientWidth; H = btn.clientHeight;
+      fillSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      dripSvg.setAttribute('width', W); dripSvg.setAttribute('height', H + FALL);
+      dripSvg.setAttribute('viewBox', '0 0 ' + W + ' ' + (H + FALL));
+      obsList = [];
+      const br = btn.getBoundingClientRect();
+      if (br.width && (this.props.dripStyle ?? 'straight') === 'flow') document.querySelectorAll('[data-ink-obstacle]').forEach(o => {
+        const r = o.getBoundingClientRect(); if (!r.width) return;
+        const left = r.left - br.left, right = r.right - br.left, top = r.top - br.top, bottom = r.bottom - br.top;
+        if (top < H - 2 || top > H + FALL - 10 || right < -50 || left > W + 50) return;
+        const cs = getComputedStyle(o);
+        let rr = parseFloat(cs.borderTopLeftRadius) || 0;
+        rr = Math.min(rr, (bottom - top) / 2, (right - left) / 2);
+        obsList.push({ left, right, top, bottom, cx: (left + right) / 2, rr });
+      });
+    };
+    measure();
+    const ro = new ResizeObserver(measure); ro.observe(btn);
+
+    const spanAt = (ob, y) => {
+      const g = GAP, LI = LEADIN, rg = ob.rr + g;
+      if (y < ob.top - g - LI || y > ob.bottom + g + LI) return null;
+      const cyT = ob.top + ob.rr, cyB = ob.bottom - ob.rr, innerL = ob.left + ob.rr, innerR = ob.right - ob.rr;
+      if (y >= cyT && y <= cyB) return { L: ob.left - g, R: ob.right + g, w: 1 };
+      if (y < cyT) { const dy = cyT - y; if (dy <= rg) { const cw = Math.sqrt(Math.max(0, rg * rg - dy * dy)); return { L: innerL - cw, R: innerR + cw, w: 1 }; } return { L: innerL, R: innerR, w: sstep(1 - (dy - rg) / LI) }; }
+      const dy = y - cyB;
+      if (dy <= rg) { const cw = Math.sqrt(Math.max(0, rg * rg - dy * dy)); return { L: innerL - cw, R: innerR + cw, w: 1 }; }
+      return { L: innerL, R: innerR, w: sstep(1 - (dy - rg) / LI) };
+    };
+
+    const routeRun = (x0, amp, freq, ph, yStart) => {
+      const y0r = (yStart == null ? H : yStart);
+      const pts = [];
+      for (let y = y0r; y <= H + FALL; y += 3) {
+        let x = x0 + amp * Math.sin((y - y0r) * freq + ph);
+        for (const ob of obsList) {
+          const sp = spanAt(ob, y); if (!sp || sp.w <= 0) continue;
+          const tgt = x0 < ob.cx ? smin(x, sp.L, SOFT) : smax(x, sp.R, SOFT);
+          x = x + (tgt - x) * sp.w;
+        }
+        pts.push({ x, y, s: 0 });
+      }
+      for (let p2 = 0; p2 < 3; p2++) for (let i = 1; i < pts.length - 1; i++) pts[i].x = pts[i - 1].x * 0.26 + pts[i].x * 0.48 + pts[i + 1].x * 0.26;
+      let acc = 0;
+      for (let i = 1; i < pts.length; i++) { acc += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y); pts[i].s = acc; }
+      return pts;
+    };
+
+    const waterY = (x, base) => base + K.MENISCUS_H * Math.sin(Math.PI * x / W) + K.RIPPLE_AMP * (Math.sin(x * 0.045 + phase * 2.1) + 0.5 * Math.sin(x * 0.105 - phase * 3.0));
+    const buildFill = () => {
+      if (f <= 0.002) { fillPath.setAttribute('d', ''); return; }
+      const base = f * H;
+      let d = 'M 0 0 L ' + W + ' 0';
+      for (let i = K.SEG; i >= 0; i--) { const x = (i / K.SEG) * W; d += ' L ' + x.toFixed(1) + ' ' + waterY(x, base).toFixed(1); }
+      fillPath.setAttribute('d', d + ' Z');
+    };
+    const buildLabel = () => {
+      const wY = f * H + K.MENISCUS_H;
+      const m = 'linear-gradient(to bottom, #000 ' + (wY - 1.2).toFixed(1) + 'px, rgba(0,0,0,0) ' + (wY + 1.2).toFixed(1) + 'px)';
+      paper.style.webkitMaskImage = m; paper.style.maskImage = m;
+    };
+    const makeRuns = () => {
+      dripG.innerHTML = ''; runs = []; pools = []; drops = [];
+      measure();
+      const inset = Math.min(H * 0.5, 30) + 4;
+      const usable = Math.max(20, W - inset * 2);
+      const n = Math.max(K.DRIP_MIN, Math.min(K.DRIP_MAX, Math.round(usable / K.DRIP_SPACING)));
+      for (const ob of obsList) { const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', inkCol); pools.push({ ob, el, g: 0, extra: 0 }); }
+      beadEl = document.createElementNS(SVGNS, 'path'); beadEl.setAttribute('fill', inkCol); dripG.appendChild(beadEl);
+      for (let i = 0; i < n; i++) {
+        const t = (i + 0.5) / n;
+        let x = inset + t * usable + (Math.random() - 0.5) * (usable / n) * 0.42;
+        x = Math.max(inset, Math.min(W - inset, x));
+        let dense = routeRun(x, 0.8 + Math.random() * 2.8, 0.02 + Math.random() * 0.05, Math.random() * 6.28);
+        let feed = -1, capLen = 0;
+        for (let pi = 0; pi < pools.length; pi++) {
+          const ob = pools[pi].ob;
+          const yi = Math.ceil((ob.top - GAP - H) / 3);
+          if (yi > 2 && yi < dense.length - 1) {
+            const sp = spanAt(ob, ob.top - GAP + 0.5);
+            if (sp && x >= sp.L + 10 && x <= sp.R - 10) { dense = dense.slice(0, yi + 1); feed = pi; capLen = dense[dense.length - 1].s; break; }
+          }
+        }
+        const fullLen = dense[dense.length - 1].s;
+        const roll = Math.random();
+        let targetLen = roll < 0.28 ? 13 + Math.random() * 24 : roll < 0.7 ? 36 + Math.random() * 44 : 84 + Math.random() * (K.DRIP_MAX_LEN - 84);
+        targetLen = feed >= 0 ? capLen : Math.min(targetLen, fullLen - 2);
+        const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', inkCol);
+        dripG.appendChild(el);
+        runs.push({ dense, x, feed, capLen, gate: null, topW: K.DRIP_TOPW * (0.7 + Math.random() * 0.85), headR: K.DRIP_HEAD_R * (0.8 + Math.random() * 0.55), grow: K.DRIP_GROW_PXPS * (0.75 + Math.random() * 0.6), wph: Math.random() * 6.28, targetLen, len: 0, holdT: 0, released: false, canRelease: feed < 0 && targetLen > 74 && Math.random() < 0.55, retracting: false, retractFrom: 0, retractStart: 0, el });
+      }
+      for (let pi = 0; pi < pools.length; pi++) {
+        const ob = pools[pi].ob;
+        const corners = [ob.left - GAP + 1, ob.right + GAP - 1];
+        for (const cxr of corners) {
+          const dense = routeRun(cxr, 1.4, 0.03, Math.random() * 6.28, ob.bottom + GAP - 2);
+          if (dense.length < 3) continue;
+          const el = document.createElementNS(SVGNS, 'path'); el.setAttribute('fill', inkCol);
+          dripG.appendChild(el);
+          runs.push({ dense, x: cxr, feed: -1, capLen: 0, gate: pi, topW: 4.8, headR: 2.4 + Math.random() * 1.2, grow: 26 + Math.random() * 18, wph: Math.random() * 6.28, targetLen: Math.min(24 + Math.random() * 46, dense[dense.length - 1].s - 2), len: 0, holdT: 0, released: false, canRelease: false, retracting: false, retractFrom: 0, retractStart: 0, el });
+        }
+      }
+      for (const pl of pools) dripG.appendChild(pl.el);
+    };
+    const drawRun = (r) => {
+      if (r.len < 0.8) { r.el.setAttribute('d', ''); return; }
+      const dn = r.dense;
+      let m = 0;
+      while (m < dn.length && dn[m].s <= r.len) m++;
+      if (m < 2) { r.el.setAttribute('d', ''); return; }
+      const pts = dn.slice(0, m);
+      if (m < dn.length) {
+        const a2 = dn[m - 1], b2 = dn[m], f2 = (r.len - a2.s) / Math.max(0.001, b2.s - a2.s);
+        pts.push({ x: a2.x + (b2.x - a2.x) * f2, y: a2.y + (b2.y - a2.y) * f2, s: r.len });
+      }
+      const n2 = pts.length, Lt = Math.max(r.len, 1);
+      const mass = Math.min(1, r.len / 92);
+      const atPool = r.feed >= 0 && r.len >= r.capLen - 2;
+      const hrT = atPool ? 1.6 : Math.max(1.6, r.headR * (0.72 + 0.85 * mass));
+      const neck = 1 - 0.3 * Math.min(1, r.len / (r.targetLen || 1));
+      const headSpan = Math.min(18, Lt * 0.55);
+      const txs = [], tys = [], hws = [];
+      for (let i = 0; i < n2; i++) {
+        const a3 = pts[Math.max(0, i - 1)], b3 = pts[Math.min(n2 - 1, i + 1)];
+        let tx = b3.x - a3.x, ty = b3.y - a3.y; const tl = Math.hypot(tx, ty) || 1;
+        txs.push(tx / tl); tys.push(ty / tl);
+        const s2 = pts[i].s, tt = s2 / Lt;
+        const flare = s2 < 10 ? 1 + (1 - s2 / 10) * 0.9 : 1;
+        let hw2 = (r.topW / 2) * flare * (1 - 0.58 * tt) * neck * (1 + 0.1 * Math.sin(s2 * 0.09 + r.wph));
+        const fromTip = Lt - s2;
+        if (!atPool && fromTip < headSpan) {
+          const u = 1 - fromTip / headSpan;
+          hw2 = (hw2 * (1 - u) + hrT * u) * (1 + 0.34 * mass * Math.sin(u * Math.PI));
+        }
+        hws.push(Math.max(0.7, hw2));
+      }
+      const left = [], right = [];
+      for (let i = 0; i < n2; i++) {
+        left.push((pts[i].x - tys[i] * hws[i]).toFixed(1) + ' ' + (pts[i].y + txs[i] * hws[i]).toFixed(1));
+        right.push((pts[i].x + tys[i] * hws[i]).toFixed(1) + ' ' + (pts[i].y - txs[i] * hws[i]).toFixed(1));
+      }
+      let d2 = 'M ' + left[0];
+      if (n2 > 1) d2 += ' L ' + left.slice(1).join(' L ');
+      const ti = n2 - 1, capR = hws[ti], ctx = txs[ti], cty = tys[ti], cpx = pts[ti].x, cpy = pts[ti].y;
+      for (let a4 = 1; a4 <= 6; a4++) {
+        const th = (a4 / 7) * Math.PI, co = Math.cos(th), si = Math.sin(th);
+        d2 += ' L ' + (cpx + (-cty * co + ctx * si) * capR).toFixed(1) + ' ' + (cpy + (ctx * co + cty * si) * capR).toFixed(1);
+      }
+      if (n2 > 1) d2 += ' L ' + right.slice(0, n2).reverse().join(' L ');
+      r.el.setAttribute('d', d2 + ' Z');
+    };
+    const drawBead = () => {
+      if (!beadEl) return;
+      const amp = Math.max(0, Math.min(1, (f - 0.9) / 0.1));
+      if (amp < 0.04 || W < 40) { beadEl.setAttribute('d', ''); return; }
+      const bx0 = Math.min(H * 0.5, 30) - 3, bx1 = W - bx0, NB = 34;
+      let d2 = 'M ' + bx0.toFixed(1) + ' ' + (H - 1.5);
+      for (let i = 0; i <= NB; i++) {
+        const x = bx0 + (i / NB) * (bx1 - bx0);
+        let b = 1.3 * amp + 0.9 * amp * Math.sin(x * 0.075 + phase * 2.2);
+        for (const r of runs) { if (r.gate != null) continue; const dxr = (x - r.x) / 10; b += Math.exp(-dxr * dxr) * (1.7 + Math.min(5, r.len * 0.07)) * amp; }
+        d2 += ' L ' + x.toFixed(1) + ' ' + (H + Math.max(0, b)).toFixed(1);
+      }
+      d2 += ' L ' + bx1.toFixed(1) + ' ' + (H - 1.5) + ' Z';
+      beadEl.setAttribute('d', d2);
+    };
+    const drawPools = () => {
+      for (const pl of pools) {
+        if (pl.g < 0.04) { pl.el.setAttribute('d', ''); continue; }
+        const ob = pl.ob, g = pl.g;
+        const halfW = ((ob.right - ob.left) / 2 + GAP) * Math.min(1, 0.34 + 0.66 * g);
+        const cx2 = ob.cx, topY = ob.top - GAP + 1.4, ph2 = 2.2 + 7.8 * g;
+        const xL = cx2 - halfW, xR = cx2 + halfW;
+        let d2 = 'M ' + xL.toFixed(1) + ' ' + (topY + 2.4).toFixed(1);
+        const NP = 14;
+        for (let i = 0; i <= NP; i++) {
+          const tt = i / NP, x = xL + tt * halfW * 2;
+          const dome = Math.sin(tt * Math.PI);
+          const wave = 1 + 0.14 * Math.sin(tt * 9 + phase * 2.4);
+          d2 += ' L ' + x.toFixed(1) + ' ' + (topY - ph2 * dome * wave).toFixed(1);
+        }
+        d2 += ' L ' + xR.toFixed(1) + ' ' + (topY + 2.4).toFixed(1) + ' Z';
+        pl.el.setAttribute('d', d2);
+      }
+    };
+    const spawnDrop = (x, y, rr) => {
+      const el = document.createElementNS(SVGNS, 'circle');
+      el.setAttribute('fill', inkCol); el.setAttribute('r', rr.toFixed(1));
+      dripG.appendChild(el);
+      drops.push({ x, y, vy: 30, r: rr, el });
+    };
+    const microSplat = (x, y) => {
+      const g2 = document.createElementNS(SVGNS, 'g');
+      let inner = '';
+      for (let i = 0; i < 3; i++) { const dx = (Math.random() - 0.5) * 18, rx = 1 + Math.random() * 1.8; inner += '<ellipse cx="' + (x + dx).toFixed(1) + '" cy="' + (y - 1 - Math.random() * 2.5).toFixed(1) + '" rx="' + rx.toFixed(1) + '" ry="' + (rx * 0.5).toFixed(1) + '" fill="' + inkCol + '"></ellipse>'; }
+      g2.innerHTML = inner; dripG.appendChild(g2);
+      g2.style.transition = 'opacity .7s ease .1s';
+      requestAnimationFrame(() => { g2.style.opacity = '0'; });
+      setTimeout(() => g2.remove(), 900);
+    };
+    const tick = (now) => {
+      const dt = lastT ? Math.min(0.05, (now - lastT) / 1000) : 0.016; lastT = now;
+      phase += dt;
+      if (anim) { let p = (now - anim.start) / anim.dur; if (p >= 1) p = 1; f = anim.from + (anim.to - anim.from) * anim.ease(p); if (p >= 1) { f = anim.to; anim = null; } }
+      buildFill(); buildLabel();
+      if (drainAt && now >= drainAt) { drainAt = 0; hovering = false; pendingSnapAt = now + K.DRIP_RETRACT_MS * 0.82; }
+      let anyRun = false;
+      for (const r of runs) {
+        const gateOpen = r.gate == null || (pools[r.gate] && pools[r.gate].g > 0.85);
+        if (hovering && !reduce && gateOpen) {
+          const tgt = f > 0.96 ? r.targetLen : 0;
+          if (r.len < tgt) {
+            let sp2 = r.grow * (1 + (r.len / K.DRIP_MAX_LEN) * 1.15);
+            if (r.feed >= 0) sp2 *= 1 - 0.45 * Math.pow(r.len / (r.capLen || 1), 2);
+            r.len = Math.min(tgt, r.len + sp2 * dt);
+            r.holdT = 0;
+          } else if (r.len > tgt) { r.len = Math.max(tgt, r.len - r.grow * 2 * dt); }
+          else if (r.canRelease && !r.released) {
+            r.holdT += dt;
+            if (r.holdT > 0.3) {
+              r.released = true;
+              let tipIdx = 0;
+              while (tipIdx < r.dense.length - 1 && r.dense[tipIdx + 1].s <= r.len) tipIdx++;
+              const tip = r.dense[tipIdx];
+              spawnDrop(tip.x, tip.y, Math.max(2, r.headR * (0.85 + 0.3 * Math.random())));
+              r.len *= 0.78;
+            }
+          }
+          r.retracting = false;
+        } else {
+          if (!r.retracting) { r.retracting = true; r.retractFrom = r.len; r.retractStart = now; }
+          let p = (now - r.retractStart) / K.DRIP_RETRACT_MS; if (p >= 1) p = 1;
+          r.len = r.retractFrom * (1 - easeOutCubic(p));
+        }
+        drawRun(r);
+        if (r.len > 0.4) anyRun = true;
+      }
+      for (let pi = 0; pi < pools.length; pi++) {
+        const pl = pools[pi];
+        let g2 = pl.extra;
+        for (const r of runs) if (r.feed === pi) g2 += Math.max(0, Math.min(1, (r.len - (r.capLen - 26)) / 26)) * 0.55;
+        g2 = Math.min(1, g2);
+        if (hovering && !reduce) pl.g = Math.min(1, pl.g + Math.max(0, g2 - pl.g) * Math.min(1, dt * 5));
+        else { pl.g = Math.max(0, pl.g - dt * 1.6); pl.extra = Math.max(0, pl.extra - dt * 0.8); }
+        if (pl.g > 0.02) anyRun = true;
+      }
+      drawPools();
+      drawBead();
+      for (let di = drops.length - 1; di >= 0; di--) {
+        const dr = drops[di];
+        dr.vy += 1350 * dt; dr.y += dr.vy * dt;
+        let landed = false;
+        for (let pi = 0; pi < pools.length; pi++) {
+          const ob = pools[pi].ob;
+          if (dr.y + dr.r >= ob.top - GAP && dr.y < ob.bottom && dr.x >= ob.left - 3 && dr.x <= ob.right + 3) {
+            pools[pi].extra = Math.min(1, pools[pi].extra + 0.45);
+            microSplat(dr.x, ob.top - GAP + 1);
+            landed = true; break;
+          }
+        }
+        if (landed || dr.y > H + FALL + 24) { dr.el.remove(); drops.splice(di, 1); continue; }
+        dr.el.setAttribute('cx', dr.x.toFixed(1)); dr.el.setAttribute('cy', dr.y.toFixed(1));
+        anyRun = true;
+      }
+      if (!hovering && !anyRun && runs.length && f < 0.05) { dripG.innerHTML = ''; runs = []; pools = []; drops = []; beadEl = null; }
+      if (pendingSnapAt && now >= pendingSnapAt) { pendingSnapAt = 0; anim = { from: f, to: 0, start: now, dur: K.SNAP_MS, ease: easeOutBack }; }
+      running = !!(anim || (hovering && !reduce) || anyRun || drainAt || pendingSnapAt);
+      if (running) rafId = requestAnimationFrame(tick); else { rafId = 0; lastT = 0; }
+    };
+    const start = () => { if (!running) { running = true; lastT = 0; rafId = requestAnimationFrame(tick); } };
+    const fill = (dur) => { anim = { from: f, to: 1, start: performance.now(), dur, ease: easeOutCubic }; start(); };
+    const onEnter = () => { hovering = true; pendingSnapAt = 0; drainAt = 0; if (reduce) { f = 1; buildFill(); buildLabel(); } else { if (!runs.length) makeRuns(); fill(K.FILL_MS); } };
+    const onLeave = () => { hovering = false; if (reduce) { f = 0; dripG.innerHTML = ''; runs = []; buildFill(); buildLabel(); } else { pendingSnapAt = performance.now() + K.DRIP_RETRACT_MS * 0.82; start(); } };
+    const onTap = () => { if (reduce) return; hovering = true; if (!runs.length) makeRuns(); fill(K.FILL_MS * 0.7); drainAt = performance.now() + 900; };
+
+    if (canHover) {
+      btn.addEventListener('pointerenter', onEnter);
+      btn.addEventListener('pointerleave', onLeave);
+      btn.addEventListener('focus', onEnter);
+      btn.addEventListener('blur', onLeave);
+    }
+    btn.addEventListener('click', (e) => {
+      if (navTarget) { e.preventDefault(); pendingSnapAt = 0; drainAt = 0; this._flood(navTarget, btn); }
+      else if (addWhat) { this._addClick(addWhat); if (!canHover) onTap(); }
+      else if (isSeal) { this._seal(); }
+      else if (!canHover && !btn.hasAttribute('data-submit')) onTap();
+    });
+    buildFill(); buildLabel();
+    return { btn, destroy(){ cancelAnimationFrame(rafId); ro.disconnect(); dripG.innerHTML = ''; } };
+  }
+
+  // ===================== store logic =====================
+  _saveCart(cart){ try { localStorage.setItem('gf3-cart', JSON.stringify(cart)); } catch(e){} }
+
+  _add(id, size){
+    const p = this.P[id]; if (!p) return;
+    if ((this.props.dropState ?? 'live') === 'between') return;
+    const key = id + (size ? ':' + size : '');
+    const cart = this.state.cart.map(r => ({ ...r }));
+    const hit = cart.find(r => r.key === key);
+    if (hit) hit.qty += 1; else cart.push({ key, id, size: size || null, qty: 1 });
+    this._saveCart(cart);
+    this.setState({ cart, drawer: true, sealed: false, sizeError: false });
+  }
+
+  _addClick(what){
+    if (what === 'hero') { if (!this.state.sizeSel) { this.setState({ sizeError: true }); return; } this._add('tee', this.state.sizeSel); }
+    else if (what === 'pdp') { const p = this.P[this.state.pdpId]; if (p.sized && !this.state.sizeSel) { this.setState({ sizeError: true }); return; } this._add(this.state.pdpId, p.sized ? this.state.sizeSel : null); }
+    else this._add(what);
+  }
+
+  _seal(){ if (!this.state.cart.length) return; this._saveCart([]); this.setState({ cart: [], sealed: true }); }
+
+  _openPiece(id){ this._lastScroll = scrollY; this.setState({ screen: 'pdp', pdpId: id, thumb: 0, sizeSel: null, sizeError: false }); requestAnimationFrame(() => { try { scrollTo(0, 0); } catch(e){} }); }
+
+  _scrollToSec(name){
+    const go = () => { const el = document.querySelector('[data-sec="' + name + '"]'); if (el) { const y = el.getBoundingClientRect().top + scrollY - 74; try { window.scrollTo({ top: y, behavior: 'smooth' }); } catch(e){ window.scrollTo(0, y); } } };
+    if (this.state.screen !== 'home') { this.setState({ screen: 'home' }); setTimeout(go, 60); } else go();
+  }
+
+  // ===================== renderVals =====================
+  renderVals(){
+    const st = this.state;
+    const ds = this.props.dropState ?? 'live';
+    const isLive = ds === 'live', isBetween = !isLive;
+    const edition = this.props.editionSize ?? 50;
+    const left = Math.min(this.props.dropLeft ?? 31, edition);
+    const soldPct = Math.round(((edition - left) / edition) * 100) + '%';
+    const low = left <= Math.max(3, edition * 0.2);
+
+    let target = Date.parse(this.props.nextDropDate ?? '') || (Date.now() + 23 * 864e5);
+    let diff = Math.max(0, target - st.now);
+    const two = n => String(n).padStart(2, '0');
+    const dd = two(Math.floor(diff / 864e5)), hh = two(Math.floor(diff / 36e5) % 24), mm = two(Math.floor(diff / 6e4) % 60), ss = two(Math.floor(diff / 1e3) % 60);
+    const nd = new Date(target);
+    const nextDropLabel = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][nd.getMonth()] + ' ' + nd.getDate();
+
+    const SZ = ['XS', 'S', 'M', 'L', 'XL'];
+    const sizes = SZ.map(l => ({
+      label: l,
+      sel: () => this.setState({ sizeSel: l, sizeError: false }),
+      style: 'position:relative;border:none;background:none;cursor:pointer;font-family:\'Space Mono\',monospace;font-size:17px;padding:10px 14px;letter-spacing:.08em;transition:color .2s,border-color .2s;font-weight:700;border-bottom:5px solid ' + (st.sizeSel === l ? '#DA7285;color:#16130F' : 'transparent;color:#4C4638')
+    }));
+
+    const p = this.P[st.pdpId];
+    const money = n => '$' + n;
+    const cartRows = st.cart.map(r => {
+      const pr = this.P[r.id];
+      return {
+        key: r.key, thumb: pr.art, name: pr.name,
+        sub: pr.kind.split('\u00b7')[0].trim() + (r.size ? ' \u00b7 ' + r.size : ''),
+        price: money(pr.price * r.qty), qty: r.qty,
+        inc: () => { const c = st.cart.map(x => x.key === r.key ? { ...x, qty: x.qty + 1 } : x); this._saveCart(c); this.setState({ cart: c }); },
+        dec: () => { const c = st.cart.map(x => x.key === r.key ? { ...x, qty: x.qty - 1 } : x).filter(x => x.qty > 0); this._saveCart(c); this.setState({ cart: c }); },
+        rm: () => { const c = st.cart.filter(x => x.key !== r.key); this._saveCart(c); this.setState({ cart: c }); }
+      };
+    });
+    const subtotal = st.cart.reduce((a, r) => a + this.P[r.id].price * r.qty, 0);
+    const count = st.cart.reduce((a, r) => a + r.qty, 0);
+
+    const tabOff = 'border:1.5px solid rgba(22,19,15,.28);background:transparent;border-radius:999px;cursor:pointer;padding:9px 18px;font-family:\'Space Mono\',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#8A8478;transition:all .25s';
+    const tabOn = 'border:1.5px solid #16130F;background:#16130F;border-radius:999px;cursor:pointer;padding:9px 18px;font-family:\'Space Mono\',monospace;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#F7F5F0;transition:all .25s';
+    const thumbBase = 'border:1px solid rgba(22,19,15,.25);background:transparent;border-radius:999px;cursor:pointer;padding:8px 16px;font-family:\'Space Mono\',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;transition:all .25s;color:#8A8478';
+    const thumbOn = 'border:1px solid #16130F;background:#16130F;border-radius:999px;cursor:pointer;padding:8px 16px;font-family:\'Space Mono\',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;transition:all .25s;color:#F7F5F0';
+
+    return {
+      intro: st.intro, skip: () => this._endIntro(),
+      satchelCount: String(count),
+      openDrawer: () => this.setState({ drawer: true, sealed: false }),
+      closeDrawer: () => this.setState({ drawer: false, sealed: false }),
+      drawer: st.drawer,
+      goHome: (e) => { if (this.state.screen !== 'home') this._flood('home', e && e.currentTarget); else { try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(err){} } },
+      navShop: (e) => { if (this.state.screen !== 'home') this._flood('home', e && e.currentTarget, 'shop'); else this._scrollToSec('shop'); },
+      navVault: (e) => { if (this.state.screen !== 'vault') this._flood('vault', e && e.currentTarget); },
+      isHome: st.screen === 'home', isPdp: st.screen === 'pdp', isVault: st.screen === 'vault',
+      isLive, isBetween,
+      editionSize: String(edition),
+      dropLeftLabel: left + ' of ' + edition + ' left',
+      dropLeftShort: left + ' left',
+      dropLeftColor: low ? '#DA7285' : '#8A8478',
+      dropSoldPct: soldPct,
+      nextDropLabel, dd, hh, mm, ss,
+      sizes, sizeError: st.sizeError,
+      tabWear: () => this.setState({ filter: this.state.filter === 'wear' ? 'all' : 'wear' }),
+      tabPaper: () => this.setState({ filter: this.state.filter === 'paper' ? 'all' : 'paper' }),
+      tabWearStyle: st.filter === 'wear' ? tabOn : tabOff,
+      tabPaperStyle: st.filter === 'paper' ? tabOn : tabOff,
+      showWear: st.filter !== 'paper',
+      showPaper: st.filter !== 'wear',
+      openSticker: () => this._openPiece('sticker'),
+      openPrint: () => this._openPiece('print'),
+      openTee: () => this._openPiece('tee'),
+      openSweat: () => this._openPiece('sweat'),
+      openOriginal: () => this._openPiece('original'),
+      notify: (e) => { e.preventDefault(); this.setState({ notified: true }); },
+      notified: st.notified, notNotified: !st.notified,
+      subscribe: (e) => { e.preventDefault(); this.setState({ subscribed: true }); },
+      subscribed: st.subscribed, notSubscribed: !st.subscribed,
+      backToShop: () => { this.setState({ screen: 'home' }); const y = this._lastScroll || 0; requestAnimationFrame(() => { try { scrollTo(0, y); } catch(e){} }); },
+      pdpKind: p.kind, pdpName: p.name, pdpPrice: money(p.price), pdpDesc: p.desc, pdpMeta: p.meta, pdpNote: p.note,
+      pdpArt: p.art, pdpArtW: p.artW, pdpSlotId: 'body-' + st.pdpId,
+      pdpHasSize: p.sized,
+      pdpScarcity: isLive ? (st.pdpId === 'original' ? '1 of 1 — one buyer, one wall' : left + ' of ' + edition + ' left — never reprinted') : 'vaulted — this piece will never be reprinted',
+      pdpCta: st.pdpId === 'original' ? 'Claim the original — ' + money(p.price) : 'Add to bag — ' + money(p.price),
+      pdpBuyable: isLive, pdpVaulted: isBetween,
+      showArt: st.thumb === 0, showBody: st.thumb === 1, showDetail: st.thumb === 2,
+      selArt: () => this.setState({ thumb: 0 }), selBody: () => this.setState({ thumb: 1 }), selDetail: () => this.setState({ thumb: 2 }),
+      thumbArtStyle: st.thumb === 0 ? thumbOn : thumbBase,
+      thumbBodyStyle: st.thumb === 1 ? thumbOn : thumbBase,
+      thumbDetailStyle: st.thumb === 2 ? thumbOn : thumbBase,
+      vaultPieces: this.VAULT,
+      cartRows, cartEmpty: !st.cart.length, cartHasItems: !!st.cart.length,
+      cartSubtotal: money(subtotal), cartTotal: money(subtotal),
+      sealed: st.sealed, notSealed: !st.sealed,
+      keepLooking: () => this.setState({ drawer: false, sealed: false })
+    };
+  }
+}
+</script>
+</body>
+</html>
