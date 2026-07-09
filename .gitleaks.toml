@@ -1,0 +1,39 @@
+# GoteFigure secret-scan config — Sprint 0 (Safe Backend Doctrine principle 11).
+# Extends gitleaks' default ruleset with GoteFigure-specific vendor patterns so the
+# pre-commit hook and any full scan catch the retired-vendor key formats too.
+title = "GoteFigure gitleaks config"
+
+[extend]
+useDefault = true
+
+# --- Custom: retired-vendor key formats (n8n, Shotstack) ---
+# Context-scoped (the vendor name must sit next to the value) to keep false positives near zero.
+[[rules]]
+id = "gotefigure-n8n-key"
+description = "n8n API key / n8n-context secret assignment"
+regex = '''(?i)n8n[._-]?(api[._-]?)?key['"\s:=]{1,4}[A-Za-z0-9._\-]{16,}'''
+tags = ["n8n", "gotefigure"]
+
+[[rules]]
+id = "gotefigure-shotstack-key"
+description = "Shotstack API key / shotstack-context secret assignment"
+regex = '''(?i)shotstack[._-]?(api[._-]?)?key['"\s:=]{1,4}[A-Za-z0-9]{16,}'''
+tags = ["shotstack", "gotefigure"]
+
+# --- Custom: any key material dropped into an *KEY(S).txt style file ---
+[[rules]]
+id = "gotefigure-keyfile"
+description = "Key material in an API_KEY.txt / *KEYS.txt style file"
+regex = '''(?i)(api|secret|access)[._-]?key['"\s:=]{1,4}[A-Za-z0-9._\-]{20,}'''
+path = '''(?i)(api_?key|.*keys)\.txt$'''
+tags = ["gotefigure"]
+
+# These files hold rule patterns / names-only templates by policy, never real secrets.
+# Allowlisting them stops the scanner from flagging its own regexes as findings.
+[allowlist]
+description = "Scanner config, names-only env template, and the hooks dir"
+paths = [
+  '''\.gitleaks\.toml$''',
+  '''(^|/)\.env\.example$''',
+  '''(^|/)\.githooks/''',
+]

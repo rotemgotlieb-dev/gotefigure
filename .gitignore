@@ -6,4 +6,21 @@ site/.astro/
 
 assets-source/work/
 
+# --- Secrets & local env (Sprint 0 hardening; Safe Backend Doctrine principle 1) ---
+# Never commit real secret values. Values live in the Cloudflare Pages env/secret store
+# (prod) and .dev.vars locally. Commit .env.example (NAMES only) instead.
+.env
+.env.*
+!.env.example
 site/.env
+site/.env.*
+!site/.env.example
+*.key
+*.pem
+API_KEY.txt
+SHOTSTACK_KEYS.txt
+.mcp.json
+.dev.vars
+site/.dev.vars
+.wrangler/
+site/.wrangler/

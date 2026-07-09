@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# GoteFigure pre-commit secret scan (Sprint 0 — Safe Backend Doctrine principle 11).
+# Blocks a commit if gitleaks finds a secret in the STAGED changes.
+# Enable once per clone:  git config core.hooksPath .githooks
+set -euo pipefail
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is not installed. Install it (brew install gitleaks) before committing." >&2
+  echo "This repo requires the secret scan; the commit is blocked until gitleaks is available." >&2
+  exit 1
+fi
+
+# --staged scans only what is about to be committed; --redact keeps any hit out of the terminal/logs.
+if ! gitleaks protect --staged --redact --config .gitleaks.toml; then
+  echo "" >&2
+  echo "pre-commit: BLOCKED — gitleaks found a secret in your staged changes." >&2
+  echo "Remove the value, put it in the Cloudflare env/secret store, then recommit." >&2
+  exit 1
+fi
