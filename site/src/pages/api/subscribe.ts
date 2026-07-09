@@ -15,18 +15,18 @@ const json = (body: unknown, status: number) =>
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const bindings = env as unknown as { DB?: any; TURNSTILE_SECRET_KEY?: string };
 
-  let email = '', website = '', token = '';
+  let email = '', honeypot = '', token = '';
   const ct = request.headers.get('content-type') || '';
   try {
     if (ct.includes('application/json')) {
       const b = (await request.json()) as Record<string, unknown>;
       email = String(b.email ?? '').trim();
-      website = String(b.website ?? '').trim();              // honeypot field
+      honeypot = String(b.gf_hp ?? '').trim();               // honeypot (non-semantic name; browser autofill ignores it)
       token = String(b['cf-turnstile-response'] ?? '').trim();
     } else {
       const f = await request.formData();
       email = String(f.get('email') ?? '').trim();
-      website = String(f.get('website') ?? '').trim();
+      honeypot = String(f.get('gf_hp') ?? '').trim();
       token = String(f.get('cf-turnstile-response') ?? '').trim();
     }
   } catch {
@@ -34,7 +34,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   }
 
   // Honeypot tripped (a bot filled the hidden field) -> look successful, store nothing.
-  if (website) return json({ ok: true }, 200);
+  if (honeypot) return json({ ok: true }, 200);
 
   if (!EMAIL_RE.test(email) || email.length > 254) return json({ ok: false, error: 'invalid_email' }, 400);
 

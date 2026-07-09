@@ -39,6 +39,9 @@ const frames = [
   title="After Hours — GoteFigure"
   description="The lights aren't on yet. GoteFigure is coming back — a salon of hand-drawn work. Leave your email and we'll tell you when the shop opens."
 >
+  <!-- Turnstile (invisible) loader: used by both After Hours notify forms; explicit-render in after-hours.ts -->
+  <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
   <!-- film grain (shared) -->
   <div class="ah-grain" aria-hidden="true"></div>
 
@@ -133,8 +136,12 @@ const frames = [
               <form data-email-form style="display:flex;gap:2cqw">
                 <input data-email-input type="email" required placeholder="you@email" aria-label="your email"
                   style="flex:1;min-width:0;border:none;border-bottom:1.5px solid var(--ink);background:transparent;padding:2.5cqw 2px;font-size:clamp(12px,3.6cqw,14px);color:var(--ink);outline:none" />
+                <input data-hp type="text" name="gf_hp" tabindex="-1" autocomplete="off" aria-hidden="true"
+                  style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none" />
                 <button type="submit" style="border:none;background:var(--ink);color:var(--paper);font-family:var(--font-mono);font-size:clamp(9px,2.9cqw,11px);letter-spacing:.14em;text-transform:uppercase;padding:0 3.6cqw;border-radius:3px">notify</button>
               </form>
+              <div data-turnstile></div>
+              <div data-email-error role="alert" aria-live="assertive" style="min-height:1em;margin-top:1.5cqw;font-family:var(--font-mono);font-size:clamp(8px,2.6cqw,10px);letter-spacing:.06em;color:var(--pink)"></div>
             </div>
             <div data-email-done style="display:none;margin-top:2cqw;font-family:var(--font-scrawl);font-size:clamp(17px,6cqw,24px);color:var(--ink)">noted. ♥ you're on the list.</div>
             <a href="/info" style="display:inline-block;margin-top:2cqw;font-family:var(--font-mono);font-size:clamp(8px,2.6cqw,10px);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);padding:2px 0 3px">meanwhile: the sketchbooks →</a>
@@ -240,8 +247,11 @@ const frames = [
           <div class="ah-email-wrap" data-email-wrap>
             <form class="ah-email-form" data-email-form>
               <input class="ah-email-input" data-email-input type="email" required placeholder="you@email" aria-label="your email" />
+              <input data-hp class="ah-hp" type="text" name="gf_hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
               <button class="ah-email-btn" type="submit">notify</button>
             </form>
+            <div data-turnstile></div>
+            <div class="ah-email-err" data-email-error role="alert" aria-live="assertive"></div>
           </div>
           <div class="ah-email-done" data-email-done>noted. ♥ you're on the list.</div>
           <a class="ah-email-link" href="/info">meanwhile: the sketchbooks →</a>
@@ -343,6 +353,8 @@ const frames = [
     .ah-email-h { font-family: var(--font-scrawl); font-size: 36px; color: var(--ink); -webkit-text-stroke: .6px var(--ink); transform: rotate(-.8deg); }
     .ah-email-wrap { margin-top: 8px; }
     .ah-email-form { display: flex; gap: 6px; }
+    .ah-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+    .ah-email-err { min-height: 1em; margin-top: 6px; font-family: var(--font-mono); font-size: 10px; letter-spacing: .06em; color: var(--pink); }
     .ah-email-input { flex: 1; min-width: 0; border: none; border-bottom: 1.5px solid var(--ink); background: transparent; padding: 6px 2px; color: var(--ink); outline: none; font-family: var(--font-mono); font-size: 13px; }
     .ah-email-input::placeholder { color: var(--muted-2); }
     .ah-email-btn { border: none; background: var(--ink); color: var(--paper); cursor: pointer; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; padding: 0 11px; border-radius: 3px; transition: background .25s; }

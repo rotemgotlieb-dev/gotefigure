@@ -8,6 +8,147 @@
 // Reduced-motion: starts lit + static in both (§7.6.2). No-ops on any page without [data-ah-block].
 import { defineModule } from './core';
 
+// ---- Sprint 1 email capture (shared by both breakpoints) ----
+// Replaces the old localStorage-only stub: submit posts to the own-the-data endpoint
+// (/api/subscribe -> Cloudflare D1, no external email service). The server verifies an
+// invisible Turnstile token (fails closed), reads a honeypot, and does a parameterized insert.
+// Invisible widget = no visual clutter; token fetched on demand via getResponse/execute.
+// Sitekey is env-sourced (PUBLIC_* is inlined at build; a sitekey is public, so this is safe) so it
+// flips in the SAME Cloudflare env layer as TURNSTILE_SECRET_KEY. Falls back to the invisible TEST key
+// for local dev + previews. GO-LIVE: set PUBLIC_TURNSTILE_SITEKEY (real SITE key) alongside the secret,
+// then confirm a real signup lands a D1 row before DNS cutover (test key + real secret = silent zero-capture).
+const TS_SITEKEY = import.meta.env.PUBLIC_TURNSTILE_SITEKEY || '1x00000000000000000000BB';
+
+interface TurnstileApi {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+  getResponse: (id: string) => string | undefined;
+  execute: (id: string) => void;
+  reset: (id: string) => void;
+  remove: (id: string) => void;
+}
+const getTS = (): TurnstileApi | undefined =>
+  (window as unknown as { turnstile?: TurnstileApi }).turnstile;
+
+// One invisible Turnstile widget bound to a container. Polls for the async-loaded script,
+// renders explicitly, and hands back a fresh token on demand (fails soft to '' so the server,
+// which fails closed, is the real gate).
+function createTurnstile(container: HTMLElement) {
+  let widgetId: string | null = null;
+  let latest = '';
+  let waiters: Array<(t: string) => void> = [];
+  const settle = (t: string) => { latest = t; const w = waiters; waiters = []; w.forEach((r) => r(t)); };
+
+  const render = () => {
+    const ts = getTS();
+    if (!ts || widgetId !== null) return;
+    try {
+      widgetId = ts.render(container, {
+        sitekey: TS_SITEKEY,
+        size: 'invisible',
+        callback: (t: string) => settle(t),
+        'error-callback': () => { latest = ''; },
+        'expired-callback': () => { latest = ''; },
+      });
+    } catch { /* render failed; getToken falls back to '' */ }
+  };
+
+  let tries = 0;
+  const poll = window.setInterval(() => {
+    if (getTS()) { window.clearInterval(poll); render(); }
+    else if (++tries > 100) window.clearInterval(poll); // give up after ~5s
+  }, 50);
+
+  return {
+    getToken(): Promise<string> {
+      const ts = getTS();
+      if (ts && widgetId !== null) {
+        const cur = ts.getResponse(widgetId);
+        if (cur) return Promise.resolve(cur);
+      }
+      return new Promise<string>((resolve) => {
+        waiters.push(resolve);
+        try { if (ts && widgetId !== null) ts.execute(widgetId); } catch { /* noop */ }
+        window.setTimeout(() => {
+          const i = waiters.indexOf(resolve);
+          if (i >= 0) { waiters.splice(i, 1); resolve(latest); }
+        }, 8000);
+      });
+    },
+    reset() { const ts = getTS(); try { if (ts && widgetId !== null) ts.reset(widgetId); } catch { /* noop */ } latest = ''; },
+    remove() { const ts = getTS(); try { if (ts && widgetId !== null) ts.remove(widgetId); } catch { /* noop */ } widgetId = null; window.clearInterval(poll); },
+  };
+}
+
+// Wire the notify-me form inside a mounted After Hours block to the capture endpoint.
+// Returns a disposer (removes the listener + the Turnstile widget) for the mount lifecycle.
+function wireEmailCapture(root: HTMLElement) {
+  const form = root.querySelector<HTMLFormElement>('[data-email-form]');
+  const input = root.querySelector<HTMLInputElement>('[data-email-input]');
+  const emailWrap = root.querySelector<HTMLElement>('[data-email-wrap]');
+  const emailDone = root.querySelector<HTMLElement>('[data-email-done]');
+  const hp = root.querySelector<HTMLInputElement>('[data-hp]');
+  const tsBox = root.querySelector<HTMLElement>('[data-turnstile]');
+  const errEl = root.querySelector<HTMLElement>('[data-email-error]');
+  if (!form || !input) return () => { /* nothing to dispose */ };
+
+  // Remembered success (per-browser UX, independent of the server): already on the list -> show done.
+  let signed = false; try { signed = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
+  if (emailWrap) emailWrap.style.display = signed ? 'none' : '';
+  if (emailDone) emailDone.style.display = signed ? 'block' : 'none';
+
+  const ts = tsBox ? createTurnstile(tsBox) : null;
+  const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+  // Failures announce to AT (role=alert lives on [data-email-error]) AND shake the input, so the
+  // outcome is perceivable to screen-reader + low-vision users, not just a silent wobble.
+  const fail = (msg: string) => {
+    if (errEl) errEl.textContent = msg;
+    input.setAttribute('aria-invalid', 'true');
+    input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfahm-wob .4s ease';
+  };
+  const clearErr = () => { if (errEl) errEl.textContent = ''; input.removeAttribute('aria-invalid'); };
+  const showDone = () => {
+    if (emailWrap) emailWrap.style.display = 'none';
+    if (emailDone) { emailDone.style.display = 'block'; emailDone.style.animation = 'gfahm-pop .5s ease both'; }
+  };
+  let busy = false;
+
+  const run = async (e: Event): Promise<void> => {
+    e.preventDefault();
+    if (busy) return;
+    clearErr();
+    const v = (input.value || '').trim();
+    if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) { fail('that email looks off, please check it'); return; }
+    busy = true; if (btn) btn.disabled = true;
+    try {
+      const hpVal = hp?.value || '';                       // honeypot: empty for a real human
+      const token = ts ? await ts.getToken() : '';
+      const res = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: v, gf_hp: hpVal, 'cf-turnstile-response': token }),
+      });
+      const data = (await res.json().catch(() => ({ ok: false }))) as { ok?: boolean };
+      // The server also answers {ok:true} for a honeypot trip (storing nothing). Only treat it as a
+      // real signup when OUR honeypot was empty, so an autofilled hidden field cannot cache a false success.
+      if (res.ok && data.ok && !hpVal) {
+        try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
+        showDone();
+      } else if (res.ok && data.ok && hpVal) {
+        fail('something went wrong, please try again');    // honeypot tripped (autofill); do not cache
+      } else {
+        fail('could not reach us, please try again'); ts?.reset();
+      }
+    } catch {
+      fail('could not reach us, please try again'); ts?.reset();
+    } finally {
+      busy = false; if (btn) btn.disabled = false;
+    }
+  };
+  const handler = (e: Event) => { void run(e); };
+  form.addEventListener('submit', handler);
+  return () => { form.removeEventListener('submit', handler); ts?.remove(); };
+}
+
 defineModule('after-hours', ({ reduced }) => {
   const cs = getComputedStyle(document.documentElement);
   const BEAM = cs.getPropertyValue('--ah-beam').trim() || '255, 214, 140';
@@ -51,9 +192,6 @@ defineModule('after-hours', ({ reduced }) => {
     const dark = q('[data-dark]'), glow = q('[data-glow]');
     const cord = q<HTMLButtonElement>('[data-cord]'), cordInner = q('[data-cord-inner]'), eyes = q('[data-eyes]');
     const wm = q<HTMLImageElement>('[data-wm]'), tagline = q('[data-tagline]'), hint = q('[data-hint]');
-    const form = q<HTMLFormElement>('[data-email-form]'), input = q<HTMLInputElement>('[data-email-input]');
-    const emailWrap = q('[data-email-wrap]'), emailDone = q('[data-email-done]');
-
     const BEAM_BASE = 135; // px on a 390-wide phone, scaled by stage width
     let rect = stage.getBoundingClientRect();
     const measure = () => { rect = stage.getBoundingClientRect(); };
@@ -112,23 +250,8 @@ defineModule('after-hours', ({ reduced }) => {
       if (!lit) paintBeam();
       updateEyes();
     };
-    const applyEmailPref = () => {
-      let has = false; try { has = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
-      if (emailWrap) emailWrap.style.display = has ? 'none' : '';
-      if (emailDone) emailDone.style.display = has ? 'block' : 'none';
-    };
-    const onSubmit = (e: Event) => {
-      e.preventDefault();
-      const v = (input?.value || '').trim();
-      if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) { if (input) { input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfahm-wob .4s ease'; } return; }
-      try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
-      if (emailWrap) emailWrap.style.display = 'none';
-      if (emailDone) { emailDone.style.display = 'block'; emailDone.style.animation = 'gfahm-pop .5s ease both'; }
-    };
-
     cord?.addEventListener('click', onToggle);
-    form?.addEventListener('submit', onSubmit);
-    applyEmailPref();
+    const disposeEmail = wireEmailCapture(root);
     let found = false; try { found = localStorage.getItem('gf-ah-found') === '1'; } catch { /* private mode */ }
     const moveEvents = ['pointermove', 'pointerdown', 'touchmove', 'touchstart'] as const;
     if (reduced) { setLit(true, true); }
@@ -143,7 +266,7 @@ defineModule('after-hours', ({ reduced }) => {
       removeEventListener('resize', measure);
       moveEvents.forEach((ev) => window.removeEventListener(ev, onMove as EventListener));
       cord?.removeEventListener('click', onToggle);
-      form?.removeEventListener('submit', onSubmit);
+      disposeEmail();
     };
   }
 
@@ -154,9 +277,6 @@ defineModule('after-hours', ({ reduced }) => {
     const dark = q('[data-dark]'), glow = q('[data-glow]');
     const cord = q<HTMLButtonElement>('[data-cord]'), cordInner = q('[data-cord-inner]'), eyes = q('[data-eyes]');
     const wm = q<HTMLImageElement>('[data-wm]'), tagline = q('[data-tagline]'), hint = q('[data-hint]');
-    const form = q<HTMLFormElement>('[data-email-form]'), input = q<HTMLInputElement>('[data-email-input]');
-    const emailWrap = q('[data-email-wrap]'), emailDone = q('[data-email-done]');
-
     const BEAM = 180; // px in the 1512-space, painted in viewport coords
     let lit = false, bx = innerWidth / 2, by = innerHeight * 0.42, tx = bx, ty = by, lastMove = 0, raf = 0;
     const t0 = performance.now();
@@ -213,23 +333,8 @@ defineModule('after-hours', ({ reduced }) => {
       if (!lit) paintBeam();
       updateEyes();
     };
-    const applyEmailPref = () => {
-      let has = false; try { has = !!localStorage.getItem('gf-soon-email'); } catch { /* private mode */ }
-      if (emailWrap) emailWrap.style.display = has ? 'none' : '';
-      if (emailDone) emailDone.style.display = has ? 'block' : 'none';
-    };
-    const onSubmit = (e: Event) => {
-      e.preventDefault();
-      const v = (input?.value || '').trim();
-      if (!v || v.indexOf('@') < 1 || v.indexOf('.') < 0) { if (input) { input.style.animation = 'none'; void input.offsetWidth; input.style.animation = 'gfahm-wob .4s ease'; } return; }
-      try { localStorage.setItem('gf-soon-email', v); } catch { /* private mode */ }
-      if (emailWrap) emailWrap.style.display = 'none';
-      if (emailDone) { emailDone.style.display = 'block'; emailDone.style.animation = 'gfahm-pop .5s ease both'; }
-    };
-
     cord?.addEventListener('click', onToggle);
-    form?.addEventListener('submit', onSubmit);
-    applyEmailPref();
+    const disposeEmail = wireEmailCapture(root);
     applyScale();
     addEventListener('resize', onResize, { passive: true });
     let found = false; try { found = localStorage.getItem('gf-ah-found') === '1'; } catch { /* private mode */ }
@@ -245,7 +350,7 @@ defineModule('after-hours', ({ reduced }) => {
       removeEventListener('resize', onResize);
       moveEvents.forEach((ev) => window.removeEventListener(ev, onMove as EventListener));
       cord?.removeEventListener('click', onToggle);
-      form?.removeEventListener('submit', onSubmit);
+      disposeEmail();
     };
   }
 
