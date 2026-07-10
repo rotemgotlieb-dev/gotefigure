@@ -22,7 +22,13 @@
     // /store, /piece/*, /vault) 404'd for real browsers while curl (no Sec-Fetch headers)
     // passed. These routes must be routed to the Worker first. Contract verified against the
     // installed wrangler config-schema.json → Assets.run_worker_first (string[] | boolean).
-    "run_worker_first": ["/store", "/store/", "/piece/*", "/vault", "/vault/", "/api/*"]
+    // S6 additions: /admin/* (gated orders view), /_image (Astro's image optimizer is a
+    // WORKER route; without this, /about images 404 under the asset layer - pre-existing
+    // S4 find), /art/v3/og/* (the GATED vault gallery: files stay in the asset store so
+    // the Worker can serve them via the ASSETS binding, but every request runs the gate
+    // first - direct public URLs 302, only cookie-holders get bytes; tradeoff accepted:
+    // no asset-layer edge cache on these ~11 images. dist-lint pins this list post-build.)
+    "run_worker_first": ["/store", "/store/", "/piece/*", "/vault", "/vault/", "/api/*", "/admin/*", "/_image", "/art/v3/og/*"]
   },
   "d1_databases": [
     { "binding": "DB", "database_name": "gotefigure", "database_id": "4e163578-3ba0-4ad9-b5b9-2d55a518a41b" }

@@ -1,0 +1,109 @@
+---
+// S6 admin orders view. Renders ONLY on the Worker (prerender=false) behind the SAME
+// shared gateOpen guard as /store//vault (one guard for every pre-launch-sensitive
+// route, costed lesson #8: a sibling route outside the guard is a walk-around).
+// /admin/* is in assets.run_worker_first so real browser navigations reach this code
+// (the S4 curl-green/browser-404 class rule). Reads are parameter-free SELECTs; all
+// data here was written by the signature-verified webhook only.
+export const prerender = false;
+
+import { env } from 'cloudflare:workers';
+import { GATE_COOKIE, gateOpen } from '../../lib/gate';
+
+if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
+
+interface OrderRow {
+  id: number;
+  fw_id: string;
+  friendly_id: string | null;
+  email: string | null;
+  line_items: string;
+  shipping_status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const bindings = env as unknown as { DB?: any };
+let rows: OrderRow[] = [];
+let dbError = false;
+try {
+  if (!bindings.DB) throw new Error('no DB binding');
+  const res = await bindings.DB
+    .prepare('SELECT id, fw_id, friendly_id, email, line_items, shipping_status, created_at, updated_at FROM orders ORDER BY created_at DESC, id DESC LIMIT 200')
+    .all();
+  rows = (res?.results ?? []) as OrderRow[];
+} catch {
+  dbError = true; // render the error state, never a fake-empty success
+}
+
+const itemSummary = (json: string): string => {
+  try {
+    const items = JSON.parse(json);
+    if (!Array.isArray(items) || items.length === 0) return 'no items recorded';
+    return items
+      .map((i) => `${typeof i?.quantity === 'number' ? i.quantity + 'x ' : ''}${typeof i?.name === 'string' ? i.name : 'item'}`)
+      .join(', ');
+  } catch {
+    return 'unparseable items';
+  }
+};
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Orders admin - GoteFigure</title>
+  </head>
+  <body>
+    <main>
+      <h1>Orders</h1>
+      <p class="sub">Written only by the signature-verified Fourthwall webhook. Fourthwall is the source of truth; reconcile there. No card data exists in this table.</p>
+      {dbError ? (
+        <p class="err" role="alert">Orders storage unavailable (DB binding or table missing). Nothing to show; this is an error, not an empty store.</p>
+      ) : rows.length === 0 ? (
+        <p class="empty">No orders yet.</p>
+      ) : (
+        <table>
+          <thead>
+            <tr><th>id</th><th>FW order</th><th>ref</th><th>email</th><th>items</th><th>shipping</th><th>placed</th><th>updated</th></tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr>
+                <td>{r.id}</td>
+                <td class="mono">{r.fw_id}</td>
+                <td class="mono">{r.friendly_id ?? '-'}</td>
+                <td>{r.email ?? '-'}</td>
+                <td>{itemSummary(r.line_items)}</td>
+                <td><span class:list={['status', r.shipping_status]}>{r.shipping_status}</span></td>
+                <td class="mono">{r.created_at}</td>
+                <td class="mono">{r.updated_at}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      <p class="back"><a href="/store">← back to the store</a></p>
+    </main>
+  </body>
+</html>
+
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #16130f; color: #f4ead8; font: 15px/1.5 ui-monospace, 'Space Mono', monospace; }
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  .sub { color: #b9a98e; font-size: 13px; margin: 0 0 28px; max-width: 72ch; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #3a332a; vertical-align: top; }
+  th { color: #b9a98e; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+  .mono { white-space: nowrap; }
+  .status { padding: 2px 8px; border: 1px solid #3a332a; border-radius: 10px; font-size: 12px; }
+  .status.shipped { border-color: #4c7a4c; color: #9fd39f; }
+  .status.pending, .status.unknown { border-color: #7a6a3c; color: #e0c987; }
+  .err { color: #e89a9a; border: 1px solid #6e3a3a; padding: 12px 14px; border-radius: 4px; }
+  .empty { color: #b9a98e; }
+  .back { margin-top: 30px; }
+  a { color: #e0c987; }
+</style>
