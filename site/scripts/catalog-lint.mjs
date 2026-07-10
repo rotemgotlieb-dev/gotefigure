@@ -7,10 +7,16 @@
 //      catalog sources. One catalog truth per fact; retiring a piece must never leave a
 //      hardcoded ghost. (Vault-archive names are deliberately NOT enforced: "OG Rabbit" as
 //      brand-character prose in about/404 is a look-alike, not inventory duplication.)
-//   B. An UNVERIFIED price marker on an ACTIVE (non-comment) line of a catalog source, or in
-//      any rendered string value of the content JSON - an unverified price must never render.
+//   B. An UNVERIFIED marker (any case) ANYWHERE in a catalog source other than overlay.ts
+//      (RAW scan, comments included - S4 #6: the old comment-stripper truncated lines at
+//      '//', including the '//' inside URLs, hiding markers on active lines; and a
+//      commented-out unverified price in the mock catalog is one uncomment away from
+//      rendering). For content JSON: any rendered string value carrying the marker.
+//      overlay.ts is exempt HERE by design - its UNVERIFIED placeholders are the cutover
+//      TODO list, owned by rule C.
 //   C. provider=fourthwall while lib/commerce/overlay.ts still contains ANY "UNVERIFIED"
-//      marker - the cutover is blocked until every price is real (Vibe quote → dashboard).
+//      marker (raw, any case) - the cutover is blocked until every price is real
+//      (Vibe quote → dashboard).
 //   D. An invalid PUBLIC_COMMERCE_PROVIDER value, or provider=fourthwall without
 //      PUBLIC_FW_STOREFRONT_TOKEN. NOTE (S4 review): lib/commerce/index.ts carries the
 //      same checks as build-time throws, but the seam has ZERO importers until the
@@ -89,6 +95,13 @@ const mockNames = [...mockTs.matchAll(/name:\s*'([^']+)'/g)].map((m) => m[1]);
 // length guard: never enforce a literal so short it matches prose by accident
 const literals = [...new Set([...pieceNames, ...mockSlugs, ...mockNames])].filter((l) => l.length >= 5);
 
+// extraction floor (S4 #6): a broken name/slug regex must fail loudly, never silently
+// shrink the enforced set until rule A is scanning for nothing.
+const MIN_LITERALS = 10;
+if (literals.length < MIN_LITERALS) {
+  fail(`[A dedup] literal extraction collected only ${literals.length} (< ${MIN_LITERALS}) - the pieces.json/catalog.mock.ts extraction is broken; rule A would be scanning for nothing`);
+}
+
 // ---------- walk src -------------------------------------------------------------------------
 function* walk(dir) {
   for (const name of readdirSync(dir)) {
@@ -118,19 +131,23 @@ function* walk(dir) {
     const file = join(SITE, rel);
     const raw = readFileSync(file, 'utf8');
     if (rel.endsWith('.json')) {
-      // any rendered string value carrying the marker fails (keys starting with _ are doc-only)
+      // any rendered string value carrying the marker (any case) fails (keys starting with _ are doc-only)
       const check = (val, path) => {
-        if (typeof val === 'string' && val.includes('UNVERIFIED')) hits.push(`${rel} → ${path}`);
+        if (typeof val === 'string' && /unverified/i.test(val)) hits.push(`${rel} → ${path}`);
         else if (Array.isArray(val)) val.forEach((v, i) => check(v, `${path}[${i}]`));
         else if (val && typeof val === 'object')
           for (const [k, v] of Object.entries(val)) { if (!k.startsWith('_')) check(v, `${path}.${k}`); }
       };
       check(JSON.parse(raw), '$');
+    } else if (rel === 'src/lib/commerce/overlay.ts') {
+      // exempt from rule B by design: overlay's UNVERIFIED placeholders are the cutover
+      // TODO list. Rule C scans it raw and blocks the fourthwall flip while any remain.
     } else {
-      // strip block comments, then line comments; UNVERIFIED on what remains = active code
-      const active = raw.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
-        .split('\n').map((l) => l.replace(/\/\/.*$/, '')).join('\n');
-      if (active.includes('UNVERIFIED')) hits.push(`${rel} (active code line)`);
+      // RAW scan, any case (S4 #6). No comment-stripping: the old stripper cut every line
+      // at '//' - including the '//' inside URLs - so a marker later on an active line was
+      // invisible; and a commented-out unverified price in the mock catalog is one
+      // uncomment away from rendering. A marker ANYWHERE in these sources fails.
+      if (/unverified/i.test(raw)) hits.push(`${rel} (raw scan, comments included)`);
     }
   }
   if (hits.length) hits.forEach((h) => fail(`[B unverified-render] UNVERIFIED price reachable by render: ${h}`));
@@ -146,7 +163,7 @@ function* walk(dir) {
   if (PROVIDER === 'fourthwall') {
     if (!FW_TOKEN) fail('[D provider] provider=fourthwall but PUBLIC_FW_STOREFRONT_TOKEN is missing');
     const overlay = readFileSync(join(SITE, 'src/lib/commerce/overlay.ts'), 'utf8');
-    if (overlay.includes('UNVERIFIED')) {
+    if (/unverified/i.test(overlay)) {
       fail('[C cutover-guard] provider=fourthwall while overlay.ts still carries UNVERIFIED price markers - cutover blocked until every price is real (runbook §6)');
     } else pass('[C cutover-guard] overlay carries no UNVERIFIED markers');
   } else pass('[C cutover-guard] n/a while provider=mock');
