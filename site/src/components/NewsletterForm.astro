@@ -1,48 +1,80 @@
 ---
-// Drops list signup (§8.4): UI + stub provider (no data stored anywhere yet —
-// real provider is an owner decision; the adapter seam is this one fetch call).
+// Drops list signup (§8.4) - REAL capture since R2-S8 (was a stub that faked success while
+// storing nothing, the second silent email-loss surface). Posts to the own-the-data endpoint
+// (/api/subscribe -> Cloudflare D1) with source 'drops' through the SAME shared helper the
+// After Hours forms use (src/lib/email-capture.ts): invisible Turnstile token (server
+// verifies, fails closed), gf_hp honeypot (success cached only when it was empty),
+// role=alert error line for AT.
 interface Props { context?: string }
 const { context = 'general' } = Astro.props;
 ---
-<form class="nl" data-newsletter data-context={context}>
+<div class="nl" data-newsletter-capture data-source="drops">
   <label class="nl-label" for={`nl-${context}`}>Know when the next drop lands</label>
-  <div class="nl-row">
-    <input id={`nl-${context}`} type="email" name="email" required placeholder="you@somewhere.com" autocomplete="email" />
-    <button type="submit" data-magnetic data-ink>I’m in</button>
+  <div class="nl-row" data-email-wrap>
+    <form class="nl-form" data-email-form novalidate>
+      <input
+        id={`nl-${context}`}
+        type="email"
+        name="email"
+        required
+        placeholder="you@somewhere.com"
+        autocomplete="email"
+        data-email-input
+      />
+      <input class="nl-hp" type="text" name="gf_hp" tabindex="-1" autocomplete="off" aria-hidden="true" data-hp />
+      <div data-turnstile></div>
+      <button type="submit" data-magnetic data-ink>I&rsquo;m in</button>
+    </form>
   </div>
-  <p class="nl-done" hidden>you’re on the list — the rabbit wrote it down 🐇</p>
+  <p class="nl-err" data-email-error role="alert" aria-live="assertive"></p>
+  <p class="nl-done" data-email-done style="display: none;">you&rsquo;re on the list &middot; the rabbit wrote it down &#128007;</p>
   <p class="nl-note">no spam, only drops. ALL NEW DESIGNS announced here first, 8AM sharp.</p>
-</form>
+</div>
+
+<script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
 <script>
+  import { wireEmailCapture } from '../lib/email-capture';
+
+  let disposers: Array<() => void> = [];
   function wire() {
-    document.querySelectorAll<HTMLFormElement>('[data-newsletter]').forEach((form) => {
-      if (form.dataset.wired) return;
-      form.dataset.wired = 'true';
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        // STUB provider: succeeds locally, stores nothing (see REPORT.md — provider decision pending)
-        form.querySelector<HTMLElement>('.nl-row')!.hidden = true;
-        form.querySelector<HTMLElement>('.nl-done')!.hidden = false;
-      });
+    document.querySelectorAll<HTMLElement>('[data-newsletter-capture]').forEach((root) => {
+      if (root.dataset.wired) return;
+      root.dataset.wired = 'true';
+      disposers.push(
+        wireEmailCapture(root, { source: root.dataset.source || 'drops', storageKey: 'gf-drops-email' }),
+      );
     });
   }
   wire();
   document.addEventListener('astro:page-load', wire);
+  document.addEventListener('astro:before-swap', () => {
+    disposers.forEach((d) => d());
+    disposers = [];
+  });
 </script>
+
+<style is:global>
+  /* Shared feedback keyframes used by the email-capture helper (inline style.animation,
+     so they must be global; same values as the After Hours page). */
+  @keyframes gfahm-pop { 0%{transform:scale(.85) rotate(2deg);opacity:0} 60%{transform:scale(1.04) rotate(2deg)} 100%{transform:scale(1) rotate(2deg);opacity:1} }
+  @keyframes gfahm-wob { 0%,100%{transform:translateX(0)} 22%{transform:translateX(-5px)} 46%{transform:translateX(5px)} 70%{transform:translateX(-3px)} }
+</style>
 
 <style>
   .nl { max-width: 480px; }
   .nl-label { display: block; font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--s-3); }
-  .nl-row { display: flex; gap: var(--s-2); }
-  .nl-row input {
+  .nl-form { display: flex; gap: var(--s-2); }
+  .nl-form input[type='email'] {
     flex: 1; min-width: 0; font: inherit; padding: var(--s-3) var(--s-4);
     border: 2px solid var(--ink); border-radius: 999px; background: var(--paper);
   }
-  .nl-row button {
+  .nl-form button {
     font: inherit; font-weight: 700; padding: var(--s-3) var(--s-6);
     background: var(--teal); color: var(--paper); border: 2px solid var(--ink); border-radius: 999px;
   }
+  .nl-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .nl-err { min-height: 1em; margin-top: var(--s-2); font-size: var(--text-sm); font-weight: 600; color: var(--pink, #b0004c); }
   .nl-done { font-weight: 600; color: var(--teal); }
   .nl-note { font-size: var(--text-sm); font-style: italic; margin-top: var(--s-2); color: color-mix(in srgb, var(--ink) 62%, var(--paper)); }
 </style>
