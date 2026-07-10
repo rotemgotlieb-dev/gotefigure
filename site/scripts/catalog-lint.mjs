@@ -34,9 +34,17 @@ const failures = [];
 const pass = (msg) => console.log(`  PASS  ${msg}`);
 const fail = (msg) => { failures.push(msg); console.error(`  FAIL  ${msg}`); };
 
-// ---------- env: resolve the provider the way astro/vite will (process env > site/.env) ----
-function dotenv() {
-  const p = join(SITE, '.env');
+// ---------- env: resolve the provider the way astro/vite ACTUALLY will ---------------------
+// `astro build` runs Vite in production mode, which loads (later wins):
+//   .env < .env.local < .env.production < .env.production.local, then process.env on top.
+// S4 review (MAJOR #3): reading only .env let a .env.local/.env.production* override flip
+// the REAL build's provider while the lint judged a different one. Two closes:
+//   (1) resolve from the same file set Vite does, in Vite's precedence;
+//   (2) hard-fail if any override file (.env.local / .env.production*) defines a
+//       PUBLIC_COMMERCE_* key at all - the provider must only ever come from the one
+//       committed-adjacent layer (.env / CI env), never a local shadow file.
+const VITE_ENV_FILES = ['.env', '.env.local', '.env.production', '.env.production.local'];
+function parseEnvFile(p) {
   if (!existsSync(p)) return {};
   const out = {};
   for (const line of readFileSync(p, 'utf8').split('\n')) {
@@ -45,9 +53,21 @@ function dotenv() {
   }
   return out;
 }
-const envFile = dotenv();
+const envFile = {};
+for (const f of VITE_ENV_FILES) Object.assign(envFile, parseEnvFile(join(SITE, f)));
 const PROVIDER = process.env.PUBLIC_COMMERCE_PROVIDER ?? envFile.PUBLIC_COMMERCE_PROVIDER ?? 'mock';
 const FW_TOKEN = process.env.PUBLIC_FW_STOREFRONT_TOKEN ?? envFile.PUBLIC_FW_STOREFRONT_TOKEN ?? '';
+
+// rule E part 1: no commerce key may live in an override env file
+{
+  const offenders = [];
+  for (const f of VITE_ENV_FILES.slice(1)) {
+    for (const key of Object.keys(parseEnvFile(join(SITE, f))))
+      if (key.startsWith('PUBLIC_COMMERCE_')) offenders.push(`${f} defines ${key}`);
+  }
+  if (offenders.length) offenders.forEach((o) => fail(`[E env-shadow] ${o} - commerce keys may only live in .env or the CI env, never a local override file (they outrank .env in the real build)`));
+  else pass('[E env-shadow] no PUBLIC_COMMERCE_* key in .env.local / .env.production*');
+}
 
 // ---------- gather catalog literals ---------------------------------------------------------
 const piecesJson = JSON.parse(readFileSync(join(SITE, 'src/content/pieces.json'), 'utf8'));
