@@ -21,7 +21,7 @@
 // vault) are prerender=false, never land in dist/client/, and get their catalog payload
 // at request time - they are out of scope here by construction.
 
-import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, statSync, existsSync, writeFileSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -37,6 +37,15 @@ if (!existsSync(CLIENT)) {
   console.error('dist-lint: dist/client not found - run `astro build` first (this tripwire checks the built artifact).');
   process.exit(1);
 }
+
+// ---------- second net for the secrets-in-dist deploy footgun (S4 finding 5) ----------------
+// wrangler serves assets.directory verbatim minus the .assetsignore at THAT directory's
+// root. wrangler.jsonc now points at ./dist/client (and the adapter emits
+// dist/client/.assetsignore), but if any config ever points assets at ./dist again, a bare
+// `wrangler deploy` would publish dist/server/** including .dev.vars. Emitting a dist-root
+// .assetsignore makes even that misconfiguration unable to publish server output or secrets.
+writeFileSync(join(SITE, 'dist/.assetsignore'), 'server/**\n.dev.vars\nwrangler.json\n');
+pass('[net] dist/.assetsignore emitted (server/**, .dev.vars, wrangler.json)');
 
 // ---------- gather the same catalog literals catalog-lint enforces --------------------------
 const piecesJson = JSON.parse(readFileSync(join(SITE, 'src/content/pieces.json'), 'utf8'));

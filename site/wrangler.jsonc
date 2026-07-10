@@ -8,7 +8,13 @@
   "compatibility_date": "2026-06-01",
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "./dist",
+    // ./dist/client, NEVER ./dist (S4 review MAJOR #5): the deploy normally follows the
+    // .wrangler/deploy/config.json redirect to the adapter-generated config (assets =
+    // ../client relative to dist/server), but if that redirect is ever absent a bare
+    // `wrangler deploy` reads THIS file - and ./dist would publish dist/server/** including
+    // .dev.vars (local gate/Turnstile secrets) as public assets. dist-lint additionally
+    // emits dist/.assetsignore (server/**, .dev.vars) as a second net.
+    "directory": "./dist/client",
     "not_found_handling": "404-page",
     // CRITICAL (R2-S4 catch, 2026-07-10): with `not_found_handling` set, BROWSER NAVIGATIONS
     // (Sec-Fetch-Mode: navigate) to paths without a static asset are answered by the ASSET
