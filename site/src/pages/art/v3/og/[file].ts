@@ -3,35 +3,69 @@
 // the vault gate - doctrine: serve gated content through the function, never as
 // directly-addressable static files).
 //
-// Design: the files stay in the asset STORE (dist/client) so this route can stream
-// them via the ASSETS binding without bloating the Worker bundle, but
-// assets.run_worker_first ("/art/v3/og/*") makes EVERY request run this code first:
-// no cookie -> 302 to /, valid signed cookie -> bytes. dist-lint asserts post-build
-// that the built config still carries both the route pattern and the ASSETS binding,
-// so a config regression cannot silently re-publish the gallery.
+// WHY THE BYTES ARE BUNDLED, NOT ASSET-STORE FILES (adversarial walk-around find,
+// observed 2026-07-10 on the built worker): the installed @astrojs/cloudflare handler
+// (dist/utils/handler.js) serves any manifest-matched static asset BEFORE route
+// matching - `matchStaticAsset()` runs first, so a public/ file at this same path is
+// returned by the asset layer and this gate NEVER RUNS, run_worker_first or not
+// (curl proof: direct og1.jpg fetch returned 200 with the asset layer's
+// `public, max-age=0` cache header, no cookie). The only way the gate is the ONLY
+// door is for the files not to exist as public assets at all: they live in
+// src/vault-art/ and are inlined into this route's lazy server chunk (~616K source,
+// loaded on first gallery hit). dist-lint asserts dist/client/art/v3/og/ stays gone.
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { env } from 'cloudflare:workers';
 import { GATE_COOKIE, gateOpen } from '../../../../lib/gate';
 
-const FILE_RE = /^og\d{1,2}\.jpg$/; // exact catalog shape; anything else is a 404, never a path echo
+import og1 from '../../../../vault-art/og1.jpg?inline';
+import og2 from '../../../../vault-art/og2.jpg?inline';
+import og3 from '../../../../vault-art/og3.jpg?inline';
+import og4 from '../../../../vault-art/og4.jpg?inline';
+import og5 from '../../../../vault-art/og5.jpg?inline';
+import og6 from '../../../../vault-art/og6.jpg?inline';
+import og7 from '../../../../vault-art/og7.jpg?inline';
+import og8 from '../../../../vault-art/og8.jpg?inline';
+import og9 from '../../../../vault-art/og9.jpg?inline';
+import og10 from '../../../../vault-art/og10.jpg?inline';
+import og11 from '../../../../vault-art/og11.jpg?inline';
 
-export const GET: APIRoute = async ({ params, request, cookies, redirect }) => {
+const GALLERY: Record<string, string> = {
+  'og1.jpg': og1, 'og2.jpg': og2, 'og3.jpg': og3, 'og4.jpg': og4, 'og5.jpg': og5,
+  'og6.jpg': og6, 'og7.jpg': og7, 'og8.jpg': og8, 'og9.jpg': og9, 'og10.jpg': og10,
+  'og11.jpg': og11,
+};
+
+// Decode each data URL once per isolate, on demand.
+const decoded = new Map<string, Uint8Array>();
+const bytesFor = (name: string): Uint8Array | null => {
+  const hit = decoded.get(name);
+  if (hit) return hit;
+  const dataUrl = GALLERY[name];
+  if (!dataUrl) return null;
+  const b64 = dataUrl.slice(dataUrl.indexOf(',') + 1);
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  decoded.set(name, out);
+  return out;
+};
+
+export const GET: APIRoute = async ({ params, cookies, redirect }) => {
   if (!(await gateOpen(cookies.get(GATE_COOKIE)?.value))) return redirect('/', 302);
 
   const file = params.file ?? '';
-  if (!FILE_RE.test(file)) return new Response('Not found', { status: 404 });
+  if (!Object.prototype.hasOwnProperty.call(GALLERY, file)) return new Response('Not found', { status: 404 });
 
-  const assets = (env as unknown as { ASSETS?: { fetch: (r: Request) => Promise<Response> } }).ASSETS;
-  if (!assets) return new Response('Not found', { status: 404 }); // fail closed, never a secret-path hint
+  const body = bytesFor(file);
+  if (!body) return new Response('Not found', { status: 404 }); // fail closed
 
-  // The binding reads the asset store directly (no run_worker_first recursion).
-  const res = await assets.fetch(new Request(new URL(`/art/v3/og/${file}`, request.url), { method: 'GET' }));
-  if (!res.ok) return new Response('Not found', { status: 404 });
-
-  // Gated bytes: private caching only (a shared cache would serve them cookieless).
-  const headers = new Headers(res.headers);
-  headers.set('cache-control', 'private, max-age=3600');
-  return new Response(res.body, { status: res.status, headers });
+  return new Response(body as unknown as BodyInit, {
+    status: 200,
+    headers: {
+      'content-type': 'image/jpeg',
+      // Gated bytes: private caching only (a shared cache would serve them cookieless).
+      'cache-control': 'private, max-age=3600',
+    },
+  });
 };

@@ -104,9 +104,18 @@ function* walk(dir) {
     if (missing.length) fail(`[gated-routes] built config run_worker_first is missing: ${missing.join(', ')}`);
     else pass(`[gated-routes] built config routes all ${REQUIRED_RWF.length} gated/worker patterns worker-first`);
     if (cfg?.assets?.binding !== 'ASSETS') {
-      fail('[gated-routes] built config has no ASSETS binding - the gated vault-gallery route cannot serve og*.jpg');
-    } else pass('[gated-routes] ASSETS binding present (gated gallery can stream from the asset store)');
+      fail('[gated-routes] built config has no ASSETS binding - adapter asset serving would break');
+    } else pass('[gated-routes] ASSETS binding present');
   }
+
+  // The vault gallery must NEVER ship as public assets again. The installed adapter
+  // serves manifest-matched assets BEFORE routes (matchStaticAsset in handler.js), so a
+  // public/ file at the gated path silently bypasses the gate for everyone (observed on
+  // the built worker 2026-07-10: 200 + the asset layer's cache header, no cookie). The
+  // bytes are inlined into the gated route's server chunk instead.
+  if (existsSync(join(CLIENT, 'art/v3/og'))) {
+    fail('[gated-routes] dist/client/art/v3/og exists - the vault gallery shipped as PUBLIC assets; the adapter serves these before the gate route ever runs');
+  } else pass('[gated-routes] vault gallery absent from public assets (served only through the gated route)');
 }
 
 // ---------- verdict ---------------------------------------------------------------------------
