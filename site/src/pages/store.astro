@@ -4,15 +4,11 @@
 
 // HARD GATE (Sprint 2): this page renders ON the Worker (prerender=false) so no static
 // /store file exists to fetch around the gate; entry requires the signed HttpOnly cookie
-// minted by /api/gate (server-verified exp + nonce + constant-time MAC). No cookie -> home.
+// minted by /api/gate. The SAME guard also protects /piece/* and /vault (review 2026-07-10
+// #1/#2: gate the whole pre-launch surface, not just the grid). No cookie -> home.
 export const prerender = false;
-import { env } from 'cloudflare:workers';
-import { GATE_COOKIE, importGateKey, verifyGateToken } from '../lib/gate';
-
-const gateSecret = (env as unknown as { GATE_SIGNING_KEY?: string }).GATE_SIGNING_KEY;
-const gateToken = Astro.cookies.get(GATE_COOKIE)?.value;
-const gateOk = gateSecret ? await verifyGateToken(await importGateKey(gateSecret), gateToken) : false;
-if (!gateOk) return Astro.redirect('/', 302);
+import { GATE_COOKIE, gateOpen } from '../lib/gate';
+if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
 
 import Layout from '../layouts/Layout.astro';
 import InkButton from '../components/InkButton.astro';

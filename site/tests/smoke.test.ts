@@ -13,22 +13,22 @@ const page = (p: string) => readFileSync(join(dist, p), 'utf8');
 
 describe('built routes', () => {
   it.each([
-    'index.html',            // After Hours (the gate)
-    'vault/index.html',
-    'piece/sticker/index.html',
-    'piece/print/index.html',
-    'piece/tee/index.html',
-    'piece/sweat/index.html',
-    'piece/original/index.html',
+    'index.html',            // After Hours (the public gate/teaser)
     '404.html',
     'about/index.html',
-  ])('%s exists', (p) => {
+  ])('%s exists (public pages stay static)', (p) => {
     expect(existsSync(join(dist, p))).toBe(true);
   });
 
-  it('/store is NOT statically built (the hard gate: Worker-rendered only, no file to fetch around it)', () => {
-    expect(existsSync(join(dist, 'store', 'index.html'))).toBe(false);
-    expect(existsSync(join(__dirname, '..', 'dist', 'store', 'index.html'))).toBe(false);
+  it.each([
+    'store/index.html',
+    'vault/index.html',
+    'piece/sticker/index.html',
+    'piece/tee/index.html',
+    'piece/original/index.html',
+  ])('%s is NOT statically built (gated pre-launch surface: Worker-rendered only, review #1/#2)', (p) => {
+    expect(existsSync(join(dist, p))).toBe(false);
+    expect(existsSync(join(__dirname, '..', 'dist', p))).toBe(false);
   });
 
   it('the gate code never ships in the client bundle', () => {
@@ -161,34 +161,23 @@ describe('store — the drop (Worker-rendered behind the gate; content asserted 
   });
 });
 
-describe('piece pages', () => {
-  it('tee PDP: placard, sizes, scarcity, ink CTA', () => {
-    const html = page('piece/tee/index.html');
-    expect(html).toContain('data-piece-id="tee"');
-    expect(html).toContain('data-sized="1"');
-    expect(html).toContain('never reprinted');
-    expect(html).toContain('data-add="pdp"');
-    expect(html).toContain('measurements');
-    expect(html).toContain('heavyweight cotton tee');
-  });
-
-  it('original PDP: 1 of 1, claim CTA, no sizes', () => {
-    const html = page('piece/original/index.html');
-    expect(html).toContain('1 of 1');
-    expect(html).toContain('Claim the original');
-    expect(html).not.toContain('data-sized="1"');
+describe('piece pages (gated: Worker-rendered, content in the server bundle)', () => {
+  it('PDP templates compiled into the worker (placard, sizes, scarcity, claim CTA)', () => {
+    expect(serverBundle).toContain('data-piece-id');
+    expect(serverBundle).toContain('measurements');
+    expect(serverBundle).toContain('never reprinted');
+    expect(serverBundle).toContain('Claim the original');
+    expect(serverBundle).toContain('one buyer, one wall');
   });
 });
 
-describe('the vault', () => {
-  const html = page('vault/index.html');
+describe('the vault (gated: Worker-rendered, content in the server bundle)', () => {
   it('lists all 11 vaulted pieces, never-reprinted voice, dark room', () => {
     for (const name of ['OG Rabbit', 'Twin Figs', 'Fly Agaric', 'The Alien', 'Azrieli Cat']) {
-      expect(html).toContain(name);
+      expect(serverBundle).toContain(name);
     }
-    expect(html).toContain('never reprinted');
-    expect(html).toContain('not for sale');
-    expect(html).toContain('Back to the living');
+    expect(serverBundle).toContain('not for sale');
+    expect(serverBundle).toContain('Back to the living');
   });
 });
 

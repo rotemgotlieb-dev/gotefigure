@@ -8,6 +8,8 @@
 // Cookie value format: `${expUnixSeconds}.${nonceHex}.${macHex}`
 //   mac = HMAC-SHA256(GATE_SIGNING_KEY, `${exp}.${nonce}`)
 
+import { env } from 'cloudflare:workers';
+
 const enc = new TextEncoder();
 
 export const GATE_COOKIE = 'gf_gate';
@@ -43,6 +45,18 @@ export async function signGateToken(key: CryptoKey, nowMs = Date.now()): Promise
   const nonce = toHex(crypto.getRandomValues(new Uint8Array(16)).buffer);
   const mac = await hmacHex(key, `${exp}.${nonce}`);
   return `${exp}.${nonce}.${mac}`;
+}
+
+/**
+ * Page guard: is the signed gate cookie present + valid? Reads GATE_SIGNING_KEY from
+ * the Worker env itself so every pre-launch route (/store, /piece/*, /vault) shares ONE
+ * check (security review 2026-07-10 #1/#2: the catalog was leaking around the gate at the
+ * prerendered piece/vault pages). Fails CLOSED when the secret is missing.
+ */
+export async function gateOpen(cookieValue: string | undefined): Promise<boolean> {
+  const secret = (env as unknown as { GATE_SIGNING_KEY?: string }).GATE_SIGNING_KEY;
+  if (!secret) return false;
+  return verifyGateToken(await importGateKey(secret), cookieValue);
 }
 
 /** Verify a gate token: shape, MAC (constant-time via subtle.verify), THEN expiry. */

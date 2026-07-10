@@ -1,8 +1,13 @@
 ---
 // THE VAULT (design lines 411-444) — where every drop ends up. Dark room, 11 pieces, forever.
+// GATED (review 2026-07-10 #2): renders on the Worker behind the same signed cookie as /store.
+export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import InkButton from '../components/InkButton.astro';
 import { vault } from '../lib/drop';
+import { GATE_COOKIE, gateOpen } from '../lib/gate';
+
+if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
 ---
 <Layout title="The Vault — GoteFigure" description="Where every drop ends up. Sold out, never reprinted, not for sale." dark>
   <div class="vault">

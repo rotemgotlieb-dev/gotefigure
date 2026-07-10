@@ -1,16 +1,20 @@
 ---
 // PIECE — the placard PDP (design lines 330-409). art | worn | detail views; worn is a labeled
 // placeholder until the owner drops the real photo (never invent stand-ins — HANDOFF rule).
+// GATED (review 2026-07-10 #1): renders on the Worker behind the same signed cookie as /store,
+// so the pre-launch catalog is not prerendered + publicly fetchable. Was getStaticPaths/static.
+export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import InkButton from '../../components/InkButton.astro';
 import {
   pieces, drop, isLive, isBetween, dropLow, money, SIZES,
 } from '../../lib/drop';
+import { GATE_COOKIE, gateOpen } from '../../lib/gate';
 
-export function getStaticPaths() {
-  return pieces.map((p) => ({ params: { id: p.id }, props: { piece: p } }));
-}
-const { piece: p } = Astro.props;
+if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
+
+const p = pieces.find((x) => x.id === Astro.params.id);
+if (!p) return Astro.redirect('/store', 302);
 
 const scarcity = isLive
   ? (p.original ? '1 of 1 — one buyer, one wall' : `${drop.left} of ${drop.editionSize} left — never reprinted`)

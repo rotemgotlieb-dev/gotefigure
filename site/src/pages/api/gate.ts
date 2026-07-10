@@ -50,7 +50,13 @@ export const POST: APIRoute = async ({ request, clientAddress, cookies }) => {
       .prepare('SELECT COUNT(*) AS n FROM gate_attempts WHERE ip = ?1 AND ts > ?2')
       .bind(ip, now - WINDOW_SECONDS)
       .first();
-    if ((row?.n ?? 0) >= MAX_FAILURES) return json({ ok: false, error: 'rate_limited' }, 429);
+    // Throttled: record the hit too (so hammering EXTENDS the window, not just wrong codes,
+    // review #4) and return the SAME shape as a wrong code (review #6: no 429-vs-403 oracle
+    // that lets an attacker pace just under the limit).
+    if ((row?.n ?? 0) >= MAX_FAILURES) {
+      try { await bindings.DB.prepare('INSERT INTO gate_attempts (ip, ts) VALUES (?1, ?2)').bind(ip, now).run(); } catch { /* read-side already fails closed */ }
+      return json({ ok: false, error: 'wrong_code' }, 403);
+    }
   } catch {
     return json({ ok: false, error: 'server_misconfigured' }, 500); // fail closed, never open
   }
