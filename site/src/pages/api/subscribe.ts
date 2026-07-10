@@ -9,13 +9,17 @@ import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// S8: `source` is attacker-controlled input that the emailing agent later segments by.
+// Allowlist server-side; a missing source means a legacy After Hours bundle (deployed
+// before source existed) -> default 'after-hours'; anything else is rejected pre-write.
+const SOURCES = new Set(['after-hours', 'drops']);
 const json = (body: unknown, status: number) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
   const bindings = env as unknown as { DB?: any; TURNSTILE_SECRET_KEY?: string };
 
-  let email = '', honeypot = '', token = '';
+  let email = '', honeypot = '', token = '', source = '';
   const ct = request.headers.get('content-type') || '';
   try {
     if (ct.includes('application/json')) {
@@ -23,11 +27,13 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       email = String(b.email ?? '').trim();
       honeypot = String(b.gf_hp ?? '').trim();               // honeypot (non-semantic name; browser autofill ignores it)
       token = String(b['cf-turnstile-response'] ?? '').trim();
+      source = String(b.source ?? '').trim();
     } else {
       const f = await request.formData();
       email = String(f.get('email') ?? '').trim();
       honeypot = String(f.get('gf_hp') ?? '').trim();
       token = String(f.get('cf-turnstile-response') ?? '').trim();
+      source = String(f.get('source') ?? '').trim();
     }
   } catch {
     return json({ ok: false, error: 'bad_request' }, 400);
@@ -35,6 +41,9 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
   // Honeypot tripped (a bot filled the hidden field) -> look successful, store nothing.
   if (honeypot) return json({ ok: true }, 200);
+
+  if (!source) source = 'after-hours';
+  if (!SOURCES.has(source)) return json({ ok: false, error: 'invalid_source' }, 400);
 
   if (!EMAIL_RE.test(email) || email.length > 254) return json({ ok: false, error: 'invalid_email' }, 400);
 
@@ -55,7 +64,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   try {
     await bindings.DB
       .prepare('INSERT INTO subscribers (email, source) VALUES (?1, ?2) ON CONFLICT(email) DO NOTHING')
-      .bind(email.toLowerCase(), 'after-hours')
+      .bind(email.toLowerCase(), source)
       .run();
   } catch {
     return json({ ok: false, error: 'db_error' }, 500);
