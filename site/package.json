@@ -7,12 +7,13 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/catalog-lint.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "test": "vitest run",
-    "verify": "astro build && vitest run",
-    "deploy": "astro build && wrangler deploy"
+    "lint:catalog": "node scripts/catalog-lint.mjs",
+    "verify": "node scripts/catalog-lint.mjs && astro build && vitest run",
+    "deploy": "node scripts/catalog-lint.mjs && astro build && wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/shantell-sans": "^5.2.7",
