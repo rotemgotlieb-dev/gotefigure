@@ -12,6 +12,10 @@ const which = (import.meta.env.PUBLIC_COMMERCE_PROVIDER as string | undefined) |
 
 // Fail LOUDLY at build time (§5 fail-loudly ethos): a typo like "forthwall" or a missing
 // storefront token must never silently ship the mock catalog as the "real" one.
+// HONESTY NOTE (S4 review, 2026-07-10): this module has ZERO importers until the runbook
+// §6 Part B wiring, so these throws run in NO build today. The live enforcement of the
+// same invariants is scripts/catalog-lint.mjs rules D/E/F (incl. the committed
+// site/commerce.provider pin). After Part B these throws become the second net.
 if (which !== 'mock' && which !== 'fourthwall') {
   throw new Error(
     `PUBLIC_COMMERCE_PROVIDER must be "mock" or "fourthwall", got "${which}" - see docs/INVENTORY-RUNBOOK.md`,

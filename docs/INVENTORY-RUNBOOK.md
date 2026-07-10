@@ -152,13 +152,22 @@ Re-validate the Fourthwall JSON shapes against real published products when they
 Part C - **The flip:**
 1. Fill `overlay.ts` for every published slug (template is scaffolded in the file,
    commented out) and DELETE the `UNVERIFIED` markers as each price is confirmed real.
-2. Set `PUBLIC_COMMERCE_PROVIDER=fourthwall` in `site/.env` (and CI env).
+2. Set `PUBLIC_COMMERCE_PROVIDER=fourthwall` in `site/.env` (and CI env), AND change the
+   committed pin `site/commerce.provider` to `fourthwall` in the same commit. catalog-lint
+   fails on ANY mismatch between the two, in either direction.
 3. `cd site && npm run deploy`.
 
-**Guardrails already in place:** `catalog-lint` FAILS the deploy if the provider is
-`fourthwall` while `overlay.ts` still contains any `UNVERIFIED` marker, or if the token is
-missing; `lib/commerce/index.ts` fails the build loudly on a typo'd provider value or a
-missing token (a typo must never silently ship the mock catalog).
+**Guardrails (honest status, S4 review 2026-07-10):** the live enforcement is
+`catalog-lint`, wired ahead of every build/verify/deploy. It FAILS on: provider=fourthwall
+while `overlay.ts` still contains any `UNVERIFIED` marker (rule C); an invalid provider
+value or a missing storefront token (rule D); any `PUBLIC_COMMERCE_*` key hiding in a
+`.env.local`/`.env.production*` override file (rule E); and any mismatch between the
+resolved env and the committed `site/commerce.provider` pin (rule F). The pin is what
+stops a CI or scheduled build - which has no `site/.env` - from silently resolving back
+to `mock` after the cutover and shipping the mock catalog as the real store.
+`lib/commerce/index.ts` carries the same typo/token checks as build-time throws, but the
+seam has ZERO importers until Part B lands, so those throws run in no build today; they
+become a second net only after the Part B wiring.
 
 ## 7. Honest constraints (do not route around these)
 

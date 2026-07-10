@@ -12,7 +12,16 @@
 //   C. provider=fourthwall while lib/commerce/overlay.ts still contains ANY "UNVERIFIED"
 //      marker - the cutover is blocked until every price is real (Vibe quote → dashboard).
 //   D. An invalid PUBLIC_COMMERCE_PROVIDER value, or provider=fourthwall without
-//      PUBLIC_FW_STOREFRONT_TOKEN (mirrors the build-time throw in lib/commerce/index.ts).
+//      PUBLIC_FW_STOREFRONT_TOKEN. NOTE (S4 review): lib/commerce/index.ts carries the
+//      same checks as build-time throws, but the seam has ZERO importers until the
+//      runbook §6 Part B wiring, so those throws run in NO build today - THIS rule is
+//      the only live enforcement of the provider state.
+//   E. Any PUBLIC_COMMERCE_* key in a .env.local / .env.production* override file
+//      (those outrank .env in the real Vite build - the lint must judge the same value).
+//   F. The resolved provider disagreeing with the committed site/commerce.provider pin
+//      (one line: mock | fourthwall). Bidirectional: catches a forgotten pin AFTER the
+//      cutover AND an env that silently reverted to mock (e.g. CI with no .env) BEFORE
+//      a scheduled deploy ships the mock catalog as the real store.
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
 import { join, relative, dirname } from 'node:path';
@@ -141,6 +150,21 @@ function* walk(dir) {
       fail('[C cutover-guard] provider=fourthwall while overlay.ts still carries UNVERIFIED price markers - cutover blocked until every price is real (runbook §6)');
     } else pass('[C cutover-guard] overlay carries no UNVERIFIED markers');
   } else pass('[C cutover-guard] n/a while provider=mock');
+}
+
+// ---------- rule F: the committed provider pin must match the resolved env -------------------
+{
+  const pinPath = join(SITE, 'commerce.provider');
+  if (!existsSync(pinPath)) {
+    fail('[F provider-pin] site/commerce.provider is missing - commit the one-line pin (mock | fourthwall)');
+  } else {
+    const pin = readFileSync(pinPath, 'utf8').trim();
+    if (pin !== 'mock' && pin !== 'fourthwall') {
+      fail(`[F provider-pin] site/commerce.provider must be "mock" or "fourthwall", got "${pin}"`);
+    } else if (pin !== PROVIDER) {
+      fail(`[F provider-pin] committed pin says "${pin}" but the env resolves "${PROVIDER}" - update BOTH together (runbook §6 Part C). This is the guard against a CI/cron build with no .env silently shipping the mock catalog post-cutover.`);
+    } else pass(`[F provider-pin] committed pin and resolved env agree: "${PROVIDER}"`);
+  }
 }
 
 // ---------- verdict --------------------------------------------------------------------------
