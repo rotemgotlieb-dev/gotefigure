@@ -12,6 +12,6 @@
     "not_found_handling": "404-page"
   },
   "d1_databases": [
-    { "binding": "DB", "database_name": "gotefigure", "database_id": "local-dev-placeholder" }
+    { "binding": "DB", "database_name": "gotefigure", "database_id": "4e163578-3ba0-4ad9-b5b9-2d55a518a41b" }
   ]
 }
