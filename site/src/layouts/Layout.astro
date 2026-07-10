@@ -14,8 +14,13 @@ import '../styles/base.css';
 import Header from '../components/Header.astro';
 import SatchelDrawer from '../components/SatchelDrawer.astro';
 
-interface Props { title: string; description: string; dark?: boolean; }
-const { title, description, dark = false } = Astro.props;
+// `gated`: only the server-gated pages (store / piece / vault, prerender=false) set this.
+// It is what lets the satchel drawer serialize the catalog payload (names/prices/art) into
+// the page. Public prerendered pages (about, 404, info/*) MUST leave it false, or the full
+// pre-launch catalog bakes into static HTML anyone can fetch (S4 adversarial review,
+// CRITICAL finding, 2026-07-10). Enforced post-build by scripts/dist-lint.mjs.
+interface Props { title: string; description: string; dark?: boolean; gated?: boolean; }
+const { title, description, dark = false, gated = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
@@ -48,7 +53,7 @@ const { title, description, dark = false } = Astro.props;
       <slot />
     </main>
     <div transition:persist="cart" style="position: relative; z-index: var(--z-drawer);">
-      <SatchelDrawer />
+      <SatchelDrawer catalog={gated} />
     </div>
     <!-- flood-to-navigate overlay — persists across swaps; driven by animations/flood-nav -->
     <svg class="gf-flood" transition:persist="flood" aria-hidden="true" preserveAspectRatio="none"

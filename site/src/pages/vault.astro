@@ -9,7 +9,7 @@ import { GATE_COOKIE, gateOpen } from '../lib/gate';
 
 if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
 ---
-<Layout title="The Vault — GoteFigure" description="Where every drop ends up. Sold out, never reprinted, not for sale." dark>
+<Layout title="The Vault — GoteFigure" description="Where every drop ends up. Sold out, never reprinted, not for sale." dark gated>
   <div class="vault">
     <div class="inner">
       <div class="head">

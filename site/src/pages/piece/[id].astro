@@ -21,7 +21,7 @@ const scarcity = isLive
   : 'vaulted — this piece will never be reprinted';
 const cta = p.original ? `Claim the original — ${money(p.price)}` : `Add to bag — ${money(p.price)}`;
 ---
-<Layout title={`${p.name} — GoteFigure`} description={p.desc}>
+<Layout title={`${p.name} — GoteFigure`} description={p.desc} gated>
   <div class="piece" data-piece-page data-piece-id={p.id} data-sized={p.sized ? '1' : undefined}>
     <a href="/#shop" class="back mono">← the drop</a>
 

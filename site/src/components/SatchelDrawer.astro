@@ -1,12 +1,24 @@
 ---
 // The Satchel — bag drawer (design lines 446-513). Client-rendered rows from lib/satchel.
 // Focus-trapped + ESC (a11y law §10). "Seal the order" = mock ritual → sealed state.
+//
+// `catalog` (S4 adversarial review, CRITICAL, 2026-07-10): the pieceMap payload
+// (names/prices/art) serializes into data-pieces ONLY when the hosting page is a gated
+// server-rendered one. On public prerendered pages (about, 404, info/*) the drawer renders
+// WITHOUT the payload, so the pre-launch catalog never bakes into public static HTML.
+// The client script parses data-pieces per render and refreshes it on astro:before-swap,
+// so a drawer persisted from a public page picks the payload up on the first gated page.
 import { pieces, money } from '../lib/drop';
 import InkButton from './InkButton.astro';
 
-const pieceMap = Object.fromEntries(pieces.map((p) => [p.id, {
-  name: p.name, kindShort: p.kindShort, price: p.price, art: p.art,
-}]));
+interface Props { catalog?: boolean }
+const { catalog = false } = Astro.props;
+
+const pieceMap = catalog
+  ? Object.fromEntries(pieces.map((p) => [p.id, {
+      name: p.name, kindShort: p.kindShort, price: p.price, art: p.art,
+    }]))
+  : null;
 
 // sealed-badge boil: 3 pre-generated wobbly circles stepped at ~6fps (no animated filters — §7.6.3)
 function wobblyCircle(seed: number): string {
@@ -28,7 +40,7 @@ function wobblyCircle(seed: number): string {
 }
 const boilVariants = [11, 47, 83].map(wobblyCircle);
 ---
-<div class="gf-satchel" data-satchel hidden data-pieces={JSON.stringify(pieceMap)}>
+<div class="gf-satchel" data-satchel hidden data-pieces={pieceMap ? JSON.stringify(pieceMap) : undefined}>
   <div class="backdrop" data-satchel-close></div>
   <aside role="dialog" aria-modal="true" aria-label="Your bag">
 
@@ -150,11 +162,20 @@ const boilVariants = [11, 47, 83].map(wobblyCircle);
 <script>
   import { satchel } from '../lib/satchel';
 
+  // transition:persist carries this drawer node across client-side navigations, and public
+  // pages ship it WITHOUT data-pieces (catalog leak fix). So: copy the payload from each
+  // incoming document that has one, and let render() parse it fresh every time.
+  document.addEventListener('astro:before-swap', (e) => {
+    const doc = (e as Event & { newDocument?: Document }).newDocument;
+    const incoming = doc?.querySelector<HTMLElement>('[data-satchel]')?.dataset.pieces;
+    const cur = document.querySelector<HTMLElement>('[data-satchel]');
+    if (incoming && cur) cur.dataset.pieces = incoming;
+  });
+
   function wire() {
     const root = document.querySelector<HTMLElement>('[data-satchel]');
     if (!root || root.dataset.wired) return;
     root.dataset.wired = '1';
-    const P = JSON.parse(root.dataset.pieces || '{}') as Record<string, { name: string; kindShort: string; price: number; art: string }>;
     const money = (n: number) => '$' + n;
     const rowsEl = root.querySelector<HTMLElement>('[data-rows]')!;
     const emptyEl = root.querySelector<HTMLElement>('[data-empty]')!;
@@ -166,6 +187,7 @@ const boilVariants = [11, 47, 83].map(wobblyCircle);
     const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string));
 
     const render = () => {
+      const P = JSON.parse(root.dataset.pieces || '{}') as Record<string, { name: string; kindShort: string; price: number; art: string }>;
       const rows = satchel.rows();
       const count = rows.reduce((a, r) => a + r.qty, 0);
       document.querySelectorAll('[data-cart-count]').forEach((el) => { el.textContent = String(count); });
