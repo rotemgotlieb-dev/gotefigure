@@ -1,17 +1,19 @@
 // Smoke tests over BUILT html (run `npm run verify`). Guards the routing contract:
-// `/` is the pre-launch After Hours gate (v3 skin); the v3 store home now lives at `/store`.
+// `/` is the pre-launch After Hours gate (v3 skin); `/store` renders ON the Worker
+// behind the signed-cookie hard gate (Sprint 2) and must never exist as a static file.
+// Static assets live under dist/client; the adapter emits the worker + its own
+// wrangler.json under dist/server (verified via `wrangler deploy --dry-run`).
 // Not a substitute for browser verification.
 import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
-const dist = join(__dirname, '..', 'dist');
+const dist = join(__dirname, '..', 'dist', 'client');
 const page = (p: string) => readFileSync(join(dist, p), 'utf8');
 
 describe('built routes', () => {
   it.each([
     'index.html',            // After Hours (the gate)
-    'store/index.html',      // v3 store home, preserved behind the gate
     'vault/index.html',
     'piece/sticker/index.html',
     'piece/print/index.html',
@@ -24,8 +26,24 @@ describe('built routes', () => {
     expect(existsSync(join(dist, p))).toBe(true);
   });
 
-  it('/shop redirects home (old links survive)', () => {
-    expect(page('shop/index.html')).toContain('url=/');
+  it('/store is NOT statically built (the hard gate: Worker-rendered only, no file to fetch around it)', () => {
+    expect(existsSync(join(dist, 'store', 'index.html'))).toBe(false);
+    expect(existsSync(join(__dirname, '..', 'dist', 'store', 'index.html'))).toBe(false);
+  });
+
+  it('the gate code never ships in the client bundle', () => {
+    // The old client gate hardcoded the passphrase; assert no bundle carries it again.
+    const astroDir = join(dist, '_astro');
+    if (!existsSync(astroDir)) return;
+    const { readdirSync } = require('node:fs') as typeof import('node:fs');
+    for (const f of readdirSync(astroDir)) {
+      if (!f.endsWith('.js')) continue;
+      expect(readFileSync(join(astroDir, f), 'utf8')).not.toContain('timnertimner');
+    }
+  });
+
+  it('/shop redirects home (old links survive — now via the platform _redirects file)', () => {
+    expect(page('_redirects')).toMatch(/\/shop\s+\/\s+301/);
   });
 });
 
@@ -80,8 +98,32 @@ describe('home — After Hours (the pre-launch gate)', () => {
   });
 });
 
-describe('store — the drop (now at /store, behind the gate)', () => {
-  const html = page('store/index.html');
+// /store no longer exists as static HTML (the hard gate renders it on the Worker),
+// so its content contract is asserted against the compiled SERVER bundle: the page
+// template strings must survive into dist/server. Proves the 1:1 port content shipped
+// into the Worker without needing a live render in the smoke tier.
+const serverDir = join(__dirname, '..', 'dist', 'server');
+const serverBundle = (() => {
+  const { readdirSync, statSync } = require('node:fs') as typeof import('node:fs');
+  let out = '';
+  const walk = (dir: string) => {
+    for (const f of readdirSync(dir)) {
+      const p = join(dir, f);
+      if (statSync(p).isDirectory()) walk(p);
+      else if (f.endsWith('.mjs') || f.endsWith('.js')) out += readFileSync(p, 'utf8');
+    }
+  };
+  if (existsSync(serverDir)) walk(serverDir);
+  return out;
+})();
+
+describe('store — the drop (Worker-rendered behind the gate; content asserted in the server bundle)', () => {
+  const html = serverBundle;
+
+  it('the gate wiring compiled into the worker (cookie name + login route)', () => {
+    expect(html).toContain('gf_gate');
+    expect(html).toContain('gate_attempts');
+  });
 
   it('mounts the scroll brush-stroke + arrival + home main', () => {
     expect(html).toContain('data-home-main');
@@ -107,9 +149,7 @@ describe('store — the drop (now at /store, behind the gate)', () => {
     expect(html).toContain('This month');
   });
 
-  it('live drop state renders hero CTA + edition badge; countdown teaser present', () => {
-    expect(html).toContain('data-add="hero"');
-    expect(html).toContain('31 left');
+  it('countdown teaser template compiled into the worker (hero CTA + stock badge are runtime-computed, not assertable as literals)', () => {
     expect(html).toContain('next drop');
     expect(html).toContain('data-count-dd');
   });
@@ -152,8 +192,8 @@ describe('the vault', () => {
   });
 });
 
-describe('satchel drawer (store)', () => {
-  const html = page('store/index.html');
+describe('satchel drawer (store, in the server bundle)', () => {
+  const html = serverBundle;
   it('drawer shell with seal ritual + honest prototype note', () => {
     expect(html).toContain('data-satchel');
     expect(html).toContain('Seal the order');

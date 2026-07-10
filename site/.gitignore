@@ -28,3 +28,6 @@ pnpm-debug.log*
 # design-proof generated artifacts (evidence lives in docs/evidence/)
 site/tests/design/out/
 tests/design/out/
+
+# per root policy: NAMES-only example is committed
+!.env.example

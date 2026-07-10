@@ -155,29 +155,49 @@ defineModule('after-hours', ({ reduced }) => {
   const NIGHT = cs.getPropertyValue('--ah-night-rgb').trim() || '12, 9, 6';
 
   // ---- shared author gate (single corner element, both breakpoints) ----
-  // Client-side soft gate to preview the not-yet-open store on production (not real security —
-  // the code ships in the bundle; the durable hard gate is a post-hosting Worker/middleware step).
-  const GATE_CODE = 'timnertimner';
+  // HARD GATE (Sprint 2): the code never ships in this bundle. The form POSTs to
+  // /api/gate (rate-limited, constant-time compare) which sets a signed HttpOnly
+  // cookie; /store itself verifies that cookie ON the Worker. localStorage below is
+  // a UX hint only (skip the form when likely unlocked) — never security state.
   const STORE_PATH = '/store';
   const gateBtn = document.querySelector<HTMLElement>('[data-gate-btn]');
   const gateForm = document.querySelector<HTMLFormElement>('[data-gate-form]');
   const gateInput = document.querySelector<HTMLInputElement>('[data-gate-input]');
-  const storeUnlocked = () => { try { return localStorage.getItem('gf-store-open') === '1'; } catch { return false; } };
+  const likelyUnlocked = () => { try { return localStorage.getItem('gf-store-open') === '1'; } catch { return false; } };
+  const wobble = () => {
+    if (!gateInput) return;
+    gateInput.style.animation = 'none'; void gateInput.offsetWidth; gateInput.style.animation = 'gfahm-wob .4s ease';
+  };
   const onGateBtn = () => {
-    if (storeUnlocked()) { location.href = STORE_PATH; return; }
+    if (likelyUnlocked()) { location.href = STORE_PATH; return; } // server re-checks; bounces home if stale
     if (!gateForm) return;
     const opening = gateForm.hasAttribute('hidden');
     gateForm.toggleAttribute('hidden');
     if (opening) gateInput?.focus();
   };
+  let gateBusy = false;
   const onGateSubmit = (e: Event) => {
     e.preventDefault();
-    if ((gateInput?.value || '') === GATE_CODE) {
-      try { localStorage.setItem('gf-store-open', '1'); } catch { /* private mode */ }
-      location.href = STORE_PATH;
-    } else if (gateInput) {
-      gateInput.style.animation = 'none'; void gateInput.offsetWidth; gateInput.style.animation = 'gfahm-wob .4s ease';
-    }
+    if (gateBusy) return;
+    const code = gateInput?.value || '';
+    if (!code) { wobble(); return; }
+    gateBusy = true;
+    fetch('/api/gate', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
+      .then((r) => r.json() as Promise<{ ok?: boolean }>)
+      .then((b) => {
+        if (b.ok) {
+          try { localStorage.setItem('gf-store-open', '1'); } catch { /* private mode */ }
+          location.href = STORE_PATH;
+        } else {
+          wobble(); // wrong code and rate-limited look identical on purpose
+        }
+      })
+      .catch(wobble)
+      .finally(() => { gateBusy = false; });
   };
   gateBtn?.addEventListener('click', onGateBtn);
   gateForm?.addEventListener('submit', onGateSubmit);
