@@ -1,4 +1,4 @@
-// Cloudflare Workers config (§8.1 — Workers is the chosen rail). Serves the built static
+// Cloudflare Workers config (§8.1 - Workers is the chosen rail). Serves the built static
 // assets + the on-demand /api endpoint (via the @astrojs/cloudflare adapter), with the
 // D1 subscribers DB bound as `DB`. `database_id` is a local placeholder until the real D1
 // is created (wrangler d1 create) after `wrangler login`.
@@ -9,7 +9,14 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    // CRITICAL (R2-S4 catch, 2026-07-10): with `not_found_handling` set, BROWSER NAVIGATIONS
+    // (Sec-Fetch-Mode: navigate) to paths without a static asset are answered by the ASSET
+    // layer's 404 page and the Worker NEVER RUNS - so every prerender=false route (the gated
+    // /store, /piece/*, /vault) 404'd for real browsers while curl (no Sec-Fetch headers)
+    // passed. These routes must be routed to the Worker first. Contract verified against the
+    // installed wrangler config-schema.json → Assets.run_worker_first (string[] | boolean).
+    "run_worker_first": ["/store", "/store/", "/piece/*", "/vault", "/vault/", "/api/*"]
   },
   "d1_databases": [
     { "binding": "DB", "database_name": "gotefigure", "database_id": "4e163578-3ba0-4ad9-b5b9-2d55a518a41b" }
