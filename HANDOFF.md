@@ -1,9 +1,91 @@
 # GoteFigure — HANDOFF / current context (read this first)
 
-_Written 2026-07-02 to bring a fresh agent up to speed. This captures decisions and status that
-were previously only in a prior session's memory. For the immutable spec see `System_Architecture.md`;
-for working rules see `CLAUDE.md` + `.claude/rules/`; for the plan see `research/MASTER-PLAN.md` and
-`docs/superpowers/plans/ROADMAP.md`._
+> ⚠️ The dated status block directly below is the CURRENT truth. The narrative under
+> "GoteFigure — HANDOFF / current context" further down is the older 2026-07-02 context
+> (it still says Vercel/Astro-6/V2-redesign; the live stack is Cloudflare Workers). Read
+> the status block first.
+
+---
+
+## W1 status — 2026-07-10 (Opus 3-window sprint, GoteFigure backend)
+
+**Branch:** committed on a feature branch; `main` stays at the seal reference `15120d5`.
+**Seal:** UNCHANGED. Nothing was deployed this session. The live worker is still the sealed
+build; the store gate (signed-cookie + client bounce + `run_worker_first`) is intact
+(dist-lint PASS). This work is source-only, ready for Rotem's review/merge/deploy — per the
+Safe Backend Doctrine, nothing auto-deploys.
+
+### Shipped this sprint (all verified by observation)
+1. **Payments/orders are REAL + proven.** Researched + VERIFIED Fourthwall's webhook contract
+   against the live docs (header `X-Fourthwall-Hmac-SHA256`, HMAC-SHA256, base64, over the raw
+   body; envelope `{id=EVENT id, type, data=<order>}`, order id = `data.id`, `data.friendlyId`).
+   Fixed a real correctness bug in `site/src/lib/orders.ts`: `extractOrder` was keying an order
+   on the per-delivery EVENT id when `data.id` was absent, which would break cross-event
+   idempotency; now it keys strictly on the order id and rejects keyless events. Locked by a new
+   test in `site/tests/orders.test.ts` (RED->GREEN). Applied migration `0003_orders` to a local
+   D1 and ran the full webhook battery against the BUILT worker: signed -> 1 D1 row; replay ->
+   still 1; ORDER_UPDATED (different event id, same order) -> still 1, shipping pending->shipped;
+   unsigned + wrong-secret -> 401 no row; signed-but-keyless -> 400 no row (`event_id_rows=0`).
+   Evidence: `docs/evidence/r2-s6-orders/webhook-e2e-proof.md`.
+   **Rotem's remaining console steps** (only Rotem can do these): `docs/SECURITY-CLOSEOUT.md` §6,
+   now a complete verified 5-step runbook (remote migrate, create the FW webhook subscribing
+   ORDER_PLACED/ORDER_UPDATED, `wrangler secret put FW_WEBHOOK_SECRET`, redeploy, send a signed
+   test + read the row back). No code change needed at cutover.
+2. **Inventory flow verified + made easier.** E2E-proved runbook scenario 3 (price change) behind
+   the REAL gate: edited `tee.price` 34->39, built, authenticated via `POST /api/gate`, observed
+   `$39` render on `/store` + `/piece/tee` at 1280x800 and 390x844 with zero console errors,
+   reverted to 34 and re-observed. Added local-preview-through-the-gate recipes to
+   `docs/INVENTORY-RUNBOOK.md` so future catalog edits are easy to verify before deploy.
+3. **Performance pass (public After Hours page).** Mobile Lighthouse 70 -> **94**, LCP 5.6s ->
+   **2.7s**, page 876 KiB -> **401 KiB**; desktop held 99, LCP 0.9s -> 0.6s. Fixes: PNG->WebP via
+   sharp (9 images; `overthinking`+`twins` stay PNG, they were larger as WebP), `fetchpriority=high`
+   on the LCP ghost image, `loading=lazy` on the gallery art (safe: the salon starts dark, art is
+   torch-revealed). Verified 0 broken images / 0 failed requests at both widths + a screenshot;
+   zero visual regression. Evidence: `docs/evidence/perf/after-hours-lighthouse.md`.
+4. **Store copy voice-lint.** Removed every user-facing em/en dash (53 fixes across content JSON +
+   astro pages), zero banned words, zero AI-voice/brand-truth issues (an adversarial audit workflow
+   confirmed the copy already reads in Rotem's voice; the only work was dashes). Remaining dashes
+   are code comments / CSS separators / a non-rendered mock annotation.
+
+Full verify green after all changes: build + dist-lint + 60 tests.
+
+**Verification / agent-integration pass (honest tiers):**
+- The payments change is verified by OBSERVATION (the strongest tier): RED->GREEN tests plus
+  the full webhook battery run against the built worker (see the evidence doc). The perf change
+  is verified by 0-broken/0-failed browser checks + a screenshot. Copy by voice-lint + build.
+- Security backstop (self-run, standing in for the guard's deterministic battery): no `.dev.vars`
+  secret value appears in `dist/client`; no `.env`/`.dev.vars`/secret file is in the change set;
+  the local FW/gate secret values appear in NO tracked file (src or docs); the gitleaks pre-commit
+  hook is in place; `dist-lint` PASS confirms the gate `run_worker_first` list + ASSETS binding +
+  no vault-gallery leak (config-drift + gate-integrity intact). Result: **PASS**.
+- Two independent review-agent dispatches (a code-reviewer + a general reviewer) both no-op'd this
+  session (0 tool uses; derailed by IDE/MCP context injections at startup). Rather than burn more
+  dispatches, verification leaned on the empirical proofs above. A fresh reviewer should still give
+  `site/src/lib/orders.ts` a second read at merge time.
+
+### FOR W3 / ROTEM — brain-dump handoff (do NOT let this drop; W1 cannot write the vault)
+Rotem brain-dumped (2026-07-10, mid-sprint) the KEY to the agent-integration dream, and asked it
+be captured durably. It belongs in the vault `[[Backlog]]` §Systems + memory
+`[[agent-integration-auto-routing]]` (W3's flagship). W1 is isolation-bound from vault writes, so
+it is parked here verbatim for W3/Rotem to fold in:
+
+> On complex freelance projects (esp. TiDB, with more engagements coming), when working across
+> several fronts at a high level, use the purpose-built agents/skills for what they're for to reach
+> a higher polish + better end result. Candidate agents for a project like the DB one: design-shipper,
+> ui-design-master, video-master, sound-engineer (design); brainstorm + straight-talk (planning).
+> Constantly develop the workflow where weak points show. Keep track of every scope of work so
+> nothing loses context (split into two terminal windows only if needed; prefer one).
+> THE DREAM (his words, "probably the key"): take ALL the skills + agents and naturally, organically
+> integrate them so that when Rotem asks something, the model recognizes which skills/agents would
+> yield a better output and triggers them automatically/unprompted in the workflow. He wants Fable 5
+> to build exactly this auto-routing. "This is how I want to integrate the agents... extremely
+> important and actionable."
+
+W1 applied the principle in-sprint: invoked the copy-audit workflow, the `gotefigure-backend-guard`
+sentinel, and a code-review pass rather than shipping unreviewed (verdicts below).
+
+---
+
 
 ## What GoteFigure is
 The art label of **Rotem** — hand-drawn ink art. Launched 2020, vanished, relaunching now ("back

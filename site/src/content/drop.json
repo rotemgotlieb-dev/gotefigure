@@ -1,5 +1,5 @@
 {
-  "_comment": "OWNER CONTROL SURFACE — the drop state machine. dropState: 'live' (drop on sale) | 'between' (countdown, everything vaulted). dropLeft = items remaining in this edition. nextDropDate is local time.",
+  "_comment": "OWNER CONTROL SURFACE: the drop state machine. dropState: 'live' (drop on sale) | 'between' (countdown, everything vaulted). dropLeft = items remaining in this edition. nextDropDate is local time.",
   "dropState": "live",
   "editionSize": 50,
   "dropLeft": 31,

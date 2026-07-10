@@ -1,9 +1,16 @@
 # INVENTORY RUNBOOK - how to change what the store sells
 
 *Fable R2 Sprint S4, 2026-07-10. Branch `r2-s4-catalog`. Every scenario below names the system
-that OWNS the truth, the exact steps, and the one deploy command. Scenario 4 was run
-end-to-end (edit, build, observed render at 1280x800 + 390x844, revert) on 2026-07-10;
-the other JSON scenarios use the identical mechanism (build-time JSON, rebuild, deploy).*
+that OWNS the truth, the exact steps, and the one deploy command. Scenario 4 (stock/pre-order
+flip) AND scenario 3 (price change) were both run end-to-end (edit, build, observed render
+through the real gate at 1280x800 + 390x844, revert) on 2026-07-10; the other JSON scenarios
+use the identical mechanism (build-time JSON, rebuild, deploy).*
+
+*W1 re-verification, 2026-07-10 (Opus sprint): scenario 3 proven live against the BUILT worker.
+Edited `tee.price` 34 -> 39, `npm run build`, `wrangler dev` on `dist/server/wrangler.json`,
+authenticated through the real `POST /api/gate` (cookie minted), and observed `$39` render on
+`/store` and `/piece/tee` at both widths with zero console errors; reverted to 34 and re-observed
+`$34`. Both passes ALL-GREEN. Harness pattern in the "preview locally" box below.*
 
 ## 0. The truth map (read this first)
 
@@ -44,6 +51,30 @@ cd site && npm run deploy
 That runs `catalog-lint` (blocks bad catalog states), `astro build`, `wrangler deploy` - in
 that order, failing fast. CI equivalent: push to `main` runs `npm run verify` (lint + build +
 tests) then a secrets-gated `wrangler deploy` (`.github/workflows/deploy.yml`).
+
+**Preview a change locally, through the gate (the easy way):**
+
+```sh
+cd site && npm run dev          # serves the gated store with the LOCAL gate code (.dev.vars GATE_CODE)
+```
+
+Open the local URL, click the faint dot in the corner of the After Hours door, and type the
+local `GATE_CODE` (in `site/.dev.vars`). The store opens and your edit is there. This is the
+one-command way for the owner to eyeball a catalog change before deploying.
+
+**Preview against the BUILT worker (the pre-deploy proof, matches production exactly):**
+
+```sh
+cd site && npm run build
+D1=/tmp/gf-d1-state
+npx wrangler d1 migrations apply gotefigure --local -c dist/server/wrangler.json --persist-to $D1
+npx wrangler dev -c dist/server/wrangler.json --port 8788 --persist-to $D1
+```
+
+`--persist-to` a dir OUTSIDE `dist/` (astro build wipes `dist/`, which would drop a local D1
+kept there). Authenticate by `POST`ing the gate code to `/api/gate` and reusing the `gf_gate`
+cookie (plus `localStorage['gf-store-open']='1'` for the client bounce), then load `/store`.
+This is exactly how W1 re-verified scenario 3 above.
 
 **After every deploy, verify LIVE, not just deployed** (Learnings 2026-07-09, deployed ≠
 live-on-the-domain): load gotefigure.com through the gate and see the change with your eyes.

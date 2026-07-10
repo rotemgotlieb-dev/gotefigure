@@ -2,18 +2,26 @@
 // PURE module by design (no `cloudflare:workers` import) so vitest can exercise it
 // directly; the endpoint owns all env/binding access.
 //
-// STEP A research basis (2026-07-10, docs.fourthwall.com/llms.txt + /webhooks/getting-started):
-// Fourthwall publicly documents webhooks (order-placed, order-updated, donation,
-// gift-purchase, ...) and a dedicated /webhooks/signature-verification page. The exact
-// header name + digest encoding on that page were NOT readable within this sprint's
-// research cap, so both are CONFIGURABLE (env FW_WEBHOOK_SIG_HEADER; base64 AND hex
-// digests accepted) and must be aligned to that page at cutover. The mechanism itself
-// is the doctrine's required control regardless of vendor detail: HMAC-SHA256 over the
-// RAW request body, verified constant-time, before any parsing or write.
+// VERIFIED 2026-07-10 against docs.fourthwall.com/webhooks/signature-verification +
+// /webhooks/webhook-model + /api-reference/order-events/order-placed:
+//   - Signature header: `X-Fourthwall-Hmac-SHA256` (Platform Apps use
+//     `X-Fourthwall-Hmac-Apps-SHA256`). Header lookup is case-insensitive (Fetch API),
+//     so the lowercased default below matches. Override via FW_WEBHOOK_SIG_HEADER only
+//     for the Platform-Apps variant.
+//   - Algorithm: HMAC-SHA256 over the ENTIRE raw request body, digest BASE64-encoded
+//     (FW's own sample: `base64.b64encode(hmac.new(secret, body, sha256).digest())`,
+//     compared with `hmac.compare_digest`). We decode to bytes and verify constant-time
+//     via crypto.subtle.verify. Hex is also accepted defensively; FW ships base64.
+//   - Envelope: { testMode, id (EVENT id, weve_...), webhookId, shopId, type
+//     (e.g. "ORDER_PLACED"), apiVersion, createdAt, data: <the order> }. The ORDER id is
+//     data.id; friendlyId is data.friendlyId. See extractOrder for the field walk.
+// The mechanism is the doctrine's required control regardless: HMAC-SHA256 over the RAW
+// body, verified constant-time, before any parse or write.
 
 const enc = new TextEncoder();
 
-/** Default signature header. NOT verified against Fourthwall docs yet; override via FW_WEBHOOK_SIG_HEADER at cutover. */
+/** Fourthwall signature header (standard webhooks). Case-insensitive lookup; override via
+ * FW_WEBHOOK_SIG_HEADER only for the Platform-Apps `X-Fourthwall-Hmac-Apps-SHA256` variant. */
 export const DEFAULT_SIG_HEADER = 'x-fourthwall-hmac-sha256';
 
 const b64ToBytes = (s: string): Uint8Array | null => {
@@ -76,18 +84,23 @@ export interface ExtractedOrder {
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v.trim() : null);
 
 /**
- * Defensive extraction from a verified, parsed payload. The real order-placed /
- * order-updated payload shape was not readable within the research cap, so this walks
- * the plausible envelope paths (data / order / root) and field spellings; whatever it
- * cannot find stays null/default, and the FULL raw event is persisted alongside so no
- * data is lost while the real shape is unverified. Never invents values.
+ * Defensive extraction from a verified, parsed payload. The order object lives in the
+ * event envelope's `data` (verified 2026-07-10 against Fourthwall's webhook-model:
+ * { id: <EVENT id, weve_...>, type, data: <order> }); `order` is accepted as a defensive
+ * alt spelling. We NEVER fall back to the envelope root, because p.id is the per-delivery
+ * EVENT id: keying an order on it would break cross-event idempotency (an ORDER_PLACED
+ * and a later ORDER_UPDATED for the SAME order carry different event ids and would write
+ * two rows). Field spellings inside the order are walked defensively; whatever is absent
+ * stays null/default and the FULL raw event is persisted alongside so no data is lost.
+ * Never invents values.
  */
 export function extractOrder(payload: unknown): ExtractedOrder | null {
   if (!payload || typeof payload !== 'object') return null;
   const p = payload as Record<string, unknown>;
-  const d = ((p.data ?? p.order ?? p) || {}) as Record<string, unknown>;
+  const d = (p.data ?? p.order) as Record<string, unknown> | undefined;
+  if (!d || typeof d !== 'object') return null; // no order envelope = nothing to store
 
-  const fwId = str(d.id) ?? str(p.id);
+  const fwId = str(d.id); // the ORDER id (data.id), never the envelope event id (p.id)
   if (!fwId || fwId.length > 128) return null; // no order id = nothing to key on; reject upstream
 
   const shipping = (d.shipping ?? {}) as Record<string, unknown>;
