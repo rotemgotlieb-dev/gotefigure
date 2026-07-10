@@ -7,11 +7,14 @@ the other JSON scenarios use the identical mechanism (build-time JSON, rebuild, 
 
 ## 0. The truth map (read this first)
 
+**Prerequisites:** `cd site && npm ci` (Node 22.12+, see package.json engines); deploys
+additionally need wrangler auth (`npx wrangler login`, or `CLOUDFLARE_API_TOKEN` in CI).
+
 The repo contains TWO catalog systems. Know which one you are editing.
 
 | System | Files | Who renders it | Status |
 |---|---|---|---|
-| **V3 drop catalog** | `site/src/content/pieces.json` + `drop.json` + `vault.json` + `drops.json`, loaded by `site/src/lib/drop.ts` | `store.astro`, `piece/[id].astro`, `vault.astro`, `SatchelDrawer`, `ProductTile` | **LIVE. This is what visitors see.** |
+| **V3 drop catalog** | `site/src/content/pieces.json` + `drop.json` + `vault.json`, loaded by `site/src/lib/drop.ts` | `store.astro`, `piece/[id].astro`, `vault.astro`, `SatchelDrawer`, `ProductTile` | **LIVE. This is what visitors see.** |
 | **Commerce swap seam** | `site/src/lib/commerce/*` (mock provider + Fourthwall provider + `overlay.ts`), switched by `PUBLIC_COMMERCE_PROVIDER` | Nothing on the live pages. Its only consumers, `CartDrawer.astro` and `ProductCard.astro`, are orphaned (zero imports) | Dormant. Built and tested, waiting for the Fourthwall cutover |
 
 **Truth callout (2026-07-10):** the ask "flip `PUBLIC_COMMERCE_PROVIDER` and the site serves
@@ -75,8 +78,9 @@ hidden flag). If the piece moves to the permanent archive, **`vault.json`** owns
    `vault.json` `pieces`, and its `id` to `vault.json` `strip` if it should show in the
    /store vault strip.
 3. `cd site && npm run deploy`.
-4. Verify: tile gone from `/store`; `/piece/<id>` no longer resolves; vault strip shows it
-   if vaulted. Catalog-lint will catch any stray hardcoded reference to the retired name.
+4. Verify: tile gone from `/store`; `/piece/<id>` now 302s to `/store` (unknown ids
+   redirect rather than 404 - `piece/[id].astro` line ~17); vault strip shows it if
+   vaulted. Catalog-lint will catch any stray hardcoded reference to the retired name.
 
 ## 3. Change a price
 
@@ -116,8 +120,7 @@ sold size counts drive the single bulk order to Vibe.
 ## 5. Swap the drop (Drop N → Drop N+1)
 
 **Truth owners: `pieces.json` (new lineup) + `vault.json` (retired lineup) + `drop.json`
-(reset state machine) + `drops.json` (the site-wide announcement banner: `{active, headline,
-href}`).** One edit session, one deploy:
+(reset state machine).** One edit session, one deploy:
 
 1. Move the outgoing drop's pieces: delete from `pieces.json`, append to `vault.json`
    (`pieces` + `strip` for the ones worth showing off).
@@ -125,9 +128,14 @@ href}`).** One edit session, one deploy:
    exactly one `hero: true`).
 3. Reset `drop.json`: `dropState` (usually `"live"` on launch morning), fresh `editionSize`,
    `dropLeft = editionSize`, next `nextDropDate`.
-4. Optionally arm the banner in `drops.json`.
-5. `cd site && npm run deploy`, then eyeball every changed surface through the gate:
+4. `cd site && npm run deploy`, then eyeball every changed surface through the gate:
    `/store` grid + hero, each new `/piece/<id>`, `/vault`.
+
+**`drops.json` honesty note (S4 review, 2026-07-10):** the file exists (`{active, headline,
+href}`) but NOTHING consumes it - `lib/drop.ts` imports only `drop.json` / `pieces.json` /
+`vault.json`, and no component reads a banner (verified by grep). Editing it changes
+nothing a visitor sees. It stays in the repo as a catalog-lint-watched source; wiring an
+actual announcement banner (or deleting the file) is a future, deliberate step.
 
 ## 6. The mock-to-Fourthwall cutover (NOT one env flip today - three parts)
 
