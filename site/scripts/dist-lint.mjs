@@ -86,6 +86,29 @@ function* walk(dir) {
   else pass(`[artifact-leak] ${scanned} public artifacts (HTML+JS) carry zero catalog literals and zero price payloads`);
 }
 
+// ---------- S6: gated-route coverage in the BUILT worker config ------------------------------
+// The vault gallery + admin view + every gated page depend on assets.run_worker_first in the
+// ADAPTER-GENERATED config (dist/server/wrangler.json, what `wrangler deploy` actually reads
+// via the .wrangler/deploy redirect). If a config regression drops a pattern, real-browser
+// navigations silently bypass the Worker (the R2-S4 curl-green/browser-404 class bug) and the
+// og*.jpg files in the asset store become public again. Pin it at the artifact.
+{
+  const REQUIRED_RWF = ['/store', '/piece/*', '/vault', '/api/*', '/admin/*', '/_image', '/art/v3/og/*'];
+  const builtCfgPath = join(SITE, 'dist/server/wrangler.json');
+  if (!existsSync(builtCfgPath)) {
+    fail('[gated-routes] dist/server/wrangler.json missing - the adapter did not emit a worker config');
+  } else {
+    const cfg = JSON.parse(readFileSync(builtCfgPath, 'utf8'));
+    const rwf = cfg?.assets?.run_worker_first;
+    const missing = Array.isArray(rwf) ? REQUIRED_RWF.filter((p) => !rwf.includes(p)) : REQUIRED_RWF;
+    if (missing.length) fail(`[gated-routes] built config run_worker_first is missing: ${missing.join(', ')}`);
+    else pass(`[gated-routes] built config routes all ${REQUIRED_RWF.length} gated/worker patterns worker-first`);
+    if (cfg?.assets?.binding !== 'ASSETS') {
+      fail('[gated-routes] built config has no ASSETS binding - the gated vault-gallery route cannot serve og*.jpg');
+    } else pass('[gated-routes] ASSETS binding present (gated gallery can stream from the asset store)');
+  }
+}
+
 // ---------- verdict ---------------------------------------------------------------------------
 if (failures.length) {
   console.error(`\ndist-lint: ${failures.length} failure(s). The BUILT public artifact leaks catalog data - fix the source that rendered it (docs/INVENTORY-RUNBOOK.md).`);
