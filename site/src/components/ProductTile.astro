@@ -18,7 +18,7 @@ const dark = !!p.original;
   {p.hero && !isBetween && <span class="corner mono">{dropLeftShort}</span>}
   {dark && <span class="corner mono">1 of 1</span>}
 
-  <a class="tile-link" href={`/piece/${p.id}/`} aria-label={`${p.name} — ${p.kindShort}, ${money(p.price)}`}></a>
+  <a class="tile-link" href={`/piece/${p.id}/`} aria-label={`${p.name}, ${p.kindShort}, ${money(p.price)}`}></a>
 
   <div class="artbox" class:list={[{ 'paper-well': dark }]}>
     <img data-tart src={p.art} alt="" style={`max-width:${p.tileArtMax}`} loading="lazy" />

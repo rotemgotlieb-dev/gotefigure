@@ -58,10 +58,30 @@ Full verify green after all changes: build + dist-lint + 60 tests.
   the local FW/gate secret values appear in NO tracked file (src or docs); the gitleaks pre-commit
   hook is in place; `dist-lint` PASS confirms the gate `run_worker_first` list + ASSETS binding +
   no vault-gallery leak (config-drift + gate-integrity intact). Result: **PASS**.
+- `gotefigure-backend-guard` returned **GREEN** (full battery: gitleaks on the commit range + working
+  tree clean; no secret values in `dist/client`; the 9 new `.webp` are valid RIFF/WebP art with no
+  embedded data class; `dist-lint` 6/6; built-worker no-cookie navigations to /store,/vault,/admin
+  all 302, gated og bytes 302 — seal holds; orders change confirmed as idempotency hardening with
+  fail-closed intact; npm audit high=0 critical=0). §4 live-domain checks SKIPPED (nothing deployed).
+- **The guard earned its keep (agent-integration payoff):** it flagged user-facing em dashes still
+  in SHIPPED prose from SHARED COMPONENTS that the first commit's page-only sweep missed
+  (`SatchelDrawer` empty-note + proto line, `ProductTile` aria-label — all render via `Layout` on
+  about/store/piece/vault/404/info; `CartDrawer`/`ProductCard` are the dormant commerce seam that
+  ships at cutover; `Footer` is orphaned). Fixed in the follow-up commit and re-verified at the
+  BUILT-OUTPUT layer: dist/client static HTML + the worker bundle now carry zero user-facing em/en
+  dashes (old-dash SatchelDrawer strings in the bundle = 0). 60 tests still green.
+- BANKED LEARNING (FOR W3 to fold into voice-lint tooling / Learnings): *a "no-X-in-shipped-prose"
+  guarantee must be verified against the BUILT OUTPUT (dist HTML + worker bundle), never just source
+  page files, because layouts/components inject prose a page-file sweep misses. Scope any copy/voice
+  audit to the shipped surface, not a hand-picked page list.* Same class as the doctrine's
+  artifact-grep lens; applied this session after the guard caught the gap.
+- BRAND-TRUTH FLAG (FOR ROTEM / gotefigure-brand): `Footer.astro:10` reads "drawn every day, really,
+  every day" — at odds with the MONTHLY-cadence brand model. Footer is currently orphaned (not
+  shipped), so I only removed its em dash; if it is ever wired in, reword the daily claim first.
 - Two independent review-agent dispatches (a code-reviewer + a general reviewer) both no-op'd this
-  session (0 tool uses; derailed by IDE/MCP context injections at startup). Rather than burn more
-  dispatches, verification leaned on the empirical proofs above. A fresh reviewer should still give
-  `site/src/lib/orders.ts` a second read at merge time.
+  session (0 tool uses; derailed by IDE/MCP context injections at startup). Verification leaned on
+  the empirical proofs above + the guard. A fresh reviewer should still give `site/src/lib/orders.ts`
+  a second read at merge time.
 
 ### FOR W3 / ROTEM — brain-dump handoff (do NOT let this drop; W1 cannot write the vault)
 Rotem brain-dumped (2026-07-10, mid-sprint) the KEY to the agent-integration dream, and asked it

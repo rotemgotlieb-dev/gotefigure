@@ -23,7 +23,7 @@ const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
 
     <ul id="cart-lines" class="lines"></ul>
     <div id="cart-empty" class="empty">
-      <p>Nothing in here yet — the rabbit checked twice.</p>
+      <p>Nothing in here yet, the rabbit checked twice.</p>
       <a href="/" class="empty-cta mono caps" id="cart-empty-cta">go find something weird →</a>
     </div>
 
@@ -46,7 +46,7 @@ const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
       <p class="subtotal"><span>Subtotal</span> <strong id="cart-subtotal" class="mono">$0</strong></p>
       <button type="button" id="cart-checkout" class="checkout mono" disabled>Checkout</button>
       <p id="mock-note" class="mock-note" hidden>
-        checkout opens when the real store connects — the art is ready, the register isn’t ☺
+        checkout opens when the real store connects. the art is ready, the register isn’t ☺
       </p>
     </footer>
   </aside>
@@ -74,10 +74,10 @@ const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
         <div class="line-info">
           <p class="line-name">${i.name}</p>
           <p class="line-variant mono">${i.variantLabel} · ${money(i.unitPrice)}</p>
-          <div class="line-qty" role="group" aria-label="Quantity — ${i.name}">
-            <button type="button" class="qty-btn mono" data-dq="-1" aria-label="One less — ${i.name}">−</button>
+          <div class="line-qty" role="group" aria-label="Quantity, ${i.name}">
+            <button type="button" class="qty-btn mono" data-dq="-1" aria-label="One less, ${i.name}">−</button>
             <span aria-live="polite">${i.quantity}</span>
-            <button type="button" class="qty-btn mono" data-dq="1" aria-label="One more — ${i.name}">+</button>
+            <button type="button" class="qty-btn mono" data-dq="1" aria-label="One more, ${i.name}">+</button>
             <button type="button" class="line-remove" data-remove aria-label="Remove ${i.name}">remove</button>
           </div>
         </div>
@@ -100,13 +100,13 @@ const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
     const types = new Set(items.map((i) => typeBySlug[i.slug] ?? 'apparel'));
     const shipline = $('cart-shipline');
     if (items.length && types.has('apparel') && (types.has('poster') || types.has('sticker'))) {
-      shipline.textContent = 'heads up — tees print to order and ship separately from posters & stickers';
+      shipline.textContent = 'heads up: tees print to order and ship separately from posters & stickers';
       shipline.hidden = false;
     } else if (items.length && !types.has('apparel')) {
-      shipline.textContent = 'ships from California in 2–4 days';
+      shipline.textContent = 'ships from California in 2-4 days';
       shipline.hidden = false;
     } else if (items.length) {
-      shipline.textContent = 'printed to order — usually ships within a week';
+      shipline.textContent = 'printed to order, usually ships within a week';
       shipline.hidden = false;
     } else {
       shipline.hidden = true;
@@ -161,7 +161,7 @@ const typeBySlug = Object.fromEntries(products.map((p) => [p.slug, p.type]));
     document.addEventListener('gf:busy', ((e: CustomEvent<boolean>) => { $('cart-busy').hidden = !e.detail; }) as EventListener);
     document.addEventListener('gf:error', ((e: CustomEvent<string>) => {
       const el = $('cart-error');
-      el.textContent = `${e.detail} — try that again?`;
+      el.textContent = `${e.detail}, try that again?`;
       el.hidden = false;
       setTimeout(() => { el.hidden = true; }, 5000);
     }) as EventListener);
