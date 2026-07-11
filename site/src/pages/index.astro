@@ -299,8 +299,10 @@ const frames = [
   @media (min-width: 1024px) { .ah-block--mobile { display: none; } }
 
   /* ---- mobile stage (phone salon) ---- */
-  .ah-screen { position: fixed; inset: 0; display: flex; justify-content: center; background: var(--ah-night); }
-  .ah-stage { position: relative; height: 100%; width: min(100vw, 52dvh); overflow: hidden; touch-action: none; container-type: size; }
+  /* full-bleed: the stage fills the whole viewport width (no pillarbox), and the screen
+     under it is the WALL colour so any leftover edge reads as the salon wall, never black. */
+  .ah-screen { position: fixed; inset: 0; display: flex; justify-content: center; background: var(--ah-wall); }
+  .ah-stage { position: relative; height: 100%; width: 100%; overflow: hidden; touch-action: none; container-type: size; }
 
   /* ---- author access gate — deliberately faint; 44px hit area, 9px visible dot ---- */
   .ah-gate { position: fixed; right: 0; bottom: 0; z-index: 11000; display: flex; align-items: center; gap: 6px; padding-right: env(safe-area-inset-right); padding-bottom: env(safe-area-inset-bottom); }
@@ -315,7 +317,9 @@ const frames = [
   /* ================= DESKTOP STAGE (≥ 1024px): 1512×946 canvas scaled to the viewport ================= */
   @media (min-width: 1024px) {
     .ah-block--desktop { display: block; }
-    .ah-d { position: fixed; inset: 0; overflow: hidden; background: var(--ah-night); }
+    /* full-bleed: fill the exposed area with the salon WALL colour (was --ah-night), so a
+       viewport wider than the 1512x946 canvas shows the wall continuing, never black bars. */
+    .ah-d { position: fixed; inset: 0; overflow: hidden; background: var(--ah-wall); }
 
     .ah-room, .ah-front { position: absolute; left: 50%; top: 50%; width: 1512px; height: 946px; transform: translate(-50%,-50%); transform-origin: center; }
     .ah-room { background: var(--ah-wall); overflow: hidden; z-index: 1; }
