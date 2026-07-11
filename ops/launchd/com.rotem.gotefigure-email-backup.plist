@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
-  Daily backup of the GoteFigure D1 `subscribers` list to a PRIVATE local CSV.
-  DRAFT held in the repo; installing it is Rotem's console step (see
-  docs/EMAIL-BACKUP-RUNBOOK.md). Uses a login shell (-lc) so nvm/PATH + the cached
+  Daily backup of the GoteFigure D1 `subscribers` list to a PRIVATE local CSV AND a
+  PRIVATE off-machine git repo (GF_BACKUP_GIT_DIR below). Installed + loaded 2026-07-11
+  (see docs/EMAIL-BACKUP-RUNBOOK.md). Uses a login shell (-lc) so nvm/PATH + the cached
   `wrangler login` token resolve under launchd. Runs 09:15 PT daily (Mac must be awake).
+  Reverse: launchctl unload ~/Library/LaunchAgents/com.rotem.gotefigure-email-backup.plist
 -->
 <plist version="1.0">
 <dict>
@@ -15,6 +16,10 @@
     <string>-lc</string>
     <string>cd /Users/rotemgotlieb/conductor/repos/gotefigure-backend &amp;&amp; exec node scripts/backup-subscribers.mjs</string>
   </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>GF_BACKUP_GIT_DIR</key><string>/Users/rotemgotlieb/gotefigure-email-backups</string>
+  </dict>
   <key>StartCalendarInterval</key>
   <dict>
     <key>Hour</key><integer>9</integer>

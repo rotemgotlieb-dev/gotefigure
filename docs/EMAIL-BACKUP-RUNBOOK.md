@@ -14,36 +14,49 @@ with a non-zero exit on any mismatch, so a bad run shows up in the launchd error
 - Run log: `~/Desktop/gotefigure-email-backups/backup.log`
 - Columns: `id,email,source,created_at`
 
-**Proven run (2026-07-10):** exported **3 rows** to `2026-07-10.csv`, verified == live count 3,
-destination confirmed OUTSIDE any git repo (not committable). See `backup.log`.
+**Proven run (2026-07-11):** exported **4 rows** to `2026-07-11.csv`, verified == live count 4,
+destination confirmed OUTSIDE any git repo (not committable), AND pushed off-machine to the
+private repo (see below). Earlier proven run 2026-07-10: 3 rows, count-verified. See `backup.log`.
+
+**STATUS (2026-07-11): LIVE.** The launchd job is installed + loaded and the off-machine
+private repo is provisioned and wired into the plist (`EnvironmentVariables > GF_BACKUP_GIT_DIR`).
+Off-machine repo: `rotemgotlieb-dev/gotefigure-email-backups` (PRIVATE), cloned to
+`~/gotefigure-email-backups`.
 
 ## Prerequisite (one time)
 `wrangler login` in Rotem's shell (the job uses `--remote`, which needs the cached OAuth
 token; the same login already used for D1/deploys). No secret is stored by this script.
 
-## Install the daily schedule (Rotem's console step)
-The launchd job is drafted in the repo but installing it is a system action:
+## Install the daily schedule (DONE 2026-07-11)
+The launchd job is installed + loaded. It runs 09:15 PT daily (the Mac must be awake, per the
+local-automation reality). The install steps that were run:
 ```sh
 cp ops/launchd/com.rotem.gotefigure-email-backup.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.rotem.gotefigure-email-backup.plist
 launchctl list | grep gotefigure-email-backup     # confirm it registered
 ```
-It runs 09:15 PT daily (the Mac must be awake, per the local-automation reality). Run it
-on demand any time with:
+Reverse (reversible at any time):
 ```sh
-cd ~/conductor/repos/gotefigure-backend && node scripts/backup-subscribers.mjs
+launchctl unload ~/Library/LaunchAgents/com.rotem.gotefigure-email-backup.plist
+rm ~/Library/LaunchAgents/com.rotem.gotefigure-email-backup.plist
+```
+Run it on demand any time with (off-machine push included via the env var):
+```sh
+cd ~/conductor/repos/gotefigure-backend && \
+  GF_BACKUP_GIT_DIR="$HOME/gotefigure-email-backups" node scripts/backup-subscribers.mjs
 ```
 
-## Optional: off-machine copy to a PRIVATE repo
-Off by default. To also push each CSV off the machine, create a **private** repo and point
-the job at it:
+## Off-machine copy to a PRIVATE repo (PROVISIONED 2026-07-11)
+Wired and live. The private repo `rotemgotlieb-dev/gotefigure-email-backups` is cloned to
+`~/gotefigure-email-backups`, and the plist sets `GF_BACKUP_GIT_DIR` to it, so every scheduled
+run also commits+pushes the CSV off-machine. It was set up with:
 ```sh
-gh repo create gotefigure-email-backups --private --clone   # PRIVATE, never public
-# then set the env for the job (e.g. in the plist's command or your shell):
-GF_BACKUP_GIT_DIR="$HOME/path/to/gotefigure-email-backups" node scripts/backup-subscribers.mjs
+gh repo create rotemgotlieb-dev/gotefigure-email-backups --private   # PRIVATE, never public
+gh repo clone rotemgotlieb-dev/gotefigure-email-backups ~/gotefigure-email-backups
+# then GF_BACKUP_GIT_DIR is set in the plist's EnvironmentVariables dict.
 ```
 The script refuses to run the off-machine copy unless that dir is a git repo with an
-`origin` remote. It is on YOU to keep that repo private. Do not point it at any public repo.
+`origin` remote. Keep that repo PRIVATE. Do not point it at any public repo.
 
 ## Safety guarantees (why this can't repeat the public-sheet mistake)
 - The script **refuses** to write the CSV inside the `gotefigure-backend` working tree (a
