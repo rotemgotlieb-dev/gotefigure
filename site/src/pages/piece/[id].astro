@@ -17,11 +17,11 @@ const p = pieces.find((x) => x.id === Astro.params.id);
 if (!p) return Astro.redirect('/store', 302);
 
 const scarcity = isLive
-  ? (p.original ? '1 of 1 — one buyer, one wall' : `${drop.left} of ${drop.editionSize} left — never reprinted`)
-  : 'vaulted — this piece will never be reprinted';
-const cta = p.original ? `Claim the original — ${money(p.price)}` : `Add to bag — ${money(p.price)}`;
+  ? (p.original ? '1 of 1, one buyer, one wall' : `${drop.left} of ${drop.editionSize} left. never reprinted`)
+  : 'vaulted, this piece will never be reprinted';
+const cta = p.original ? `Claim the original · ${money(p.price)}` : `Add to bag · ${money(p.price)}`;
 ---
-<Layout title={`${p.name} — GoteFigure`} description={p.desc} gated>
+<Layout title={`${p.name} · GoteFigure`} description={p.desc} gated>
   <div class="piece" data-piece-page data-piece-id={p.id} data-sized={p.sized ? '1' : undefined}>
     <a href="/#shop" class="back mono">← the drop</a>
 
@@ -30,7 +30,7 @@ const cta = p.original ? `Claim the original — ${money(p.price)}` : `Add to ba
         <div class="stage">
           <div class="view art" data-view="art" role="img" aria-label={p.name} style={`width:${p.artW};background-image:url('${p.art}')`}></div>
           <div class="view worn" data-view="worn" hidden>
-            <span class="mono">ON-BODY / IN-ROOM PHOTO<br />— the real shot lands here —</span>
+            <span class="mono">ON-BODY / IN-ROOM PHOTO<br />the real shot lands here</span>
           </div>
           <div class="view detail" data-view="detail" hidden role="img" aria-label="detail view" style={`background-image:url('${p.art}')`}></div>
         </div>
@@ -61,7 +61,7 @@ const cta = p.original ? `Claim the original — ${money(p.price)}` : `Add to ba
         </div>
 
         {isLive && <div class="cta"><InkButton label={cta} add="pdp" wide size="lg" /></div>}
-        {isBetween && <div class="vaulted-cta mono">Vaulted — gone for good</div>}
+        {isBetween && <div class="vaulted-cta mono">Vaulted, gone for good</div>}
 
         <div class="trust mono" data-ink-obstacle>free US shipping · 30-day size swaps · secure checkout</div>
 
@@ -70,7 +70,7 @@ const cta = p.original ? `Claim the original — ${money(p.price)}` : `Add to ba
           {p.sized && (
             <details>
               <summary class="mono">measurements ▾</summary>
-              <div class="mono measurements">XS 18" · S 19.5" · M 21" · L 23" · XL 25" — chest, laid flat.<br />Cold wash inside-out, hang dry. The print ages with you.</div>
+              <div class="mono measurements">XS 18" · S 19.5" · M 21" · L 23" · XL 25", chest laid flat.<br />Cold wash inside-out, hang dry. The print ages with you.</div>
             </details>
           )}
         </div>

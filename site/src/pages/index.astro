@@ -12,32 +12,32 @@ import Immersive from '../layouts/Immersive.astro';
 
 // Desktop framed works — geometry in the 1512×946 stage space (scaled as one unit). Verbatim from the mock.
 const frames = [
-  { img: '/art/after-hours/committee.png', alt: 'Nine ink heads in a row', title: 'the committee', no: 'NO 001 · INK · NOT FOR SALE (YET)',
+  { img: '/art/after-hours/committee.webp', alt: 'Nine ink heads in a row', title: 'the committee', no: 'NO 001 · INK · NOT FOR SALE (YET)',
     l: '14.6%', t: '10.6%', rot: '-1.5deg', fw: '348px', fpad: '5.3% 5.3% 7.3%', inner: 'var(--white)', ipad: '0',
     shadow: '0 16px 38px rgba(12,9,6,.28), 0 2px 6px rgba(12,9,6,.2)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '.8deg' },
   { img: '/art/after-hours/twins.png', alt: 'Pink mirrored figures', title: 'the twins', no: 'NO 007 · SEEING DOUBLE',
     l: '31%', t: '66.7%', rot: '1.8deg', fw: '150px', fpad: '8% 8% 11.3%', inner: 'var(--white)', ipad: '8%',
     shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-.6deg' },
-  { img: '/art/after-hours/hare.png', alt: 'The hare, wide-eyed', title: 'the hare', no: 'NO 002 · DO NOT FEED',
+  { img: '/art/after-hours/hare.webp', alt: 'The hare, wide-eyed', title: 'the hare', no: 'NO 002 · DO NOT FEED',
     l: '14.2%', t: '62.5%', rot: '1.4deg', fw: '151px', fpad: '12.4% 12.4% 17.1%', inner: 'var(--ah-mat-pink)', ipad: '0',
     shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-1deg' },
-  { img: '/art/after-hours/brain-weather.png', alt: 'Pink liquid maze blob', title: 'brain weather', no: 'NO 003 · WET PAINT',
+  { img: '/art/after-hours/brain-weather.webp', alt: 'Pink liquid maze blob', title: 'brain weather', no: 'NO 003 · WET PAINT',
     l: '39.2%', t: '17.4%', rot: '1.6deg', fw: '237px', fpad: '5.8% 5.8% 7.7%', inner: 'var(--white)', ipad: '0',
     shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '5px 10px 4px', capMt: '9px', tSize: '20px', capRot: '-.7deg' },
-  { img: '/art/after-hours/regular.png', alt: 'Teal antenna creature', title: 'the regular', no: 'NO 004 · HE WAITS TOO',
+  { img: '/art/after-hours/regular.webp', alt: 'Teal antenna creature', title: 'the regular', no: 'NO 004 · HE WAITS TOO',
     l: '78.6%', t: '19.1%', rot: '-2deg', fw: '151px', fpad: '9.2% 9.2% 13.1%', inner: 'var(--white)', ipad: '7.7%',
     shadow: '0 14px 32px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '1deg' },
   { img: '/art/after-hours/overthinking.png', alt: 'Tangled colour maze', title: 'overthinking', no: 'NO 005 · MARKER',
     l: '54.2%', t: '67.6%', rot: '-1.6deg', fw: '210px', fpad: '7.6% 7.6% 10.6%', inner: 'var(--white)', ipad: '0',
     shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '.9deg' },
-  { img: '/art/after-hours/four-birds.png', alt: 'Four mirrored birds', title: 'four birds, one bird', no: 'NO 006 · MIRRORED',
+  { img: '/art/after-hours/four-birds.webp', alt: 'Four mirrored birds', title: 'four birds, one bird', no: 'NO 006 · MIRRORED',
     l: '60%', t: '17.4%', rot: '1.2deg', fw: '215px', fpad: '7% 7% 9.5%', inner: 'var(--white)', ipad: '0',
     shadow: '0 16px 38px rgba(12,9,6,.28)', capPad: '4px 9px 3px', capMt: '8px', tSize: '18px', capRot: '-.8deg' },
 ];
 ---
 <Immersive
-  title="After Hours — GoteFigure"
-  description="The lights aren't on yet. GoteFigure is coming back — a salon of hand-drawn work. Leave your email and we'll tell you when the shop opens."
+  title="After Hours · GoteFigure"
+  description="The lights aren't on yet. GoteFigure is coming back, a salon of hand-drawn work. Leave your email and we'll tell you when the shop opens."
 >
   <!-- Turnstile (invisible) loader: used by both After Hours notify forms; explicit-render in after-hours.ts -->
   <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
@@ -56,7 +56,7 @@ const frames = [
           <div style="position:absolute;left:0;right:0;bottom:0;height:7.5%;background:var(--ah-floor);box-shadow:inset 0 10px 18px rgba(var(--ink-rgb),.18)"></div>
           <div style="position:absolute;left:0;right:0;bottom:7.5%;height:4px;background:var(--ah-skirt);box-shadow:0 2px 4px rgba(var(--ink-rgb),.22)"></div>
 
-          <img src="/art/after-hours/ghost.png" alt="" aria-hidden="true" decoding="async"
+          <img src="/art/after-hours/ghost.webp" alt="" aria-hidden="true" fetchpriority="high" decoding="async"
             style="position:absolute;left:50%;top:52%;width:92cqw;height:auto;transform:translate(-50%,-50%) rotate(-4deg);opacity:.07;mix-blend-mode:multiply;pointer-events:none" />
 
           <!-- MOBILE FRAMED WORKS. DESIGN REQUIREMENT (Rotem, 2026-07-10): EVEN LEFT/RIGHT BORDER -
@@ -68,7 +68,7 @@ const frames = [
           <div style="position:absolute;left:37.5%;top:40%;transform:translate(-50%,-50%) rotate(-1.5deg);width:58cqw;z-index:6">
             <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.6cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28),0 2px 6px rgba(var(--ah-night-rgb),.2)">
               <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-                <img src="/art/after-hours/committee.png" alt="Nine ink heads in a row" decoding="async" style="width:100%;height:auto" />
+                <img src="/art/after-hours/committee.webp" alt="Nine ink heads in a row" loading="lazy" decoding="async" style="width:100%;height:auto" />
               </div>
             </div>
           </div>
@@ -76,7 +76,7 @@ const frames = [
           <div style="position:absolute;left:80%;top:43.5%;transform:translate(-50%,-50%) rotate(1.4deg);width:21cqw;z-index:5">
             <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 14px 30px rgba(var(--ah-night-rgb),.28)">
               <div style="background:var(--ah-mat-pink);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-                <img src="/art/after-hours/hare.png" alt="The hare, wide-eyed" decoding="async" style="width:100%;height:auto" />
+                <img src="/art/after-hours/hare.webp" alt="The hare, wide-eyed" loading="lazy" decoding="async" style="width:100%;height:auto" />
               </div>
             </div>
           </div>
@@ -84,7 +84,7 @@ const frames = [
           <div style="position:absolute;left:39.5%;top:60%;transform:translate(-50%,-50%) rotate(1.6deg);width:36cqw;z-index:4">
             <div style="background:var(--ah-frame);padding:2cqw 2cqw 2.7cqw;box-shadow:0 14px 32px rgba(var(--ah-night-rgb),.28)">
               <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-                <img src="/art/after-hours/brain-weather.png" alt="Pink liquid maze blob" decoding="async" style="width:100%;height:auto" />
+                <img src="/art/after-hours/brain-weather.webp" alt="Pink liquid maze blob" loading="lazy" decoding="async" style="width:100%;height:auto" />
               </div>
             </div>
           </div>
@@ -92,7 +92,7 @@ const frames = [
           <div style="position:absolute;left:80%;top:67%;transform:translate(-50%,-50%) rotate(-2deg);width:21cqw;z-index:3">
             <div style="background:var(--ah-frame);padding:1.8cqw 1.8cqw 2.4cqw;box-shadow:0 12px 28px rgba(var(--ah-night-rgb),.3)">
               <div style="background:var(--white);box-shadow:inset 0 0 0 1px rgba(var(--ink-rgb),.08)">
-                <img src="/art/after-hours/regular.png" alt="Teal antenna creature" decoding="async" style="width:100%;height:auto" />
+                <img src="/art/after-hours/regular.webp" alt="Teal antenna creature" loading="lazy" decoding="async" style="width:100%;height:auto" />
               </div>
             </div>
           </div>
@@ -130,7 +130,7 @@ const frames = [
           </div>
 
           <div style="position:absolute;left:4cqw;bottom:calc(2.4cqw + env(safe-area-inset-bottom));display:flex;align-items:center;gap:2.3cqw;opacity:.85;z-index:4">
-            <img src="/art/after-hours/signature.png" alt="Gote — signature" decoding="async" style="height:5cqw;width:auto;mix-blend-mode:multiply" />
+            <img src="/art/after-hours/signature.webp" alt="Gote signature" loading="lazy" decoding="async" style="height:5cqw;width:auto;mix-blend-mode:multiply" />
             <span style="font-family:var(--font-mono);font-size:clamp(7px,2.3cqw,9px);letter-spacing:.22em;text-transform:uppercase;color:var(--muted)">works on paper</span>
           </div>
         </div>
@@ -140,7 +140,7 @@ const frames = [
 
         <header style="position:absolute;left:0;right:0;top:0;z-index:40;display:flex;align-items:flex-start;justify-content:space-between;gap:3.6cqw;padding:4.1cqw 4.1cqw 0;pointer-events:none">
           <div style="display:flex;align-items:baseline;gap:2.6cqw">
-            <img data-wm src="/art/after-hours/wordmark.png" alt="Gote Figure" decoding="async" style="height:7.7cqw;min-height:22px;width:auto;filter:invert(1) brightness(1.6);transition:filter .9s ease" />
+            <img data-wm src="/art/after-hours/wordmark.webp" alt="Gote Figure" decoding="async" style="height:7.7cqw;min-height:22px;width:auto;filter:invert(1) brightness(1.6);transition:filter .9s ease" />
             <span data-tagline style="font-family:var(--font-scrawl);font-size:clamp(13px,4.8cqw,19px);color:var(--ah-tagline);transform:rotate(-2deg) translateY(-3px);display:inline-block;transition:color .9s ease;white-space:nowrap">· after hours</span>
           </div>
         </header>
@@ -168,7 +168,7 @@ const frames = [
       <div class="ah-front" data-stage-front>
         <header class="ah-header">
           <div class="ah-brand">
-            <img class="ah-wm" data-wm src="/art/after-hours/wordmark.png" alt="Gote Figure" decoding="async" />
+            <img class="ah-wm" data-wm src="/art/after-hours/wordmark.webp" alt="Gote Figure" decoding="async" />
             <span class="ah-tagline" data-tagline>· after hours</span>
           </div>
         </header>
@@ -190,14 +190,14 @@ const frames = [
         <div class="ah-vignette" aria-hidden="true"></div>
         <div class="ah-floor" aria-hidden="true"></div>
         <div class="ah-rail" aria-hidden="true"></div>
-        <img class="ah-walltag" src="/art/after-hours/ghost.png" alt="" aria-hidden="true" decoding="async" />
+        <img class="ah-walltag" src="/art/after-hours/ghost.webp" alt="" aria-hidden="true" loading="lazy" decoding="async" />
 
         <div class="ah-gallery" data-art-band>
           {frames.map((f) => (
             <div class="ah-frame" style={`--l:${f.l};--t:${f.t};--rot:${f.rot};--fw:${f.fw}`}>
               <div class="ah-frame-mat" style={`padding:${f.fpad};box-shadow:${f.shadow}`}>
                 <div class="ah-frame-inner" style={`background:${f.inner};${f.ipad !== '0' ? `padding:${f.ipad};` : ''}`}>
-                  <img src={f.img} alt={f.alt} decoding="async" />
+                  <img src={f.img} alt={f.alt} loading="lazy" decoding="async" />
                 </div>
               </div>
               <div class="ah-cap-wrap" style={`margin-top:${f.capMt}`}>
@@ -240,7 +240,7 @@ const frames = [
         </div>
 
         <div class="ah-signature">
-          <img class="ah-sig-img" src="/art/after-hours/signature.png" alt="Gote — signature" decoding="async" />
+          <img class="ah-sig-img" src="/art/after-hours/signature.webp" alt="Gote signature" loading="lazy" decoding="async" />
           <span class="ah-sig-label">works on paper</span>
         </div>
       </div>
@@ -273,7 +273,7 @@ const frames = [
   .ah-grain {
     position: fixed; inset: 0; z-index: var(--z-grain); pointer-events: none;
     mix-blend-mode: multiply; opacity: .22;
-    background-image: url("/art/after-hours/grain.png"); background-repeat: repeat;
+    background-image: url("/art/after-hours/grain.webp"); background-repeat: repeat;
   }
 
   /* ---- block toggle: mobile is the base, desktop takes over at 1024px ---- */

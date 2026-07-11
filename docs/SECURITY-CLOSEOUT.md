@@ -66,11 +66,50 @@ Observed on the S6 build:
 - dist-lint now ALSO pins the built config's `run_worker_first` list + `ASSETS` binding, so a
   config regression cannot silently re-expose gated routes or the vault gallery.
 
-## 6. S6 secrets to provision before webhook cutover (console, names only)
-- `wrangler secret put FW_WEBHOOK_SECRET` - the signing secret from the Fourthwall webhook
-  config (dashboard -> Settings -> For developers -> webhooks).
-- Optional plain var `FW_WEBHOOK_SIG_HEADER` - ONLY if Fourthwall's signature-verification doc
-  (docs.fourthwall.com/webhooks/signature-verification) names a different header than the
-  code default `x-fourthwall-hmac-sha256`. Read that page at cutover; the digest encoding
-  (base64/hex) is accepted either way.
-- Then apply the orders migration remotely: `wrangler d1 migrations apply gotefigure --remote`.
+## 6. Turn orders ON (console + one CLI; the code side is DONE and proven)
+
+The order pipeline is built, migration-applied locally, and proven end-to-end against the
+built worker (signed -> 1 D1 row, replay/update -> still 1 row, unsigned/wrong-secret ->
+401, signed-but-keyless -> 400/no row). Evidence: `docs/evidence/r2-s6-orders/webhook-e2e-proof.md`.
+The Fourthwall signing details below were VERIFIED 2026-07-10 against
+docs.fourthwall.com/webhooks/signature-verification + /webhooks/webhook-model, so no code
+change is needed at cutover. Do these five steps, in order:
+
+1. **Apply the orders migration to the REAL D1** (one CLI, Rotem's authed shell):
+   ```sh
+   cd site && npx wrangler d1 migrations apply gotefigure --remote
+   ```
+   Proves it took: `npx wrangler d1 execute gotefigure --remote --command \
+   "SELECT name FROM sqlite_master WHERE type='table' AND name='orders';"` returns `orders`.
+
+2. **Create the webhook in Fourthwall** (dashboard -> Settings -> For developers ->
+   Webhooks, i.e. `https://<shop>.fourthwall.com/admin/dashboard/settings/for-developers`):
+   - Endpoint URL: `https://gotefigure.com/api/orders/webhook`
+   - Subscribe ONLY the order events: `ORDER_PLACED` and `ORDER_UPDATED`. (Do not point
+     donation/gift events here; the endpoint stores whatever verified event carries an
+     order id, so keep it order-only.)
+   - Copy the **signing secret** Fourthwall shows for this webhook.
+
+3. **Set the secret on the Worker** (never in the repo):
+   ```sh
+   npx wrangler secret put FW_WEBHOOK_SECRET   # paste the FW signing secret
+   ```
+   Do NOT set `FW_WEBHOOK_SIG_HEADER`: the code default `x-fourthwall-hmac-sha256` already
+   matches Fourthwall's `X-Fourthwall-Hmac-SHA256` header (lookup is case-insensitive).
+   Set it to `x-fourthwall-hmac-apps-sha256` ONLY if this is a Platform App integration
+   (it is not for a normal shop webhook). Encoding is base64, already handled.
+
+4. **Redeploy so the live Worker has the secret binding**, then confirm fail-closed is off:
+   a signed test send should now write a row (next step). Until the secret is set the
+   endpoint correctly returns 500 (fail closed) and writes nothing.
+
+5. **Send a real signed test + read the row back** (deployed != working):
+   - Fourthwall webhook config -> "Send test" (or place a $0/test order).
+   - Verify: `npx wrangler d1 execute gotefigure --remote --command \
+     "SELECT fw_id, friendly_id, email, shipping_status FROM orders ORDER BY id DESC LIMIT 5;"`
+     shows the order, keyed on the FW order id (not a `weve_*` event id).
+   - Or load `https://gotefigure.com/admin/orders` through the gate.
+
+Bot Fight Mode caveat (from §2): if FW deliveries start failing after enabling it, add a
+WAF rule to SKIP Bot Fight for `http.request.uri.path eq "/api/orders/webhook"`. The HMAC
+check is the real auth; Bot Fight is shell, not gate.

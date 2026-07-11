@@ -76,6 +76,18 @@ describe('extractOrder (defensive envelope walk; never invents values)', () => {
     expect(extractOrder({ data: { id: 'y'.repeat(200) } })).toBeNull();
   });
 
+  it('NEVER keys an order on the envelope event id (webhook-model: top-level id is the per-delivery event id)', () => {
+    // A real Fourthwall envelope has a top-level `id` = event id (weve_...) that changes
+    // every delivery; the order id lives in `data.id`. If `data.id` is absent, the event
+    // MUST be rejected, never keyed on the event id - else ORDER_PLACED and a later
+    // ORDER_UPDATED for the SAME order (different event ids) would write two rows and
+    // break idempotency.
+    expect(extractOrder({ id: 'weve_event_abc', type: 'ORDER_PLACED', data: { email: 'a@b.co' } })).toBeNull();
+    // And when data.id IS present, it wins over the envelope event id.
+    const o = extractOrder({ id: 'weve_event_abc', type: 'ORDER_PLACED', data: { id: 'ord_1', friendlyId: 'GF-1001' } });
+    expect(o?.fwId).toBe('ord_1');
+  });
+
   it('defaults, never fabricates: unknown status + empty items', () => {
     const o = extractOrder({ data: { id: 'z9' } });
     expect(o).toMatchObject({ fwId: 'z9', friendlyId: null, email: null, lineItems: '[]', shippingStatus: 'unknown' });

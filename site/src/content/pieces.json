@@ -1,5 +1,5 @@
 {
-  "_comment": "OWNER ALLOWLIST — only pieces listed here exist in the store, in this order. category: 'wear' | 'paper' drives the tabs. sized=true renders XS-XL. Art paths live in /public. Copy is placard voice (design P{} verbatim).",
+  "_comment": "OWNER ALLOWLIST: only pieces listed here exist in the store, in this order. category: 'wear' | 'paper' drives the tabs. sized=true renders XS-XL. Art paths live in /public. Copy is placard voice (design P{} verbatim).",
   "pieces": [
     {
       "id": "sticker",
@@ -45,7 +45,7 @@
       "sized": true,
       "category": "wear",
       "hero": true,
-      "desc": "This month’s drawing — one continuous pour of rose on crimson. Printed front and centre, once, never again.",
+      "desc": "This month’s drawing. One continuous pour of rose on crimson. Printed front and centre, once, never again.",
       "meta": "ink line, colored digitally · water-based print · 100% heavyweight cotton",
       "note": "i let the line walk and followed it.",
       "underline": "M2 4 C 30 6.5, 58 1, 98 3.5"
@@ -78,7 +78,7 @@
       "sized": false,
       "category": "paper",
       "original": true,
-      "desc": "Not a print — the actual sheet of paper the ink touched. Signed, sleeved, shipped flat. One buyer, one wall.",
+      "desc": "Not a print. The actual sheet of paper the ink touched. Signed, sleeved, shipped flat. One buyer, one wall.",
       "meta": "india ink + gouache on cold-press · 35×35cm · signed original",
       "note": "i can’t make another. that’s the point.",
       "underline": "M2 3.5 C 36 1, 64 6.5, 98 3"

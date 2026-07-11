@@ -29,7 +29,7 @@ const hh0 = two(Math.floor(diff / 36e5) % 24);
 const mm0 = two(Math.floor(diff / 6e4) % 60);
 const ss0 = two(Math.floor(diff / 1e3) % 60);
 ---
-<Layout title="GoteFigure — hand-drawn ink, one drop a month" description="Hand-drawn ink art by Rotem. One drop a month — limited, never reprinted, vaulted forever." gated>
+<Layout title="GoteFigure · hand-drawn ink, one drop a month" description="Hand-drawn ink art by Rotem. One drop a month. Limited, never reprinted, vaulted forever." gated>
 
   <!-- ============ ARRIVAL — one drop of ink (plays once per session; gated pre-paint) ============ -->
   <div class="gf-arrival" data-arrival-root aria-hidden="true">
@@ -59,7 +59,7 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
       {isLive && (
         <>
           <div class="hero-art">
-            <img data-rv="soak" src={tee.art} alt={`${tee.name} — this month's drawing`} width="1600" height="1200" />
+            <img data-rv="soak" src={tee.art} alt={`${tee.name} , this month's drawing`} width="1600" height="1200" />
           </div>
           <h1 class="brush hero-title">{tee.name}</h1>
           <div class="sizes" data-sizes data-rv-stagger>
@@ -67,7 +67,7 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
           </div>
           <div class="size-error" data-size-error hidden>Pick a size first.</div>
           <div class="hero-cta">
-            <InkButton label={`Add to bag — ${money(tee.price)}`} add="hero" size="lg" />
+            <InkButton label={`Add to bag · ${money(tee.price)}`} add="hero" size="lg" />
           </div>
         </>
       )}
@@ -76,7 +76,7 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
         <>
           <div class="drying mono">
             <span class="pulse-dot"></span>
-            <span>Drop 02 — drying on the desk</span>
+            <span>Drop 02, drying on the desk</span>
           </div>
           <div class="facedown">
             <img src={tee.art} alt="" aria-hidden="true" />
@@ -135,9 +135,9 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
     <!-- ——— ROTEM ——— -->
     <section class="rotem" data-doodle="720">
       <div data-la="4" data-la-ring data-la-splat aria-hidden="true" class="la-anchor"></div>
-      <div id="rotem-portrait"><img src="/art/v3/rotem-portrait.png" alt="Rotem — the one hand behind every line" width="770" height="770" /></div>
-      <p data-rv="fade" class="statement brush">every piece here starts as pen on paper — drawn by me, once.</p>
-      <img data-rv="fade" data-rv-d="150" src="/art/v3/signature.png" alt="Rotem — signature" class="sig" width="1554" height="1146" />
+      <div id="rotem-portrait"><img src="/art/v3/rotem-portrait.png" alt="Rotem, the one hand behind every line" width="770" height="770" /></div>
+      <p data-rv="fade" class="statement brush">every piece here starts as pen on paper, drawn by me, once.</p>
+      <img data-rv="fade" data-rv-d="150" src="/art/v3/signature.png" alt="Rotem's signature" class="sig" width="1554" height="1146" />
     </section>
 
     <!-- ——— VAULT STRIP ——— -->
@@ -147,7 +147,7 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
         <h2 class="brush">The Vault</h2>
         <div class="polaroids">
           {vaultStrip.map((v, i) => (
-            <div data-rv="fade" data-rv-d={50 + i * 70} class="polaroid"><img src={v.img} alt={`Vaulted piece — ${v.name}`} width="276" height="276" loading="lazy" /></div>
+            <div data-rv="fade" data-rv-d={50 + i * 70} class="polaroid"><img src={v.img} alt={`Vaulted piece · ${v.name}`} width="276" height="276" loading="lazy" /></div>
           ))}
         </div>
         <div class="vs-note mono">every drop retires here · sold out, forever</div>
@@ -159,14 +159,14 @@ const ss0 = two(Math.floor(diff / 1e3) % 60);
     <footer class="gf-footer" data-doodle="620">
       <img src="/art/v3/signature.png" alt="Rotem" class="big-sig" width="1554" height="1146" />
       <form class="subscribe" data-subscribe>
-        <input type="email" required placeholder="one email per drop — that's it" aria-label="newsletter email" />
+        <input type="email" required placeholder="one email per drop, that's it" aria-label="newsletter email" />
         <InkButton label="Knock →" submit size="sm" />
       </form>
       <div class="subscribed brush" data-subscribed hidden>✶ you're in. one email per drop.</div>
       <div class="trust mono">
         <span data-ink-obstacle>free US shipping</span><span data-ink-obstacle>30-day size swaps</span><span data-ink-obstacle>secure checkout</span>
       </div>
-      <div class="copyright mono">© 2026 gotefigure — every line drawn by one hand</div>
+      <div class="copyright mono">© 2026 gotefigure · every line drawn by one hand</div>
     </footer>
 
   </div>
