@@ -24,3 +24,6 @@ SHOTSTACK_KEYS.txt
 site/.dev.vars
 .wrangler/
 site/.wrangler/
+
+# Email-list backups: real subscriber PII, must never be committed here (script also refuses)
+gotefigure-email-backups/

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Daily backup of the GoteFigure D1 `subscribers` list to a PRIVATE local CSV.
+  DRAFT held in the repo; installing it is Rotem's console step (see
+  docs/EMAIL-BACKUP-RUNBOOK.md). Uses a login shell (-lc) so nvm/PATH + the cached
+  `wrangler login` token resolve under launchd. Runs 09:15 PT daily (Mac must be awake).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.rotem.gotefigure-email-backup</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-lc</string>
+    <string>cd /Users/rotemgotlieb/conductor/repos/gotefigure-backend &amp;&amp; exec node scripts/backup-subscribers.mjs</string>
+  </array>
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>9</integer>
+    <key>Minute</key><integer>15</integer>
+  </dict>
+  <key>StandardOutPath</key><string>/Users/rotemgotlieb/Desktop/gotefigure-email-backups/launchd.out.log</string>
+  <key>StandardErrorPath</key><string>/Users/rotemgotlieb/Desktop/gotefigure-email-backups/launchd.err.log</string>
+  <key>RunAtLoad</key><false/>
+</dict>
+</plist>
