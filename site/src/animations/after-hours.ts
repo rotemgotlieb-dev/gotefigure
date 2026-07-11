@@ -115,7 +115,7 @@ defineModule('after-hours', ({ reduced }) => {
       if (wm) wm.style.filter = on ? 'none' : 'invert(1) brightness(1.6)';
       if (tagline) tagline.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-tagline)';
       if (hint) {
-        hint.textContent = on ? 'soon. promise. · pull the cord to close up' : 'drag your thumb · a cord hangs somewhere';
+        hint.textContent = on ? 'pull the cord to close up' : 'drag your thumb · a cord hangs somewhere';
         hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint)';
         hint.style.animation = on ? 'none' : '';
       }
@@ -202,7 +202,7 @@ defineModule('after-hours', ({ reduced }) => {
       if (wm) wm.style.filter = on ? 'none' : 'invert(1) brightness(1.6)';
       if (tagline) tagline.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-tagline)';
       if (hint) {
-        hint.textContent = on ? 'soon. promise. · pull the cord to close up' : 'somewhere, a cord is hanging · pull it';
+        hint.textContent = on ? 'pull the cord to close up' : 'somewhere, a cord is hanging · pull it';
         hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint)';
         hint.style.animation = on ? 'none' : '';
       }
