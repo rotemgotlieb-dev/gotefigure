@@ -116,7 +116,7 @@ defineModule('after-hours', ({ reduced }) => {
       if (tagline) tagline.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-tagline)';
       if (hint) {
         hint.textContent = on ? 'pull the cord to close up' : 'drag your thumb · a cord hangs somewhere';
-        hint.style.color = on ? 'var(--ah-hint-lit)' : 'var(--ah-hint)';
+        hint.style.color = on ? 'var(--ah-sub-lit)' : 'var(--ah-hint)'; // lit hint matches the lit sub colour
         hint.style.animation = on ? 'none' : '';
       }
       if (cordInner && !instant) { cordInner.style.animation = 'none'; void cordInner.offsetWidth; cordInner.style.animation = 'gfahm-sway .9s ease 2'; }
