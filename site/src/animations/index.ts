@@ -13,6 +13,7 @@ import './tiles';
 import './countdown';
 import './store-ui';
 import './after-hours'; // no-ops unless the page has [data-room-stage] (the After Hours salon)
+import './scroll-choreography'; // no-ops unless the page has [data-lights-up] (the Lights Up storefront)
 
 startMotion();
 initFloodNav();
