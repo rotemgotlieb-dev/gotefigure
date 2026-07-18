@@ -33,13 +33,15 @@ const archive = [
     <!-- ========================= HERO: lights down ========================= -->
     <section class="lu-hero" data-hero>
       <div class="lu-hero-inner">
-        <p class="lu-eyebrow lu-eyebrow--lit">Gote Figure</p>
-        <h1 class="lu-h1">
-          <span>Back from 2020</span>
-          <span>Five years later</span>
-          <span class="lu-h1-accent">Better this time</span>
-        </h1>
-        <p class="lu-hero-sub">A salon of hand-drawn work, reissued from the vault.</p>
+        <div class="lu-hero-copy">
+          <p class="lu-eyebrow lu-eyebrow--lit">Gote Figure</p>
+          <h1 class="lu-h1">
+            <span>Back from 2020</span>
+            <span>Five years later</span>
+            <span class="lu-h1-accent">Better this time</span>
+          </h1>
+          <p class="lu-hero-sub">A salon of hand-drawn work, reissued from the vault.</p>
+        </div>
         <figure class="lu-hero-art">
           <img src="/art/lights-up/hero-poster.jpg" alt="A hand-drawn blue rabbit framed in a paper shrine"
                width="1400" height="788" fetchpriority="high" decoding="async" />
@@ -182,17 +184,17 @@ const archive = [
       box-shadow: inset 0 -60px 140px rgba(var(--ink-rgb), .14), inset 0 0 160px rgba(var(--ink-rgb), .06);
     }
     /* torch veil: dark at the edges, a warm hole on the framed ART (the torch lights the
-       work, not the wall behind the type). Opacity scrubbed by JS. The hole was originally
-       at 50% 34%, directly behind the H1: the lit wall showed through the hole and washed
-       the light hero type to 1.08:1 in the opening frame (design-eval refute, 2026-07-18).
-       Light-register parity: the type zone must stay DARK while the veil is up. */
+       work). Opacity scrubbed by JS. The hero COPY does not rely on this staying off its
+       type: it carries its own local dark scrim (.lu-hero-copy::before) so the beam is free
+       to sit low on the art. (History: the hole was at 50% 34% behind the H1 = 1.08:1; then
+       50% 64% left the amber line on the ramp = ~1:1; the scrim decouples copy from beam.) */
     .lu-veil {
       z-index: 1; opacity: 1;
-      background: radial-gradient(circle 60vh at 50% 64%,
+      background: radial-gradient(circle 54vh at 50% 74%,
         rgba(var(--ah-beam), .12),
         rgba(var(--ah-night-rgb), 0) 12vh,
-        rgba(var(--ah-night-rgb), .78) 30vh,
-        rgba(var(--ah-night-rgb), .985) 72vh);
+        rgba(var(--ah-night-rgb), .74) 32vh,
+        rgba(var(--ah-night-rgb), .985) 70vh);
     }
     .lu-glow {
       z-index: 1; opacity: 0;
@@ -206,21 +208,38 @@ const archive = [
     /* ---- hero ---- */
     .lu-hero { min-height: 100svh; display: grid; place-items: center; padding: var(--s-16) var(--s-6) var(--s-24); }
     .lu-hero-inner { width: min(720px, 100%); text-align: center; }
+    /* the copy sits in the dark salon (lights off); a soft local shadow anchored to the
+       TEXT keeps the whole cluster on a reliably dark register, so the light headline, warm
+       sub, and amber accent all clear contrast wherever the torch beam falls. Travels with
+       the text (viewport-independent, unlike a fixed veil gradient), z-index -1 puts it above
+       the fixed veil but below the type. Lifts under reduced-motion, where the wall is lit
+       and the copy flips to ink. Parity is per-patch: chasing the hole position left the
+       amber line on the ramp at ~1:1; this decouples the copy backdrop from the beam. */
+    .lu-hero-copy { position: relative; }
+    .lu-hero-copy::before {
+      content: ''; position: absolute; inset: -16% -14% -24%; z-index: -1; pointer-events: none;
+      /* a dark plateau (not a quick falloff) so the sub, the lowest line, sits on solid dark
+         where the scrim used to fade into the beam ramp (worst pixel was 2.84:1, floor 3). */
+      background: radial-gradient(122% 104% at 50% 50%,
+        rgba(var(--ah-night-rgb), .92),
+        rgba(var(--ah-night-rgb), .82) 54%,
+        rgba(var(--ah-night-rgb), 0) 88%);
+    }
     .lu-eyebrow--lit { font-size: 11px; color: var(--ah-tagline); margin: 0 0 var(--s-6); }
     .lu-h1 { display: grid; gap: .04em; margin: 0; font-family: var(--font-brush); font-weight: 400;
       line-height: .96; font-size: clamp(2.4rem, 1.4rem + 5vw, 4.6rem); color: var(--ah-hero-lit); }
     .lu-h1-accent { color: var(--amber); }
-    /* the sub sits INSIDE the torch beam (a lit patch even while the room is dark), so its
-       register is the beam, not the room: ink, readable at every veil state (parity gate). */
+    /* the sub sits on the copy scrim (dark), so it uses the brand's lights-off subhead tone;
+       reduced-motion flips it to muted-dark for the lit wall (parity block below). */
     .lu-hero-sub { margin: var(--s-6) auto 0; font-family: var(--font-scrawl);
-      font-size: clamp(1.15rem, 1rem + 1.4vw, 1.7rem); color: var(--ink); transform: rotate(-.5deg); }
+      font-size: clamp(1.15rem, 1rem + 1.4vw, 1.7rem); color: var(--ah-sub-dark); transform: rotate(-.5deg); }
     .lu-hero-art { margin: var(--s-12) auto 0; width: min(560px, 100%);
       background: var(--ah-frame); padding: 12px 12px 16px;
       box-shadow: 0 24px 60px rgba(var(--ah-night-rgb), .5), 0 3px 10px rgba(var(--ah-night-rgb), .4);
       transform: rotate(-.8deg); }
     .lu-hero-art img { display: block; width: 100%; height: auto; box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .1); }
     /* the hint transits dark -> lit as the veil rises; a LOCAL ink backdrop keeps it one
-       register in every state (local-backdrop-over-global-veil, the archive's own fix). */
+       register in every state (local-backdrop-over-veil, the archive's own fix). */
     .lu-scrollhint { margin: var(--s-12) auto 0; width: fit-content; font-family: var(--font-mono);
       font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ah-tagline);
       background: rgba(var(--ah-night-rgb), .82); border-radius: 4px; padding: 7px 12px; }
@@ -329,8 +348,12 @@ const archive = [
       .lu-glow { opacity: 1 !important; }
       [data-rv="fade"] { opacity: 1 !important; transform: none !important; transition: none !important; }
       /* lights resolve UP, so hero text colored for the dark register flips to ink to stay readable.
-         the archive and footer keep their own dark panels, so their light text stays readable as-is. */
-      .lu-h1 { color: var(--ink); }
+         the copy scrim lifts (the wall is lit, not dark), and the amber accent goes ink with the
+         rest of the headline so it reads on the lit cream wall (amber-on-cream is ~1.7:1: a WCAG
+         parity fix, not a palette change; the lit-register accent color is a Rotem taste call).
+         the archive and footer keep their own dark panels, so their light text stays readable. */
+      .lu-hero-copy::before { display: none; }
+      .lu-h1, .lu-h1-accent { color: var(--ink); }
       .lu-eyebrow--lit, .lu-hero-sub { color: var(--muted-dark); }
       .lu-scrollhint { display: none; }
     }
