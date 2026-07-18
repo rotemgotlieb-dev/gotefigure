@@ -6,7 +6,11 @@ defineModule('countdown', () => {
   const host = document.querySelector<HTMLElement>('[data-next-drop]');
   const dds = document.querySelectorAll<HTMLElement>('[data-count-dd]');
   if (!host || !dds.length) return;
-  const target = Date.parse(host.dataset.nextDrop || '') || Date.now() + 23 * 864e5;
+  // Ethics floor (dtc lane): a countdown is legal only against a REAL deadline. If the
+  // page's date is missing or unparseable, do not tick at all (the server seeds zeros);
+  // never fabricate a target.
+  const target = Date.parse(host.dataset.nextDrop || '');
+  if (!Number.isFinite(target)) return;
   const two = (n: number) => String(n).padStart(2, '0');
 
   const tick = () => {
