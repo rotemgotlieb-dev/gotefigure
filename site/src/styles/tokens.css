@@ -22,6 +22,16 @@
   /* legacy-era token kept for archive contexts (spec §3.1) */
   --og-pink: #F27C8D;
 
+  /* 2026 store accents, law-first (System_Architecture §3.1; ratified 2026-07-18).
+     Amber is the CTA and the torch light; teal is the secondary; sunset is the warm bridge.
+     These match the brand's own art (the rabbit: teal body, amber eyes). BOTH pinks
+     (--pink, --og-pink) are archive / history only, never a buyable-store accent. */
+  --amber: #F0A028;
+  --amber-rgb: 240, 160, 40;
+  --teal: #2AA79B;
+  --teal-rgb: 42, 167, 155;
+  --sunset: #E8836B;
+
   /* After Hours — dark-salon scene palette (2026-07-08) */
   --ah-night: #0C0906;        /* room black behind the stage + the darkness */
   --ah-wall: #E9E2D3;         /* lit salon wall */
