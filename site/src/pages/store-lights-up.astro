@@ -326,4 +326,11 @@ const archive = [
       .lu-scrollhint { display: none; }
     }
   </style>
+
+  <style is:global>
+    /* Storefront palette consistency: the shared nav cart-count badge is pink (--pink) as global
+       chrome. Scope it off pink on this law-first storefront only (no other page is touched). The
+       global recolor is Rotem's call as part of the amber/teal ratification into System_Architecture v1.2. */
+    body:has([data-lights-up]) .count { color: var(--muted-dark); }
+  </style>
 </Layout>
