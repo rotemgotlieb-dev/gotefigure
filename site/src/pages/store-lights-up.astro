@@ -181,14 +181,18 @@ const archive = [
         linear-gradient(to bottom, transparent 78%, var(--ah-floor) 92%);
       box-shadow: inset 0 -60px 140px rgba(var(--ink-rgb), .14), inset 0 0 160px rgba(var(--ink-rgb), .06);
     }
-    /* torch veil: dark at the edges, a warm hole in the middle (the torch). Opacity scrubbed by JS. */
+    /* torch veil: dark at the edges, a warm hole on the framed ART (the torch lights the
+       work, not the wall behind the type). Opacity scrubbed by JS. The hole was originally
+       at 50% 34%, directly behind the H1: the lit wall showed through the hole and washed
+       the light hero type to 1.08:1 in the opening frame (design-eval refute, 2026-07-18).
+       Light-register parity: the type zone must stay DARK while the veil is up. */
     .lu-veil {
       z-index: 1; opacity: 1;
-      background: radial-gradient(circle 60vh at 50% 34%,
-        rgba(var(--ah-beam), .10),
-        rgba(var(--ah-night-rgb), 0) 16vh,
-        rgba(var(--ah-night-rgb), .58) 40vh,
-        rgba(var(--ah-night-rgb), .985) 78vh);
+      background: radial-gradient(circle 60vh at 50% 64%,
+        rgba(var(--ah-beam), .12),
+        rgba(var(--ah-night-rgb), 0) 12vh,
+        rgba(var(--ah-night-rgb), .78) 30vh,
+        rgba(var(--ah-night-rgb), .985) 72vh);
     }
     .lu-glow {
       z-index: 1; opacity: 0;
@@ -206,15 +210,20 @@ const archive = [
     .lu-h1 { display: grid; gap: .04em; margin: 0; font-family: var(--font-brush); font-weight: 400;
       line-height: .96; font-size: clamp(2.4rem, 1.4rem + 5vw, 4.6rem); color: var(--ah-hero-lit); }
     .lu-h1-accent { color: var(--amber); }
+    /* the sub sits INSIDE the torch beam (a lit patch even while the room is dark), so its
+       register is the beam, not the room: ink, readable at every veil state (parity gate). */
     .lu-hero-sub { margin: var(--s-6) auto 0; font-family: var(--font-scrawl);
-      font-size: clamp(1.15rem, 1rem + 1.4vw, 1.7rem); color: var(--ah-sub-dark); transform: rotate(-.5deg); }
+      font-size: clamp(1.15rem, 1rem + 1.4vw, 1.7rem); color: var(--ink); transform: rotate(-.5deg); }
     .lu-hero-art { margin: var(--s-12) auto 0; width: min(560px, 100%);
       background: var(--ah-frame); padding: 12px 12px 16px;
       box-shadow: 0 24px 60px rgba(var(--ah-night-rgb), .5), 0 3px 10px rgba(var(--ah-night-rgb), .4);
       transform: rotate(-.8deg); }
     .lu-hero-art img { display: block; width: 100%; height: auto; box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .1); }
-    .lu-scrollhint { margin: var(--s-12) 0 0; font-family: var(--font-mono); font-size: 11px;
-      letter-spacing: .18em; text-transform: uppercase; color: var(--ah-hint); }
+    /* the hint transits dark -> lit as the veil rises; a LOCAL ink backdrop keeps it one
+       register in every state (local-backdrop-over-global-veil, the archive's own fix). */
+    .lu-scrollhint { margin: var(--s-12) auto 0; width: fit-content; font-family: var(--font-mono);
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ah-tagline);
+      background: rgba(var(--ah-night-rgb), .82); border-radius: 4px; padding: 7px 12px; }
 
     /* ---- shared band header ---- */
     .lu-band-head { width: min(720px, 100%); margin: 0 auto var(--s-12); text-align: center; }
