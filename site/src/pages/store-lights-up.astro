@@ -354,7 +354,10 @@ const archive = [
          the archive and footer keep their own dark panels, so their light text stays readable. */
       .lu-hero-copy::before { display: none; }
       .lu-h1, .lu-h1-accent { color: var(--ink); }
-      .lu-eyebrow--lit, .lu-hero-sub { color: var(--muted-dark); }
+      .lu-eyebrow--lit { color: var(--muted-dark); }
+      /* the sub clamps to 21px on mobile (small text, 4.5 floor); muted-dark on the lit wall
+         lands at 4.38 there, so it uses the darker body tone to clear AA (design-eval residual). */
+      .lu-hero-sub { color: var(--body-soft); }
       .lu-scrollhint { display: none; }
     }
   </style>
