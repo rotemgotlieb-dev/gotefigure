@@ -17,10 +17,13 @@ looks exactly like "quiet day".
    ```
    npx wrangler d1 migrations apply gotefigure --remote
    ```
-   `wrangler deploy` does NOT apply migrations. Without `0004`, every INSERT hits
-   `no such column: event_ts` and returns 500, burning Fourthwall's retries on every delivery.
-   Existing rows backfill to `event_ts = 0` / `status_event_ts = 0` and advance normally on their
-   next real event. No manual backfill needed.
+   `wrangler deploy` does NOT apply migrations. This command applies ALL pending migrations, which
+   matters more than it first appears: as of 2026-07-18 the remote database has no `orders` table
+   at all (`pragma_table_info('orders')` returns empty on prod D1), so `0003` is unapplied there
+   too, not only `0004`. Until both land, every INSERT fails (`no such table: orders`, or
+   `no such column: event_ts` if only 0003 is applied) and returns 500, burning Fourthwall's
+   retries on every delivery. Where rows already exist, they backfill to `event_ts = 0` /
+   `status_event_ts = 0` and advance normally on their next real event. No manual backfill needed.
 
 2. **Set the secret** (Rotem, console or CLI; never routed through automation):
    ```
