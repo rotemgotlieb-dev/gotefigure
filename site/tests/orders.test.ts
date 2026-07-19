@@ -2,7 +2,14 @@
 // proof (signed POST -> 1 D1 row, replay -> still 1, unsigned -> 401) runs against the
 // built worker via wrangler dev; these tests pin the pure logic the endpoint composes.
 import { describe, it, expect } from 'vitest';
-import { verifyWebhookSignature, signWebhookBody, extractOrder, DEFAULT_SIG_HEADER } from '../src/lib/orders';
+import {
+  verifyWebhookSignature,
+  verifyWebhookSignatureBytes,
+  signWebhookBody,
+  extractOrder,
+  eventMicros,
+  DEFAULT_SIG_HEADER,
+} from '../src/lib/orders';
 
 const SECRET = 'test_webhook_secret_0123456789abcdef';
 const BODY = JSON.stringify({ type: 'ORDER_PLACED', data: { id: 'fw-ord-001', email: 'a@b.co' } });
@@ -105,5 +112,71 @@ describe('extractOrder (defensive envelope walk; never invents values)', () => {
   it('defaults, never fabricates: unknown status + empty items', () => {
     const o = extractOrder({ data: { id: 'z9' } });
     expect(o).toMatchObject({ fwId: 'z9', friendlyId: null, email: null, lineItems: '[]', shippingStatus: 'unknown' });
+  });
+});
+
+describe('eventMicros (F2/F3 monotonic key: microsecond resolution, no ms-truncation collision)', () => {
+  const SAMPLE = '2023-07-12T15:05:11.078089+00:00'; // Fourthwall webhook-model example createdAt
+
+  it('captures sub-millisecond microseconds (Date.parse alone would drop them)', () => {
+    // Date.parse truncates to ms (…078); eventMicros preserves the full …078089 microseconds.
+    expect(eventMicros(SAMPLE)).toBe(Date.parse(SAMPLE) * 1000 + 89);
+    expect(eventMicros(SAMPLE)).toBeGreaterThan(0);
+    expect(Number.isSafeInteger(eventMicros(SAMPLE))).toBe(true);
+  });
+
+  it('OLD-CODE CONTROL: two same-millisecond events collide under Date.parse but stay distinct in micros', () => {
+    const a = '2023-07-12T15:05:11.078089+00:00';
+    const b = '2023-07-12T15:05:11.078129+00:00'; // 40 microseconds later, SAME millisecond
+    expect(Date.parse(a)).toBe(Date.parse(b)); // ms truncation: identical -> strict > would DROP the later
+    expect(eventMicros(b)).toBeGreaterThan(eventMicros(a)); // micros: distinct -> strict > keeps ordering
+    expect(eventMicros(b) - eventMicros(a)).toBe(40);
+  });
+
+  it('whole-second timestamps (no fraction) parse with zero sub-ms', () => {
+    const s = '2023-07-12T15:05:11+00:00';
+    expect(eventMicros(s)).toBe(Date.parse(s) * 1000);
+  });
+
+  it('fails safe to 0 on absent / unparseable / non-string input', () => {
+    expect(eventMicros(undefined)).toBe(0);
+    expect(eventMicros(null)).toBe(0);
+    expect(eventMicros(1689174311078)).toBe(0);
+    expect(eventMicros('not-a-date')).toBe(0);
+    expect(eventMicros('')).toBe(0);
+  });
+
+  it('extractOrder keys eventTs off the ENVELOPE createdAt, NEVER the order data.createdAt', () => {
+    // Wiring the wrong (constant) data.createdAt would freeze status forever; prove the envelope wins.
+    const later = '2023-07-12T15:05:11.078089+00:00';
+    const earlier = '2020-01-01T00:00:00.000000+00:00';
+    const o = extractOrder({ type: 'ORDER_UPDATED', createdAt: later, data: { id: 'o1', createdAt: earlier } });
+    expect(o!.eventTs).toBe(eventMicros(later));
+    expect(o!.eventTs).not.toBe(eventMicros(earlier));
+    // absent envelope createdAt -> eventTs 0 (the handler logs this and the row can create but not advance)
+    expect(extractOrder({ type: 'ORDER_UPDATED', data: { id: 'o2' } })!.eventTs).toBe(0);
+  });
+});
+
+describe('verifyWebhookSignatureBytes (byte-native HMAC; no UTF-8 round-trip corruption)', () => {
+  const MULTIBYTE = JSON.stringify({ type: 'ORDER_PLACED', data: { id: 'x1', note: 'café \u{1F680} Zürich' } });
+
+  it('verifies a signature over the exact UTF-8 bytes', async () => {
+    const sig = await signWebhookBody(SECRET, MULTIBYTE);
+    const bytes = new TextEncoder().encode(MULTIBYTE);
+    expect(await verifyWebhookSignatureBytes(SECRET, bytes, sig)).toBe(true);
+  });
+
+  it('string and byte paths agree on a non-ASCII body (round-trip integrity)', async () => {
+    const sig = await signWebhookBody(SECRET, MULTIBYTE);
+    const bytes = new TextEncoder().encode(MULTIBYTE);
+    expect(await verifyWebhookSignature(SECRET, MULTIBYTE, sig)).toBe(true);
+    expect(await verifyWebhookSignatureBytes(SECRET, bytes, sig)).toBe(true);
+  });
+
+  it('rejects a byte body that differs by one byte', async () => {
+    const sig = await signWebhookBody(SECRET, MULTIBYTE);
+    const bytes = new TextEncoder().encode(MULTIBYTE + ' ');
+    expect(await verifyWebhookSignatureBytes(SECRET, bytes, sig)).toBe(false);
   });
 });
