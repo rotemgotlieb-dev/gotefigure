@@ -64,9 +64,23 @@ describe('extractOrder (defensive envelope walk; never invents values)', () => {
     expect(JSON.parse(o!.lineItems)).toHaveLength(1);
   });
 
-  it('falls back across alternate spellings and root envelopes', () => {
+  it('falls back across alternate spellings and root envelopes (F5: order-root status is NOT shipping)', () => {
+    // F5 OLD-CODE CONTROL. This exact input used to yield shippingStatus:'shipped' via the
+    // dropped `?? str(d.status)` fallback, conflating ORDER-LIFECYCLE status with shipping/
+    // fulfillment status. Post-F5 the order-root `status` is ignored for shipping_status.
     const o = extractOrder({ event: 'order-updated', order: { id: 'x1', friendly_id: 'GF-2', line_items: [], status: 'shipped' } });
-    expect(o).toMatchObject({ fwId: 'x1', friendlyId: 'GF-2', shippingStatus: 'shipped', eventType: 'order-updated' });
+    expect(o).toMatchObject({ fwId: 'x1', friendlyId: 'GF-2', shippingStatus: 'unknown', eventType: 'order-updated' });
+    // The OLD walk (with the d.status fallback) returned 'shipped' on the SAME input -- proof the fix changes behavior:
+    const oldShippingWalk = (d: any) => d.shipping?.status ?? d.shippingStatus ?? d.status ?? 'unknown';
+    expect(oldShippingWalk({ id: 'x1', status: 'shipped' })).toBe('shipped');
+    expect(o!.shippingStatus).not.toBe(oldShippingWalk({ id: 'x1', status: 'shipped' }));
+  });
+
+  it('F5: real shipping/fulfillment status still wins from shipping.status / shippingStatus', () => {
+    expect(extractOrder({ type: 'ORDER_UPDATED', data: { id: 'o1', shipping: { status: 'shipped' } } })!.shippingStatus).toBe('shipped');
+    expect(extractOrder({ type: 'ORDER_UPDATED', data: { id: 'o2', shippingStatus: 'fulfilled' } })!.shippingStatus).toBe('fulfilled');
+    // shipping.status wins over the alt spelling when both are present
+    expect(extractOrder({ type: 'ORDER_UPDATED', data: { id: 'o3', shipping: { status: 'delivered' }, shippingStatus: 'shipped' } })!.shippingStatus).toBe('delivered');
   });
 
   it('returns null with no usable order id (endpoint rejects, writes nothing)', () => {

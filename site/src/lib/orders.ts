@@ -112,7 +112,12 @@ export function extractOrder(payload: unknown): ExtractedOrder | null {
     friendlyId: str(d.friendlyId) ?? str(d.friendly_id),
     email: str(d.email) ?? str(customer.email),
     lineItems: Array.isArray(rawItems) ? JSON.stringify(rawItems) : '[]',
-    shippingStatus: str(shipping.status) ?? str(d.shippingStatus) ?? str(d.status) ?? 'unknown',
+    // F5: shipping/fulfillment status ONLY from shipping.status / shippingStatus. The
+    // order-root `d.status` is order-LIFECYCLE status (PLACED / CONFIRMED / CANCELLED etc.),
+    // NOT fulfillment; mapping it into shipping_status mislabels the admin view. Dropped.
+    // The exact live-wire fulfillment field path is a cutover re-verify item (V1_BETA
+    // contract) -- see docs/webhook-cutover-runbook.md.
+    shippingStatus: str(shipping.status) ?? str(d.shippingStatus) ?? 'unknown',
     eventType: str(p.type) ?? str(p.event) ?? str(p.topic),
   };
 }
