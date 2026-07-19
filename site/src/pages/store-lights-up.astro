@@ -375,7 +375,11 @@ const archive = [
     /* section isolation: the dark panel is CONTAINED in the slide with a short 7% ramp,
        never a long fade that lets the lit trust wall blend through its top half. At rest
        (snapped) the slide fills the viewport, so the panel's edge sits at the boundary. */
-    .lu-archive { --lu-art-h: 11svh; row-gap: var(--s-4);
+    /* phone art budget 9.5svh + tight vertical padding: the slide's content must fit the
+       VISIBLE area below the ~78px sticky header, not the raw viewport (fresh-hand refute
+       2026-07-18: at 390x844 the archive ran 5.7px over and its heading rested hidden
+       under the header; every slide's fit math budgets 100svh minus the header now). */
+    .lu-archive { --lu-art-h: 9.5svh; row-gap: var(--s-3); padding-block: var(--s-4);
       background: linear-gradient(to bottom, rgba(var(--ah-night-rgb), 0), rgba(var(--ah-night-rgb), .74) 7%, rgba(var(--ah-night-rgb), .8) 100%); }
     .lu-kicker--dim { color: var(--og-pink); }
     .lu-band-title--dim { color: var(--ah-hero-lit); }
@@ -430,7 +434,7 @@ const archive = [
         gap: var(--s-6);
         padding: var(--s-6) max(var(--s-6), calc((100% - 1080px) / 2)); }
       /* archive: one dim row of three */
-      .lu-archive { --lu-art-h: 24svh; row-gap: var(--s-6); }
+      .lu-archive { --lu-art-h: 24svh; row-gap: var(--s-6); padding-block: var(--s-6); }
       .lu-archive-grid { grid-template-columns: repeat(3, auto); justify-content: center; gap: var(--s-8); }
     }
 
