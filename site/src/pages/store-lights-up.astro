@@ -470,9 +470,17 @@ const archive = [
     /* Proximity, never mandatory: mandatory + a discrete mouse wheel is a trap (measured:
        each 240px wheel notch snapped BACK to the hero, the page could not be left), and
        mandatory also fights any slide that ever exceeds a short viewport. Proximity's own
-       gap (a rest parked mid-gap stays un-centered) is closed per tier by JS: lenis/snap on
-       the Lenis tier, a scrollend center-assist on the touch tier (scroll-choreography.ts). */
-    html:has([data-lights-up]) { scroll-snap-type: y proximity; }
-    html[data-lu-lenis] { scroll-snap-type: none !important; }
+       gap (a rest parked mid-gap stays un-centered) is closed by the direction-aware
+       assist in scroll-choreography.ts.
+       scroll-padding-top 76px = the sticky header's height, STATIC on purpose: the UA's
+       pre-paint snap then parks the page at the header-aware center directly (the JS
+       refines with the measured height, same value). Without it the pre-paint snap parked
+       76px high and the page visibly eased itself 38px after load (re-verify refute).
+       min-height 560px: below it (landscape phones) slides exceed the visible area, and
+       any snap makes the cut-off content unreachable; short viewports scroll free. */
+    @media (min-height: 560px) {
+      html:has([data-lights-up]) { scroll-snap-type: y proximity; scroll-padding-top: 76px; }
+      html[data-lu-lenis] { scroll-snap-type: none !important; }
+    }
   </style>
 </Layout>

@@ -84,16 +84,20 @@ defineModule('scroll-choreography', () => {
           ? '.lu-hero, .lu-floor .lu-sub, .lu-trust .lu-sub, .lu-archive, .lu-foot'
           : '[data-lu-snap]';
       const visibleCenter = () => (window.innerHeight + headerH()) / 2;
-      const centers = () => {
-        const cs: number[] = [];
-        root.querySelectorAll<HTMLElement>(slideSel()).forEach((el) => {
-          const r = el.getBoundingClientRect();
-          cs.push(window.scrollY + r.top + r.height / 2);
-        });
-        return cs.sort((a, b) => a - b);
-      };
-      const nearIdx = (cs: number[], v: number) =>
-        cs.reduce((bi, c, i) => (Math.abs(c - v) < Math.abs(cs[bi] - v) ? i : bi), 0);
+      // Below this height (landscape phones) slides exceed the visible area and ANY
+      // snap makes the cut-off content unreachable (re-verify: 4 of 5 landscape units
+      // overflowed a 314px budget); short viewports scroll free. Mirrors the page CSS.
+      const MIN_VH = 560;
+      const SECTIONS = '.lu-hero, .lu-floor, .lu-trust, .lu-archive, .lu-foot';
+      const unitList = () =>
+        [...root.querySelectorAll<HTMLElement>(slideSel())]
+          .map((el) => {
+            const r = el.getBoundingClientRect();
+            return { el, c: window.scrollY + r.top + r.height / 2 };
+          })
+          .sort((a, b) => a.c - b.c);
+      const nearIdx = (cs: { c: number }[], v: number) =>
+        cs.reduce((bi, u, i) => (Math.abs(u.c - v) < Math.abs(cs[bi].c - v) ? i : bi), 0);
       // Target selection is STATELESS except for the previous assist position (pPrev),
       // which supplies the travel direction. An earlier design keyed the advance on the
       // last SETTLED slide; when a notch arrived before the prior ease's settle, the
@@ -107,38 +111,97 @@ defineModule('scroll-choreography', () => {
       //   (a flick that died mid-gap is helped onward, never pulled back).
       let pPrev: number | null = null;
       let animTarget: number | null = null;
-      const settle = (cs: number[], target: number) => {
+      const settle = (list: { el: HTMLElement; c: number }[], i: number) => {
         animTarget = null;
-        root.dataset.snapped = String(cs.indexOf(target)); // observable marker, both tiers
+        root.dataset.snapped = String(i); // observable marker, both tiers
+        // remember the resting SECTION (stable across breakpoints, unlike unit indexes)
+        // so a resize or rotation can restore the reading position
+        const sec = list[i].el.matches(SECTIONS)
+          ? list[i].el
+          : list[i].el.closest<HTMLElement>(SECTIONS);
+        if (sec) root.dataset.luSection = sec.className.split(' ')[0];
       };
       const assist = () => {
-        const cs = centers();
-        if (!cs.length) return;
+        if (window.innerHeight < MIN_VH) return; // short viewport: free scroll, no snap
+        const list = unitList();
+        if (!list.length) return;
         const p = window.scrollY + visibleCenter();
         const dir = pPrev === null || Math.abs(p - pPrev) < 4 ? 0 : Math.sign(p - pPrev);
         pPrev = p;
         if (animTarget !== null) {
-          if (Math.abs(p - animTarget) <= 8) { settle(cs, animTarget); return; }
+          if (Math.abs(p - animTarget) <= 8) { settle(list, nearIdx(list, animTarget)); return; }
           animTarget = null; // user interrupted the ease; recompute from where they are
         }
-        let ti = nearIdx(cs, p);
-        const off = p - cs[ti];
+        let ti = nearIdx(list, p);
+        const off = p - list[ti].c;
         if (dir !== 0 && Math.sign(off) === dir && Math.abs(off) > Math.max(90, window.innerHeight * 0.1)) {
           const cand = ti + dir;
-          if (cand >= 0 && cand < cs.length) ti = cand; // deliberate move past a center: advance
+          if (cand >= 0 && cand < list.length) ti = cand; // deliberate move past a center: advance
         }
-        const target = cs[ti];
-        if (Math.abs(p - target) <= 8) { settle(cs, target); return; }
+        const target = list[ti].c;
+        if (Math.abs(p - target) <= 8) { settle(list, ti); return; }
         animTarget = target;
         if (lenis) lenis.scrollTo(target - visibleCenter(), { duration: 0.9 });
         else window.scrollBy({ top: target - p, behavior: 'smooth' });
       };
+      // ARMED gate: the assist acts only after real user input. The browser's own
+      // pre-paint CSS snap emits scroll events at load; reacting to those made the page
+      // ease itself 38px with zero input (re-verify refute). Wheel, touch, key, or
+      // pointer arms it; plain scroll events never do.
+      let armed = false;
+      const arm = () => {
+        armed = true;
+        // seed the direction baseline at the moment of first input, BEFORE its scroll
+        // events land: an unseeded pPrev made the first wheel notch read as directionless
+        // and get undone by plain-nearest (measured: rests 38, 38, 938 on a fresh load)
+        if (pPrev === null) pPrev = window.scrollY + visibleCenter();
+      };
+      window.addEventListener('wheel', arm, { passive: true });
+      window.addEventListener('touchstart', arm, { passive: true });
+      window.addEventListener('keydown', arm);
+      window.addEventListener('pointerdown', arm, { passive: true });
       let quiet: ReturnType<typeof setTimeout> | undefined;
-      const queue = () => { if (quiet) clearTimeout(quiet); quiet = setTimeout(assist, 260); };
+      const queue = () => {
+        if (!armed) return;
+        if (quiet) clearTimeout(quiet);
+        quiet = setTimeout(assist, 260);
+      };
       window.addEventListener('scroll', queue, { passive: true });
-      const assistOff = () => { if (quiet) clearTimeout(quiet); window.removeEventListener('scroll', queue); };
-      // restCenter seeds lazily on the first assist (no init-time rAF: the scroll canary's
-      // G1 rightly flags any requestAnimationFrame in this module as a competing-loop tell)
+      // Breakpoint crossing loses the reading position (re-verify: a rotation landed the
+      // rest on the FOOTER from mid-page): restore the remembered section's first unit,
+      // INSTANTLY (a relayout restore, not motion), after a resize settles. Also runs at
+      // branch re-init, which is what a 720px crossing triggers on a fine-pointer device.
+      const reCenter = () => {
+        const sec = root.dataset.luSection;
+        if (!sec || window.innerHeight < MIN_VH) return;
+        const list = unitList();
+        const hit = list.findIndex((u) => u.el.classList.contains(sec) || !!u.el.closest('.' + sec));
+        if (hit < 0) return;
+        pPrev = null;
+        animTarget = null;
+        const target = list[hit].c - visibleCenter();
+        if (lenis) lenis.scrollTo(target, { immediate: true });
+        else window.scrollTo(0, target);
+        root.dataset.snapped = String(hit);
+      };
+      let resizeT: ReturnType<typeof setTimeout> | undefined;
+      const onResize = () => { if (resizeT) clearTimeout(resizeT); resizeT = setTimeout(reCenter, 300); };
+      window.addEventListener('resize', onResize);
+      // Restore across a matchMedia re-init (a 720px crossing tears down and rebuilds this
+      // branch). DEFERRED like a resize, never synchronous: at re-init the new layout has
+      // not settled and an immediate restore computes stale centers (measured: the kept
+      // section rested off-screen). No-op on first load: no section stamped yet.
+      if (root.dataset.luSection) { resizeT = setTimeout(reCenter, 300); }
+      const assistOff = () => {
+        if (quiet) clearTimeout(quiet);
+        if (resizeT) clearTimeout(resizeT);
+        window.removeEventListener('scroll', queue);
+        window.removeEventListener('resize', onResize);
+        window.removeEventListener('wheel', arm);
+        window.removeEventListener('touchstart', arm);
+        window.removeEventListener('keydown', arm);
+        window.removeEventListener('pointerdown', arm);
+      };
 
       // Lights up: across the hero, torch veil 1 -> 0 and warm glow 0 -> 1. Scrub-driven,
       // never a timer: progress is owned by the scroll position alone.
