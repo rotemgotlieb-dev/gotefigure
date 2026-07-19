@@ -181,7 +181,14 @@ const pickType = (payload: unknown): string | null => {
 
 /** Minimal structural D1 surface the handler needs (real D1 and the node:sqlite test shim both satisfy it). */
 export interface WebhookDeps {
-  db?: { prepare(sql: string): { bind(...values: unknown[]): { run(): Promise<unknown> } } };
+  db?: {
+    prepare(sql: string): {
+      bind(...values: unknown[]): {
+        run(): Promise<unknown>;
+        first?(): Promise<Record<string, unknown> | null>;
+      };
+    };
+  };
   secret?: string;
   sigHeader?: string;
 }
@@ -315,6 +322,40 @@ export async function handleOrderWebhook(request: Request, deps: WebhookDeps): P
       .run();
   } catch {
     return json({ ok: false, error: 'storage_failed' }, 500); // fail closed: FW retries per its retry policy
+  }
+
+  // NO SILENT DROPS. The monotonic gate above is fail-safe against REGRESSION, but the same
+  // strictness can also STALL a legitimate status update: a stale/out-of-order event, an exact
+  // timestamp TIE (strict > rejects equals), or an unparseable envelope createdAt (statusEventTs
+  // forced to 0). Those drops are deliberate, but they must never be invisible. Read the row back
+  // and log whenever an incoming KNOWN status did not land, with the reason. Behavior is
+  // unchanged; this is observability only. Best effort: the write already succeeded, so a
+  // read-back failure must never fail the delivery (that would make Fourthwall retry a stored event).
+  if (order.shippingStatus !== 'unknown') {
+    try {
+      const stmt = deps.db.prepare('SELECT shipping_status, status_event_ts FROM orders WHERE fw_id = ?1').bind(order.fwId);
+      const row = stmt.first ? await stmt.first() : null;
+      const stored = row?.shipping_status;
+      if (row && stored !== order.shippingStatus) {
+        console.warn(
+          JSON.stringify({
+            evt: 'webhook_status_not_applied',
+            type: evType,
+            fwId: order.fwId,
+            incoming: order.shippingStatus,
+            stored,
+            reason:
+              order.eventTs === 0
+                ? 'no_event_ts'
+                : Number(row.status_event_ts) === statusEventTs
+                  ? 'timestamp_tie'
+                  : 'stale_event',
+          }),
+        );
+      }
+    } catch {
+      // observability only: never turn a successful write into a failed delivery
+    }
   }
 
   return json({ ok: true }, 200);

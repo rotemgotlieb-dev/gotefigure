@@ -58,7 +58,7 @@ signed delivery and byte-compare before trusting any of it.
 |---|---|---|
 | `ORDER_PLACED` / `ORDER_UPDATED` | `ALLOWED_EVENT_TYPES`, lib/orders.ts | **Worst case.** Every real order is acked 200 and silently dropped. Fourthwall never retries, so "no orders" and "all orders dropped" look identical. The skip log (below) is the only tell. |
 | shipping status at `shipping.status` / `shippingStatus` | `extractOrder` | Status extracts as `unknown`, and the monotonic guard holds it, so orders freeze at their first-seen status. |
-| envelope `createdAt` is EVENT time | `eventMicros(p.createdAt)` | Using the order's constant `data.createdAt` instead would make `event_ts` identical across an order's events, freezing status forever. |
+| envelope `createdAt` is EVENT time | `eventMicros(p.createdAt)` | Two ways to lose here, same outcome. **Wrong field:** using the order's constant `data.createdAt` makes `event_ts` identical across an order's events, freezing status forever. **Absent or renamed:** if the envelope stops carrying `createdAt` (or renames it), every event parses to `0`, so each order sticks at its first-seen status permanently. Both are visible only as log lines, so check them at cutover: `webhook_no_event_ts` fires on the unparseable case, and `webhook_status_not_applied` names every status that did not land, with a reason of `no_event_ts`, `timestamp_tie`, or `stale_event`. |
 | `x-fourthwall-hmac-sha256`, base64 digest | `DEFAULT_SIG_HEADER` | Every delivery 401s. |
 | 100 KB cap | `MAX_BODY_BYTES` | An oversized order 413s and burns its retries. Order metadata is KBs, so confirm the largest realistic order plus envelope sits well under the cap. |
 

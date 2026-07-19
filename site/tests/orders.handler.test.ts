@@ -224,6 +224,75 @@ describe('F2/F3: monotonic upsert (two watermarks) -- replay + out-of-order cann
   });
 });
 
+describe('NO SILENT DROPS: every stalled status update is observable (verifier finding 2b)', () => {
+  // The monotonic gate deliberately drops some legitimate status updates (stale, tie, or no
+  // parseable timestamp). Behavior is intentional and unchanged; these prove none of them is SILENT.
+  const warnings = (spy: any) => spy.mock.calls.map((c: any) => String(c[0])).join('\n');
+
+  it('P3: a real status with NO envelope createdAt is dropped, and says so', async () => {
+    const db = newDb();
+    await handleOrderWebhook(await signedReq(placed('ord_p3', T1)), deps(db)); // pending @T1
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // ORDER_UPDATED carrying a REAL shipped status but no envelope createdAt -> statusEventTs 0
+    const noTs = { type: 'ORDER_UPDATED', id: 'weve_x', data: { id: 'ord_p3', shipping: { status: 'shipped' } } };
+    const res = await handleOrderWebhook(await signedReq(noTs), deps(db));
+    expect(res.status).toBe(200);
+    expect(rowOf(db, 'ord_p3').shipping_status).toBe('pending'); // dropped (documented fail-safe)
+    const w = warnings(spy);
+    expect(w).toContain('webhook_no_event_ts'); // pre-write tripwire
+    expect(w).toContain('webhook_status_not_applied'); // post-write: the drop itself is reported
+    expect(w).toContain('no_event_ts'); // with its reason
+    spy.mockRestore();
+  });
+
+  it('P3c: an EXACT timestamp tie drops the status, and is no longer silent', async () => {
+    const db = newDb();
+    await handleOrderWebhook(await signedReq(placed('ord_tie', T1)), deps(db)); // pending @T1
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    // same createdAt as the stored status watermark: strict > rejects equals
+    const res = await handleOrderWebhook(await signedReq(shipped('ord_tie', T1)), deps(db));
+    expect(res.status).toBe(200);
+    expect(rowOf(db, 'ord_tie').shipping_status).toBe('pending'); // dropped
+    const w = warnings(spy);
+    expect(w).toContain('webhook_status_not_applied');
+    expect(w).toContain('timestamp_tie'); // the previously SILENT case now names itself
+    expect(w).not.toContain('webhook_no_event_ts'); // ts parsed fine; this is a tie, not a missing ts
+    spy.mockRestore();
+  });
+
+  it('a genuinely stale (older) status update is dropped and reported as stale_event', async () => {
+    const db = newDb();
+    await handleOrderWebhook(await signedReq(placed('ord_stale', T1)), deps(db));
+    await handleOrderWebhook(await signedReq(shipped('ord_stale', T3)), deps(db)); // shipped @T3
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await handleOrderWebhook(await signedReq(envelope('ORDER_UPDATED', 'ord_stale', T2, { shipping: { status: 'pending' } })), deps(db));
+    expect(rowOf(db, 'ord_stale').shipping_status).toBe('shipped'); // no regression
+    expect(warnings(spy)).toContain('stale_event');
+    spy.mockRestore();
+  });
+
+  it('stays QUIET when the status DID land (no false alarms)', async () => {
+    const db = newDb();
+    await handleOrderWebhook(await signedReq(placed('ord_q', T1)), deps(db));
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await handleOrderWebhook(await signedReq(shipped('ord_q', T2)), deps(db)); // advances normally
+    expect(rowOf(db, 'ord_q').shipping_status).toBe('shipped');
+    expect(warnings(spy)).not.toContain('webhook_status_not_applied');
+    spy.mockRestore();
+  });
+
+  it('a read-back failure never turns a stored delivery into a failure', async () => {
+    const db = newDb();
+    const shim: any = makeShim(db);
+    const realPrepare = shim.prepare.bind(shim);
+    shim.prepare = (sql: string) =>
+      sql.startsWith('SELECT') ? { bind: () => ({ first: async () => { throw new Error('read-back down'); } }) } : realPrepare(sql);
+    const res = await handleOrderWebhook(await signedReq(placed('ord_rb', T1)), { db: shim, secret: SECRET });
+    expect(res.status).toBe(200); // the write succeeded; observability must not fail it
+    expect(count(db)).toBe(1);
+  });
+});
+
 describe('F6: real byte-length cap enforced while buffering', () => {
   it('OLD-CODE CONTROL: a body whose UTF-16 length <= cap but UTF-8 bytes > cap is rejected (413)', async () => {
     const db = newDb();
