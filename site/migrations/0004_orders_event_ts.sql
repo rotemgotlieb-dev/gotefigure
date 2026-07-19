@@ -1,0 +1,21 @@
+-- F2/F3: make the orders upsert MONOTONIC, not just idempotent. Fourthwall HMACs the RAW body
+-- only (no signed nonce/timestamp) and retries at-least-once with NO ordering guarantee, so a
+-- byte-identical earlier delivery carries a valid signature and a stale/out-of-order event can
+-- arrive at any time. The pre-F2/F3 upsert was last-writer-wins (shipping_status = excluded...),
+-- which REGRESSES state on replay (observed shipped->pending). Two high-water marks fix it:
+--
+--   event_ts         microseconds since epoch of the ENVELOPE createdAt (the EVENT time, which
+--                    advances per delivery; NOT the order's own createdAt). Gates raw_event /
+--                    event_ts / updated_at, so the row reflects the latest DELIVERED event.
+--   status_event_ts  event_ts of the latest event that carried a KNOWN shipping status (0 for an
+--                    'unknown'-status event). Gates shipping_status independently, so an
+--                    'unknown' event never overwrites a known status and never advances the
+--                    status high-water mark, while a later correctly-typed event still heals it
+--                    (even out of order). The handler binds statusEventTs = (status=='unknown' ? 0 : event_ts).
+--
+-- ADD COLUMN ... NOT NULL DEFAULT 0 is legal SQLite / D1 and backfills existing rows to 0. A row
+-- at event_ts=0 can still be advanced by any real event (real event_ts > 0). Apply on prod via
+-- `wrangler d1 migrations apply` BEFORE the new handler goes live, else INSERT hits
+-- 'no such column: event_ts' -> storage_failed 500 -> FW retries (see docs/webhook-cutover-runbook.md).
+ALTER TABLE orders ADD COLUMN event_ts INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE orders ADD COLUMN status_event_ts INTEGER NOT NULL DEFAULT 0;
