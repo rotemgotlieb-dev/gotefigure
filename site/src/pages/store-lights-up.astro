@@ -1,9 +1,20 @@
 ---
 // DRAFT storefront flagship, Direction A "Lights Up" (2026-07-18, personal / gotefigure).
+/* design-source: approved-mock feat/storefront-lights-up ac0f4ba..d6dc15a (Rotem's Direction A
+   pick, independently verified 10/10, T3-hardened; owner review 2026-07-18 "STAMP OF APPROVAL"
+   with three named layout fixes: viewport-fit, snap-to-center, section isolation. This pass
+   lands ONLY those fixes on the approved look; no re-origination, no new visual elements.) */
 // The After Hours salon, lit up: scroll drives the torch veil off and the warm glow on
 // (animations/scroll-choreography.ts). NOT linked from nav, NOT the live store. Preview only
 // (Layout bounces here to / unless localStorage 'gf-store-open' is set). Drafts only: every
 // price, size, and edition count is an UNVERIFIED placeholder, never a fabricated number.
+//
+// SECTION-AS-SLIDE (owner review 2026-07-18): every section is a 100svh slide whose content
+// fully fits the viewport (viewport-fit rule), the scroll snaps each slide centered
+// (lenis/snap on the Lenis tier, native CSS scroll-snap on the touch and reduced-motion
+// tiers), and slides are isolated (a centered slide fills the viewport, so neighbors never
+// co-appear at rest; the archive carries its own contained dark panel). On phones the dense
+// floor and trust sections reflow into two sub-slides each, so the unit in view always fits.
 import Layout from '../layouts/Layout.astro';
 
 // The reissue classics (real hand-drawn ink pieces). Titles are descriptive, not invented
@@ -31,7 +42,7 @@ const archive = [
     <div class="lu-glow" data-glow aria-hidden="true"></div>
 
     <!-- ========================= HERO: lights down ========================= -->
-    <section class="lu-hero" data-hero>
+    <section class="lu-hero" data-hero data-lu-snap>
       <div class="lu-hero-inner">
         <div class="lu-hero-copy">
           <p class="lu-eyebrow lu-eyebrow--lit">Gote Figure</p>
@@ -51,93 +62,123 @@ const archive = [
     </section>
 
     <!-- ========================= ON SALE NOW: lit floor ========================= -->
-    <section class="lu-floor" data-floor>
-      <header class="lu-band-head" data-rv="fade">
-        <p class="lu-kicker">The Drop</p>
-        <h2 class="lu-band-title">On sale now</h2>
-        <p class="lu-band-sub">Classics pulled back from the vault. New numbered editions. Each one, once.</p>
-      </header>
-
-      <div class="lu-drop-grid">
-        {drop.map((p) => (
-          <article class="lu-piece" data-rv="fade">
-            <div class="lu-frame">
-              <div class="lu-mat" style={`background:${p.mat}`}>
-                <img src={p.img} alt={p.title} loading="lazy" decoding="async" />
+    <section class="lu-floor" data-floor data-lu-snap>
+      <div class="lu-sub">
+        <header class="lu-band-head" data-rv="fade">
+          <p class="lu-kicker">The Drop</p>
+          <h2 class="lu-band-title">On sale now</h2>
+          <p class="lu-band-sub">Classics pulled back from the vault. New numbered editions. Each one, once.</p>
+        </header>
+        <div class="lu-duo">
+          {drop.slice(0, 2).map((p) => (
+            <article class="lu-piece" data-rv="fade">
+              <div class="lu-frame">
+                <div class="lu-mat" style={`background:${p.mat}`}>
+                  <img src={p.img} alt={p.title} loading="lazy" decoding="async" />
+                </div>
               </div>
-            </div>
-            <div class="lu-placard">
-              <div class="lu-placard-row">
-                <span class="lu-piece-title">{p.title}</span>
-                <span class="lu-badge">edition 01 . 1 of N . vaulted</span>
+              <div class="lu-placard">
+                <div class="lu-placard-row">
+                  <span class="lu-piece-title">{p.title}</span>
+                  <span class="lu-badge">edition 01 . 1 of N . vaulted</span>
+                </div>
+                <div class="lu-placard-row">
+                  <span class="lu-piece-no">{p.no}</span>
+                  <span class="lu-price">price at drop</span>
+                </div>
+                <div class="lu-sizes" role="group" aria-label="size">
+                  <span class="lu-size">S</span><span class="lu-size">M</span><span class="lu-size">L</span><span class="lu-size">XL</span>
+                </div>
+                <button type="button" class="lu-cta" aria-label={`reserve ${p.title}`}>reserve your size</button>
               </div>
-              <div class="lu-placard-row">
-                <span class="lu-piece-no">{p.no}</span>
-                <span class="lu-price">price at drop</span>
-              </div>
-              <div class="lu-sizes" role="group" aria-label="size">
-                <span class="lu-size">S</span><span class="lu-size">M</span><span class="lu-size">L</span><span class="lu-size">XL</span>
-              </div>
-              <button type="button" class="lu-cta" aria-label={`reserve ${p.title}`}>reserve your size</button>
-            </div>
-          </article>
-        ))}
+            </article>
+          ))}
+        </div>
       </div>
-
-      <p class="lu-order-banner" data-rv="fade">Pre-order. Ships about 2 to 4 weeks after the window closes.</p>
+      <div class="lu-sub">
+        <div class="lu-duo">
+          {drop.slice(2).map((p) => (
+            <article class="lu-piece" data-rv="fade">
+              <div class="lu-frame">
+                <div class="lu-mat" style={`background:${p.mat}`}>
+                  <img src={p.img} alt={p.title} loading="lazy" decoding="async" />
+                </div>
+              </div>
+              <div class="lu-placard">
+                <div class="lu-placard-row">
+                  <span class="lu-piece-title">{p.title}</span>
+                  <span class="lu-badge">edition 01 . 1 of N . vaulted</span>
+                </div>
+                <div class="lu-placard-row">
+                  <span class="lu-piece-no">{p.no}</span>
+                  <span class="lu-price">price at drop</span>
+                </div>
+                <div class="lu-sizes" role="group" aria-label="size">
+                  <span class="lu-size">S</span><span class="lu-size">M</span><span class="lu-size">L</span><span class="lu-size">XL</span>
+                </div>
+                <button type="button" class="lu-cta" aria-label={`reserve ${p.title}`}>reserve your size</button>
+              </div>
+            </article>
+          ))}
+        </div>
+        <p class="lu-order-banner" data-rv="fade">Pre-order. Ships about 2 to 4 weeks after the window closes.</p>
+      </div>
     </section>
 
     <!-- ========================= TRUST SPINE: lit ========================= -->
-    <section class="lu-trust" data-trust>
-      <!-- quality -->
-      <div class="lu-trust-block" data-rv="fade">
-        <p class="lu-kicker">Why it is better this time</p>
-        <h3 class="lu-trust-h">Made to last, this time.</h3>
-        <ul class="lu-quality">
-          <li>Made to survive the wash.</li>
-          <li>Premium blanks, not the cheapest.</li>
-          <li>Numbered once, never reprinted.</li>
-        </ul>
-        <p class="lu-fineprint">The exact make is being finalized. No promises we cannot keep.</p>
-      </div>
+    <section class="lu-trust" data-trust data-lu-snap>
+      <div class="lu-sub">
+        <!-- quality -->
+        <div class="lu-trust-block" data-rv="fade">
+          <p class="lu-kicker">Why it is better this time</p>
+          <h3 class="lu-trust-h">Made to last, this time.</h3>
+          <ul class="lu-quality">
+            <li>Made to survive the wash.</li>
+            <li>Premium blanks, not the cheapest.</li>
+            <li>Numbered once, never reprinted.</li>
+          </ul>
+          <p class="lu-fineprint">The exact make is being finalized. No promises we cannot keep.</p>
+        </div>
 
-      <!-- maker -->
-      <div class="lu-trust-block lu-maker" data-rv="fade">
-        <p class="lu-kicker">The maker</p>
-        <img class="lu-sig" src="/art/lights-up/signature.png" alt="Gote Figure, hand-signed" loading="lazy" decoding="async" />
-        <p class="lu-maker-line">Drawn by hand, the way the first ones were. One human hand, no shortcuts.</p>
+        <!-- maker -->
+        <div class="lu-trust-block lu-maker" data-rv="fade">
+          <p class="lu-kicker">The maker</p>
+          <img class="lu-sig" src="/art/lights-up/signature.png" alt="Gote Figure, hand-signed" loading="lazy" decoding="async" />
+          <p class="lu-maker-line">Drawn by hand, the way the first ones were. One human hand, no shortcuts.</p>
+        </div>
       </div>
+      <div class="lu-sub">
+        <!-- sizing -->
+        <div class="lu-trust-block" data-rv="fade">
+          <p class="lu-kicker">Sizing</p>
+          <h3 class="lu-trust-h">Know it fits before you commit.</h3>
+          <table class="lu-size-table">
+            <thead><tr><th>Size</th><th>Chest</th><th>Length</th></tr></thead>
+            <tbody>
+              <tr><td>S</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>M</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>L</td><td>TBD</td><td>TBD</td></tr>
+              <tr><td>XL</td><td>TBD</td><td>TBD</td></tr>
+            </tbody>
+          </table>
+          <p class="lu-fineprint">Exact measurements confirmed at the drop. Fits true to size, sized for everyday wear.</p>
+        </div>
 
-      <!-- sizing -->
-      <div class="lu-trust-block" data-rv="fade">
-        <p class="lu-kicker">Sizing</p>
-        <h3 class="lu-trust-h">Know it fits before you commit.</h3>
-        <table class="lu-size-table">
-          <thead><tr><th>Size</th><th>Chest</th><th>Length</th></tr></thead>
-          <tbody>
-            <tr><td>S</td><td>TBD</td><td>TBD</td></tr>
-            <tr><td>M</td><td>TBD</td><td>TBD</td></tr>
-            <tr><td>L</td><td>TBD</td><td>TBD</td></tr>
-            <tr><td>XL</td><td>TBD</td><td>TBD</td></tr>
-          </tbody>
-        </table>
-        <p class="lu-fineprint">Exact measurements confirmed at the drop. Fits true to size, sized for everyday wear.</p>
-      </div>
-
-      <!-- edition / window -->
-      <div class="lu-trust-block lu-edition" data-rv="fade">
-        <p class="lu-kicker">The edition</p>
-        <h3 class="lu-trust-h">The window is the edition.</h3>
-        <p class="lu-edition-copy">When the pre-order window closes, the run is set at whatever it sold. Then it is vaulted, and never reprinted.</p>
-        <div class="lu-window">
-          <span class="lu-window-label">pre-order window</span>
-          <span class="lu-window-val">opens at launch</span>
+        <!-- edition / window -->
+        <div class="lu-trust-block lu-edition" data-rv="fade">
+          <p class="lu-kicker">The edition</p>
+          <h3 class="lu-trust-h">The window is the edition.</h3>
+          <p class="lu-edition-copy">When the pre-order window closes, the run is set at whatever it sold. Then it is vaulted, and never reprinted.</p>
+          <div class="lu-window">
+            <span class="lu-window-label">pre-order window</span>
+            <span class="lu-window-val">opens at launch</span>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- ========================= THE ARCHIVE: lights down ========================= -->
-    <section class="lu-archive" data-archive>
+    <section class="lu-archive" data-archive data-lu-snap>
       <header class="lu-band-head" data-rv="fade">
         <p class="lu-kicker lu-kicker--dim">The Archive</p>
         <h2 class="lu-band-title lu-band-title--dim">The 2020 vault</h2>
@@ -163,9 +204,11 @@ const archive = [
       <p class="lu-archive-foot" data-rv="fade">Everything here sold out. It stays as proof.</p>
     </section>
 
-    <footer class="lu-foot">
-      <p class="lu-foot-line">Back from 2020. Five years later. Better this time.</p>
-      <p class="lu-foot-note">draft direction. nothing here is for sale yet.</p>
+    <footer class="lu-foot" data-lu-snap>
+      <div>
+        <p class="lu-foot-line">Back from 2020. Five years later. Better this time.</p>
+        <p class="lu-foot-note">draft direction. nothing here is for sale yet.</p>
+      </div>
     </footer>
 
   </div>
@@ -201,12 +244,26 @@ const archive = [
       background: radial-gradient(120% 52% at 84% -6%, rgba(var(--ah-glow), .3), transparent 60%);
     }
 
-    /* content sits above the fixed salon */
+    /* ============ section-as-slide (owner review 2026-07-18) ============
+       Every viewing unit is a 100svh slide, centered content, snap-align center. Desktop:
+       the five sections are the slides (.lu-sub and .lu-duo dissolve via display:contents).
+       Phone (<720px): the floor and trust sections hand slide duty to their two .lu-sub
+       wrappers each, so the unit in view always fits the viewport. */
     .lu-hero, .lu-floor, .lu-trust, .lu-archive, .lu-foot { position: relative; z-index: 2; }
+    .lu-hero, .lu-archive, .lu-foot,
+    .lu-floor .lu-sub, .lu-trust .lu-sub {
+      box-sizing: border-box; min-height: 100svh;
+      display: grid; align-content: center; justify-items: center;
+      padding: var(--s-6);
+    }
+    [data-lu-snap] { scroll-snap-align: center; }
+    /* phone base: the sections defer snapping to their sub-slides */
+    .lu-floor, .lu-trust { scroll-snap-align: none; }
+    .lu-floor .lu-sub, .lu-trust .lu-sub { scroll-snap-align: center; row-gap: var(--s-4); width: 100%; }
+
     .lu-eyebrow, .lu-kicker { font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .22em; }
 
     /* ---- hero ---- */
-    .lu-hero { min-height: 100svh; display: grid; place-items: center; padding: var(--s-16) var(--s-6) var(--s-24); }
     .lu-hero-inner { width: min(720px, 100%); text-align: center; }
     /* the copy sits in the dark salon (lights off); a soft local shadow anchored to the
        TEXT keeps the whole cluster on a reliably dark register, so the light headline, warm
@@ -225,121 +282,156 @@ const archive = [
         rgba(var(--ah-night-rgb), .82) 54%,
         rgba(var(--ah-night-rgb), 0) 88%);
     }
-    .lu-eyebrow--lit { font-size: 11px; color: var(--ah-tagline); margin: 0 0 var(--s-6); }
+    .lu-eyebrow--lit { font-size: 11px; color: var(--ah-tagline); margin: 0 0 var(--s-4); }
     .lu-h1 { display: grid; gap: .04em; margin: 0; font-family: var(--font-brush); font-weight: 400;
       line-height: .96; font-size: clamp(2.4rem, 1.4rem + 5vw, 4.6rem); color: var(--ah-hero-lit); }
     .lu-h1-accent { color: var(--amber); }
     /* the sub sits on the copy scrim (dark), so it uses the brand's lights-off subhead tone;
        reduced-motion flips it to muted-dark for the lit wall (parity block below). */
-    .lu-hero-sub { margin: var(--s-6) auto 0; font-family: var(--font-scrawl);
+    .lu-hero-sub { margin: var(--s-4) auto 0; font-family: var(--font-scrawl);
       font-size: clamp(1.15rem, 1rem + 1.4vw, 1.7rem); color: var(--ah-sub-dark); transform: rotate(-.5deg); }
-    .lu-hero-art { margin: var(--s-12) auto 0; width: min(560px, 100%);
+    /* viewport-fit: the frame width derives from the art height budget (poster is 1400x788,
+       so width 60svh keeps the framed art near 34svh tall) and never exceeds 560px or the
+       column. Copy + art + hint then fit one viewport at every target size. */
+    .lu-hero-art { margin: var(--s-8) auto 0; width: min(560px, 100%, 60svh);
       background: var(--ah-frame); padding: 12px 12px 16px;
       box-shadow: 0 24px 60px rgba(var(--ah-night-rgb), .5), 0 3px 10px rgba(var(--ah-night-rgb), .4);
       transform: rotate(-.8deg); }
     .lu-hero-art img { display: block; width: 100%; height: auto; box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .1); }
     /* the hint transits dark -> lit as the veil rises; a LOCAL ink backdrop keeps it one
        register in every state (local-backdrop-over-veil, the archive's own fix). */
-    .lu-scrollhint { margin: var(--s-12) auto 0; width: fit-content; font-family: var(--font-mono);
+    .lu-scrollhint { margin: var(--s-8) auto 0; width: fit-content; font-family: var(--font-mono);
       font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ah-tagline);
       background: rgba(var(--ah-night-rgb), .82); border-radius: 4px; padding: 7px 12px; }
 
     /* ---- shared band header ---- */
-    .lu-band-head { width: min(720px, 100%); margin: 0 auto var(--s-12); text-align: center; }
+    .lu-band-head { width: min(720px, 100%); margin: 0 auto; text-align: center; }
     .lu-kicker { font-size: 11px; color: var(--amber); margin: 0 0 var(--s-3); }
     .lu-band-title { margin: 0; font-family: var(--font-brush); font-weight: 400;
       font-size: clamp(2rem, 1.4rem + 3vw, 3.4rem); line-height: 1; color: var(--ink); }
-    .lu-band-sub { margin: var(--s-4) auto 0; max-width: 46ch; font-family: var(--font-hand);
+    .lu-band-sub { margin: var(--s-3) auto 0; max-width: 46ch; font-family: var(--font-hand);
       font-size: 1.05rem; line-height: 1.5; color: var(--body-soft); }
 
     /* ---- on sale floor ---- */
-    .lu-floor { padding: var(--s-24) var(--s-6); }
-    .lu-drop-grid { width: min(1040px, 100%); margin: 0 auto; display: grid; gap: var(--s-12);
-      grid-template-columns: 1fr; }
-    .lu-piece { display: flex; flex-direction: column; gap: var(--s-4); }
-    .lu-frame { align-self: center; width: min(360px, 100%); background: var(--ah-frame);
+    /* viewport-fit: the framed art is height-budgeted (svh) so a salon row always fits the
+       viewport; frames shrink-wrap their art (a salon hang has varied frames, and the pieces
+       have very different aspect ratios), placards stay uniform beneath. */
+    .lu-floor { --lu-art-h: 16svh; }
+    /* stretch, never center: a centered grid item sizes to its content's min-content and a
+       placard can then overflow its column (measured on the phone reflow: placards overlapped
+       until stretched). The frame still centers via the piece's own align-items. */
+    .lu-duo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); width: 100%; }
+    .lu-piece { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); min-width: 0; }
+    .lu-frame { width: fit-content; max-width: 100%; background: var(--ah-frame);
       padding: 14px 14px 18px; box-shadow: 0 18px 40px rgba(var(--ah-night-rgb), .22), 0 2px 6px rgba(var(--ah-night-rgb), .16);
       transform: rotate(-.6deg); }
-    .lu-mat { padding: 7%; box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .08); }
-    .lu-mat img { display: block; width: 100%; height: auto; }
-    .lu-placard { width: min(360px, 100%); align-self: center; background: var(--paper);
-      padding: var(--s-4) var(--s-6) var(--s-6); box-shadow: 0 8px 20px rgba(var(--ah-night-rgb), .12); }
-    .lu-placard-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-3);
-      margin-bottom: var(--s-2); }
-    .lu-piece-title { font-family: var(--font-scrawl); font-size: 1.6rem; line-height: 1; color: var(--ink); }
-    .lu-piece-no { font-family: var(--font-hand); font-size: .95rem; color: var(--muted-dark); }
-    .lu-badge { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase;
+    .lu-mat { padding: 10px; box-shadow: inset 0 0 0 1px rgba(var(--ink-rgb), .08); }
+    .lu-mat img { display: block; height: var(--lu-art-h, 22svh); width: auto; max-width: 100%; object-fit: contain; }
+    .lu-placard { width: min(280px, 100%); background: var(--paper);
+      padding: var(--s-3) var(--s-4) var(--s-4); box-shadow: 0 8px 20px rgba(var(--ah-night-rgb), .12); }
+    .lu-placard-row { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-2);
+      margin-bottom: var(--s-2); flex-wrap: wrap; }
+    .lu-piece-title { font-family: var(--font-scrawl); font-size: 1.35rem; line-height: 1; color: var(--ink); white-space: nowrap; }
+    .lu-piece-no { font-family: var(--font-hand); font-size: .9rem; color: var(--muted-dark); }
+    .lu-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase;
       color: var(--teal); border: 1px solid var(--teal); border-radius: 3px; padding: 3px 6px; white-space: nowrap; }
     .lu-price { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted-dark); }
-    .lu-sizes { display: flex; gap: var(--s-2); margin: var(--s-3) 0 var(--s-4); }
-    .lu-size { font-family: var(--font-mono); font-size: 12px; color: var(--size-idle);
-      border: 1px solid var(--muted-3); border-radius: var(--sloppy-quickadd); padding: 5px 10px; }
-    .lu-cta { display: block; width: 100%; cursor: pointer; font-family: var(--font-mono); font-size: 12px;
-      letter-spacing: .16em; text-transform: uppercase; color: var(--ink); background: var(--amber);
-      border: none; border-radius: var(--sloppy-btn); padding: 12px 16px; transition: transform .18s var(--ease-pop), filter .18s ease; }
+    .lu-sizes { display: flex; gap: 4px; margin: var(--s-2) 0 var(--s-3); }
+    .lu-size { font-family: var(--font-mono); font-size: 10px; color: var(--size-idle);
+      border: 1px solid var(--muted-3); border-radius: var(--sloppy-quickadd); padding: 4px 8px; }
+    .lu-cta { display: block; width: 100%; cursor: pointer; font-family: var(--font-mono); font-size: 11px;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--ink); background: var(--amber);
+      border: none; border-radius: var(--sloppy-btn); padding: 10px 12px; transition: transform .18s var(--ease-pop), filter .18s ease; }
     .lu-cta:hover { transform: translateY(-1px); filter: brightness(1.04); }
     .lu-cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
-    .lu-order-banner { width: min(1040px, 100%); margin: var(--s-16) auto 0; text-align: center;
+    .lu-order-banner { width: min(1040px, 100%); margin: var(--s-2) auto 0; text-align: center;
       font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; color: var(--ink);
-      background: rgba(var(--amber-rgb), .16); border: 1px solid var(--amber); border-radius: 4px; padding: 12px 16px; }
+      background: rgba(var(--amber-rgb), .16); border: 1px solid var(--amber); border-radius: 4px; padding: 10px 14px; }
 
     /* ---- trust spine ---- */
-    .lu-trust { width: min(1040px, 100%); margin: 0 auto; padding: var(--s-24) var(--s-6);
-      display: grid; gap: var(--s-16); grid-template-columns: 1fr; }
-    .lu-trust-block { background: var(--card); padding: var(--s-8); box-shadow: 0 10px 28px rgba(var(--ah-night-rgb), .1);
-      border-radius: var(--sloppy-tile); }
-    .lu-trust-h { margin: var(--s-2) 0 var(--s-4); font-family: var(--font-brush); font-weight: 400;
+    .lu-trust-block { width: 100%; box-sizing: border-box; background: var(--card); padding: var(--s-6);
+      box-shadow: 0 10px 28px rgba(var(--ah-night-rgb), .1); border-radius: var(--sloppy-tile); }
+    .lu-trust-h { margin: var(--s-2) 0 var(--s-3); font-family: var(--font-brush); font-weight: 400;
       font-size: 1.9rem; line-height: 1.05; color: var(--ink); }
-    .lu-quality { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-3); }
+    .lu-quality { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
     .lu-quality li { font-family: var(--font-hand); font-size: 1.1rem; color: var(--body-soft); padding-left: var(--s-6); position: relative; }
     .lu-quality li::before { content: ''; position: absolute; left: 0; top: .6em; width: 10px; height: 10px;
       background: var(--teal); border-radius: 50%; }
-    .lu-fineprint { margin: var(--s-6) 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+    .lu-fineprint { margin: var(--s-4) 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
     .lu-maker { text-align: center; }
-    .lu-sig { height: 64px; width: auto; margin: var(--s-2) auto var(--s-4); display: block; mix-blend-mode: multiply; }
-    .lu-maker-line { margin: 0 auto; max-width: 40ch; font-family: var(--font-hand); font-size: 1.15rem; color: var(--body-soft); }
+    .lu-sig { height: 60px; width: auto; margin: var(--s-2) auto var(--s-3); display: block; mix-blend-mode: multiply; }
+    .lu-maker-line { margin: 0 auto; max-width: 40ch; font-family: var(--font-hand); font-size: 1.1rem; color: var(--body-soft); }
     .lu-size-table { width: 100%; border-collapse: collapse; margin-top: var(--s-2); font-family: var(--font-mono); }
-    .lu-size-table th, .lu-size-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--muted-3); font-size: 13px; }
+    .lu-size-table th, .lu-size-table td { text-align: left; padding: 8px 8px; border-bottom: 1px solid var(--muted-3); font-size: 13px; }
     .lu-size-table th { color: var(--muted-dark); font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
     .lu-size-table td { color: var(--ink); }
-    .lu-edition-copy { margin: 0 0 var(--s-6); font-family: var(--font-hand); font-size: 1.1rem; color: var(--body-soft); }
+    .lu-edition-copy { margin: 0 0 var(--s-4); font-family: var(--font-hand); font-size: 1.1rem; color: var(--body-soft); }
     .lu-window { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s-4);
       border-top: 1px dashed var(--muted-3); padding-top: var(--s-4); }
     .lu-window-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted-dark); }
     .lu-window-val { font-family: var(--font-scrawl); font-size: 1.5rem; color: var(--amber); }
 
     /* ---- archive (dimmed) ---- */
-    .lu-archive { padding: var(--s-24) var(--s-6) var(--s-16);
-      background: linear-gradient(to bottom, rgba(var(--ah-night-rgb), 0) 0, rgba(var(--ah-night-rgb), .66) 14%, rgba(var(--ah-night-rgb), .78) 100%); }
+    /* section isolation: the dark panel is CONTAINED in the slide with a short 7% ramp,
+       never a long fade that lets the lit trust wall blend through its top half. At rest
+       (snapped) the slide fills the viewport, so the panel's edge sits at the boundary. */
+    .lu-archive { --lu-art-h: 11svh; row-gap: var(--s-4);
+      background: linear-gradient(to bottom, rgba(var(--ah-night-rgb), 0), rgba(var(--ah-night-rgb), .74) 7%, rgba(var(--ah-night-rgb), .8) 100%); }
     .lu-kicker--dim { color: var(--og-pink); }
     .lu-band-title--dim { color: var(--ah-hero-lit); }
     .lu-band-sub--dim { color: var(--dark-body); }
-    .lu-archive-grid { width: min(1040px, 100%); margin: 0 auto; display: grid; gap: var(--s-12); grid-template-columns: 1fr; }
-    .lu-vaulted { display: flex; flex-direction: column; align-items: center; gap: var(--s-3); }
-    .lu-frame--dim { position: relative; width: min(320px, 100%); filter: saturate(.82) brightness(.92); transform: rotate(.5deg); }
+    .lu-archive-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-4); width: min(1040px, 100%); justify-items: center; }
+    .lu-vaulted { display: flex; flex-direction: column; align-items: center; gap: var(--s-2); min-width: 0; }
+    .lu-frame--dim { position: relative; filter: saturate(.82) brightness(.92); transform: rotate(.5deg); }
     .lu-era { position: absolute; top: -10px; left: -10px; font-family: var(--font-mono); font-size: 10px;
       letter-spacing: .12em; color: var(--paper); background: var(--og-pink); border-radius: 3px; padding: 3px 7px; transform: rotate(-6deg); }
     .lu-vaulted-cap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
     .lu-piece-title--dim { color: var(--dark-tile-muted); }
     .lu-soldout { font-family: var(--font-scrawl); font-size: 1.2rem; color: var(--og-pink); }
-    .lu-archive-foot { text-align: center; margin: var(--s-12) auto 0; font-family: var(--font-hand);
+    .lu-archive-foot { text-align: center; margin: 0; font-family: var(--font-hand);
       font-size: 1.05rem; color: var(--dark-body); }
 
-    /* ---- footer ---- */
-    .lu-foot { position: relative; z-index: 2; text-align: center; padding: var(--s-16) var(--s-6) var(--s-24); background: rgba(var(--ah-night-rgb), .78); }
+    /* ---- footer: the closing frame (its own slide, so the archive never bleeds into it) ---- */
+    .lu-foot { text-align: center; background: rgba(var(--ah-night-rgb), .78); }
     .lu-foot-line { margin: 0; font-family: var(--font-brush); font-weight: 400; font-size: 1.6rem; color: var(--ah-hero-lit); }
     .lu-foot-note { margin: var(--s-3) 0 0; font-family: var(--font-mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
 
     /* ---- reveals (paired with animations/reveals.ts; snaps in reduced-motion) ---- */
     [data-rv="fade"] { opacity: 0; transform: translateY(26px); transition: opacity .7s var(--ease-arrive), transform .7s var(--ease-arrive); }
 
-    /* ---- tablet+ layout ---- */
+    /* ---- phone-only placard compaction: the 29-char edition badge wraps inside its box
+       and the CTA type steps down so both live inside a ~165px column ---- */
+    @media (max-width: 719.98px) {
+      .lu-badge { white-space: normal; font-size: 8.5px; }
+      .lu-cta { font-size: 9.5px; letter-spacing: .04em; padding: 9px 10px; }
+      .lu-piece-title { white-space: normal; }
+    }
+
+    /* ---- tablet and desktop: sections ARE the slides; sub wrappers dissolve ---- */
     @media (min-width: 720px) {
-      .lu-drop-grid, .lu-archive-grid { grid-template-columns: 1fr 1fr; gap: var(--s-16); }
-      .lu-trust { grid-template-columns: 1fr 1fr; }
-      .lu-piece, .lu-frame, .lu-placard { align-self: stretch; width: auto; }
-      .lu-frame { max-width: 360px; margin: 0 auto; }
-      .lu-placard { max-width: 360px; margin: 0 auto; }
+      .lu-floor .lu-sub, .lu-trust .lu-sub, .lu-duo { display: contents; }
+      .lu-floor, .lu-trust {
+        box-sizing: border-box; min-height: 100svh;
+        display: grid; align-content: center;
+        scroll-snap-align: center;
+      }
+      /* the sale floor: one salon row of four, placards beneath, banner under the row */
+      .lu-floor { --lu-art-h: 22svh;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        column-gap: var(--s-6); row-gap: var(--s-6);
+        padding: var(--s-6) max(var(--s-6), calc((100% - 1240px) / 2)); }
+      .lu-floor .lu-band-head, .lu-floor .lu-order-banner { grid-column: 1 / -1; }
+      .lu-piece { justify-self: center; width: 100%; }
+      .lu-placard { width: min(280px, 100%); }
+      .lu-piece-title { font-size: 1.4rem; }
+      .lu-mat { padding: 14px; }
+      /* trust: two by two */
+      .lu-trust { grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--s-6);
+        padding: var(--s-6) max(var(--s-6), calc((100% - 1080px) / 2)); }
+      /* archive: one dim row of three */
+      .lu-archive { --lu-art-h: 24svh; row-gap: var(--s-6); }
+      .lu-archive-grid { grid-template-columns: repeat(3, auto); justify-content: center; gap: var(--s-8); }
     }
 
     /* ---- reduced motion: lights already up, no reveal offset ---- */
@@ -367,5 +459,16 @@ const archive = [
        chrome. Scope it off pink on this law-first storefront only (no other page is touched). The
        global recolor is Rotem's call as part of the amber/teal ratification into System_Architecture v1.2. */
     body:has([data-lights-up]) .count { color: var(--muted-dark); }
+    /* Snap-to-section-center (owner review fix 2). Native tiers (touch, narrow, reduced
+       motion) snap via CSS: proximity assists, never traps. When the Lenis rig is active the
+       module sets data-lu-lenis on <html> and lenis/snap owns snapping instead (CSS snap
+       would fight the animated scroll). */
+    /* Proximity, never mandatory: mandatory + a discrete mouse wheel is a trap (measured:
+       each 240px wheel notch snapped BACK to the hero, the page could not be left), and
+       mandatory also fights any slide that ever exceeds a short viewport. Proximity's own
+       gap (a rest parked mid-gap stays un-centered) is closed per tier by JS: lenis/snap on
+       the Lenis tier, a scrollend center-assist on the touch tier (scroll-choreography.ts). */
+    html:has([data-lights-up]) { scroll-snap-type: y proximity; }
+    html[data-lu-lenis] { scroll-snap-type: none !important; }
   </style>
 </Layout>
