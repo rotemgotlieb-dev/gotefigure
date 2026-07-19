@@ -1,6 +1,6 @@
 # GoteFigure — System Architecture (Master Blueprint)
 
-**Version 1.1 — 2026-06-11 (post-review) · Status: pending owner sign-off · Target launch: ~2026-06-25 (2-week window)**
+**Version 1.2 — 2026-07-18 (amendment fold-in; v1.1 2026-06-11 post-review) · Status: pending owner sign-off · Target launch: ~2026-06-25 (2-week window)**
 
 This is the global context document for all GoteFigure build sprints. Every coding session starts from the decisions recorded here. Sections are numbered so sprints can reference and load only what they need (token discipline — see §12).
 
@@ -73,6 +73,8 @@ Friend-group energy of the 2020 captions, tuned for 2026: playful, unfiltered, s
 ### 3.5 The era system
 
 Catalog mixes **OG era (2020–21)** and **New era (2026)**. Eras are a first-class product attribute: filterable in shop, badged on cards, pink-themed for OG. The archive (old IG posts as a lo-fi faux-feed in About) makes brand history a feature, not baggage.
+
+**RECORDED 2026-07-02:** V3 Fable 5 store design committed as 7922bda (live+between drop states, scroll brush-stroke, ink-button v3, vault, satchel); as of 2026-07-18 that commit is unreachable from any branch; recover via git branch v3-recovered 7922bda before building on it.
 
 ## 4. Asset inventory (ground truth from 2026-06-11 analysis)
 
@@ -221,6 +223,8 @@ Fourthwall reality notes for the build sprint: there is **no list-all-products e
 
 `NewsletterForm` island posts through a one-function provider adapter. Provider = build-sprint decision (free-tier candidates: Buttondown / MailerLite / Kit); zero architectural risk. Drop-announcement bar (old caption voice: "ALL NEW DESIGNS DROPPING [date] 8AM" + countdown) reads from a single `drops.json` — no backend.
 
+**AMENDED 2026-07-02 (owner decision):** drop cadence is MONTHLY, not daily ("owner is busy"; daily burned the owner). Any daily-cadence framing anywhere in this spec is superseded.
+
 ### 8.5 Repo structure
 
 Layout decision (Phase 1): the repo root is this working folder (blueprint + asset sources + docs); the Astro project lives in **`site/`**. The tree below describes `site/`'s internals — except its first three entries (`System_Architecture.md`, `CLAUDE.md`, `.claude/rules/`), which live at the repo root so every sprint loads them regardless of cwd.
@@ -283,6 +287,8 @@ The owner's Token Optimization Protocol (2026-06-10) is standing law for this re
 - Terse output, outcome-first; no re-reading unchanged files; tail all command output; element-scoped screenshots ≤5/cycle; haiku for lookup subagents.
 - Lessons append ≤10 lines to topical rules files; failures one line to `immune.md` (read at review time only).
 - This document is the single source of architectural truth. Sprints cite sections (e.g. "per §7.3") instead of re-deriving decisions. Changes to decisions get recorded here first.
+
+v1.2 fold-in applied 2026-07-18; the 3-week spec-rev violation (decisions living only in HANDOFF) is closed by this rev.
 
 ## 13. Open decisions (deliberately deferred, none blocking)
 

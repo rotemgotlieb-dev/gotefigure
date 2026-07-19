@@ -12,6 +12,7 @@ So this repo `HANDOFF.md` is the status file, and the vault-destined items are p
 FOR W3 section at the bottom for W3 to fold into `[[Backlog]]` / `[[Learnings]]` / the session log.
 
 ### State at close (two divergent lines — read this first)
+- 2026-07-18 spec rev: spec is now v1.2; monthly cadence + Vercel amendment + V3 design record live IN the spec (no longer HANDOFF-only).
 - **`main` @ `77a7d68` = LIVE on gotefigure.com, store SEALED (verified 302 all session).** Contains
   ALL the After Hours work, deployed via `npm run deploy` (CI deploy is skipped, secret unset):
   PR #7 full-bleed (no black border bars) · #8 bigger/lower cord + uncover captions + hero up +
