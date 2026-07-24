@@ -1,0 +1,14 @@
+// Companion cron Worker: daily report-only orders reconcile (docs/reconcile-runbook.md).
+// Deploy separately from the site worker: `cd cron-reconcile && npx wrangler deploy`.
+// Secrets (console, never in the repo): RECONCILE_TOKEN (same value as the site worker's).
+// Optional plain var RECONCILE_URL overrides the target (e.g. a preview host for a rehearsal).
+{
+  "$schema": "../site/node_modules/wrangler/config-schema.json",
+  "name": "gotefigure-reconcile-cron",
+  "main": "worker.js",
+  "compatibility_date": "2026-06-01",
+  "triggers": {
+    // 09:17 UTC daily = 02:17 PT (off the :00 stampede; the shop is tiny, one run a day is plenty)
+    "crons": ["17 9 * * *"]
+  }
+}
