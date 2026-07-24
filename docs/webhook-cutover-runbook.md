@@ -44,10 +44,12 @@ looks exactly like "quiet day".
 4. **Register the webhook** for order events only, then place one real low-value test order and
    read the row back. Only after a real order lands is the path trusted.
 
-5. **Backfill + reconcile.** One-shot backfill (Admin API List Orders diffed against local
-   `fw_id`s) for anything that predates the cutover, then a periodic Cron reconcile that alerts on
-   drift in both directions. Until that exists, a dropped delivery is undetectable. A schema
-   comment promising a reconcile that no code performs is itself a finding.
+5. **Backfill + reconcile: BUILT (2026-07-23, `feat/orders-reconcile`).** `POST
+   /api/orders/reconcile` (token-gated, report-only by default, strictly-additive backfill on
+   `{"apply": true}`) diffs FW List Orders against local `fw_id`s in both directions. Console
+   provisioning (`FW_API_BASIC` + `RECONCILE_TOKEN` secrets) and the Cron wiring choice are in
+   `docs/reconcile-runbook.md`. Until PROVISIONED, a dropped delivery is still undetectable in
+   prod; the code no longer promises anything it does not perform.
 
 ## Re-verify at cutover (V1_BETA: the contract can change without notice)
 

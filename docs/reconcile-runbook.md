@@ -1,0 +1,73 @@
+# Orders backfill + reconcile runbook (Sprint 4 step 5)
+
+Status: **BUILT + LOCALLY PROVEN, NOT PROVISIONED.** The webhook cutover runbook's step 5
+("until a reconcile exists, a dropped delivery is undetectable") is now closed at the code
+layer: `POST /api/orders/reconcile` diffs Fourthwall's Platform API List Orders against the
+local `orders` mirror and can backfill missed rows. Nothing here has touched remote state;
+provisioning is Rotem's console work below.
+
+## What it does
+- **Report-only by default.** Pulls every FW order (paginated, `page`/`size`, bounded at
+  MAX_PAGES=40 with an explicit `truncated` flag), reads local `fw_id`s, and reports:
+  - `missingLocal`: FW has it, D1 does not = the dropped-delivery class.
+  - `missingRemote`: D1 has it, FW does not = phantom rows. Reported, NEVER deleted.
+  - Windowed pulls (`sinceDays`) suppress `missingRemote` (a window is not full truth).
+- **Backfill only on `{"apply": true}`.** Strictly additive `INSERT ... ON CONFLICT DO
+  NOTHING`: it can only create rows the webhook missed, never mutate existing ones. A
+  backfilled row lands with `event_ts = 0` and `shipping_status = 'unknown'`, so the next
+  genuine webhook delivery advances it normally (proven in tests), and its `raw_event`
+  carries a `RECONCILE_BACKFILL` provenance marker. FW's lifecycle `status` is never
+  mapped into `shipping_status` (the F5 rule).
+- **Auth:** `x-reconcile-token` header checked against the `RECONCILE_TOKEN` secret via a
+  double-HMAC constant-time-equivalent compare; missing and wrong answer the identical 401
+  before any FW call. Missing config (DB, `FW_API_BASIC`, `RECONCILE_TOKEN`) = 500
+  fail-closed. An FW non-200 = 502 with the named error, never an empty "no drift" report.
+
+## API contract this is built against (verified 2026-07-23)
+`GET https://api.fourthwall.com/open-api/v1.0/order` per
+`docs.fourthwall.com/api-reference/platform/orders/list-orders.md`: Basic auth with
+shop-level API keys ("API keys have full access to this endpoint"), `page` (default 0),
+`size` (default 20), `createdAt[gt]` ISO filter; response `{ results, total, page, size,
+totalPages }`; rate limit 100 req / 10 s per shop (our page size 50 = 1-2 requests at this
+shop's scale). **Re-verify at cutover:** the exact `user:pass` composition of `FW_API_BASIC`
+for a shop-level key is `not verified` here; confirm against one live call (a 401 response
+shape from fake creds does not document the split).
+
+## Rotem's console steps (in order, none run yet)
+1. Create a shop-level API key in the FW dashboard (for-developers page), least privilege
+   if scoping exists.
+2. `npx wrangler secret put FW_API_BASIC` (the "user:pass" string; never in the repo).
+3. Generate a long random token, `npx wrangler secret put RECONCILE_TOKEN`.
+4. Deploy (rides the normal deploy; `/api/*` is already `run_worker_first`).
+5. One manual report-only run and read it:
+   `curl -s -X POST https://gotefigure.com/api/orders/reconcile -H "x-reconcile-token: $TOKEN" | jq`
+6. If `missingLocal` is non-empty after the webhook cutover settles, run once with
+   `{"apply": true}` and read the backfilled rows back from D1.
+
+## Cron wiring (the periodic drift alert)
+The installed `@astrojs/cloudflare` 13.7.0 entry exports `fetch` only (no `scheduled`
+handler; read from `node_modules/@astrojs/cloudflare/dist/entrypoints/server.js`), so
+Cloudflare Cron cannot invoke this worker directly. Two options, pick at cutover:
+1. **Companion cron Worker (recommended, ~10 lines):** its own tiny Worker with
+   `triggers.crons = ["0 9 * * *"]` whose `scheduled` handler POSTs
+   `https://gotefigure.com/api/orders/reconcile` with the token (report-only) and logs the
+   report; alerting = reading its tail logs, or forward non-empty drift to a notification
+   later. The token lives as that Worker's secret too.
+2. **Custom entry wrapper:** wrap the adapter's `handle` in a hand-rolled entry that also
+   exports `scheduled`. More invasive (deploy-config surgery on the adapter's generated
+   config); only worth it if a second Worker is unacceptable.
+
+## Local proof (observed 2026-07-23, this branch)
+- `npx vitest run tests/reconcile.test.ts`: 20/20 PASS, covering: report-only writes
+  nothing; apply inserts ONLY missing rows (existing webhook row untouched, CANCELLED
+  lifecycle did not leak into shipping_status); a backfilled 0-ts row is advanced normally
+  by the later real webhook event (same row, upserted); missing_remote reported not
+  deleted, suppressed on windowed pulls; 500 on each missing config; 401 identical for
+  missing and wrong token with ZERO FW calls made; 400 on malformed JSON; 502 named error
+  on FW 401/403; `apply` must be literally `true`; `sinceDays` clamped to 1..365;
+  runaway `totalPages` stops at MAX_PAGES with `truncated: true`.
+- Wrangler smoke (built worker, no secrets provisioned): a JSON POST to
+  `/api/orders/reconcile` answers `500 {"ok":false,"error":"server_misconfigured"}` =
+  fail-closed before any remote call, route reachable through the worker (adapter wiring +
+  run_worker_first proven). A form-content-type POST gets Astro's built-in CSRF 403 before
+  the handler (known behavior, banked S6); FW-style server-to-server JSON passes through.
