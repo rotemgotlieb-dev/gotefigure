@@ -47,15 +47,24 @@ shape from fake creds does not document the split).
 ## Cron wiring (the periodic drift alert)
 The installed `@astrojs/cloudflare` 13.7.0 entry exports `fetch` only (no `scheduled`
 handler; read from `node_modules/@astrojs/cloudflare/dist/entrypoints/server.js`), so
-Cloudflare Cron cannot invoke this worker directly. Two options, pick at cutover:
-1. **Companion cron Worker (recommended, ~10 lines):** its own tiny Worker with
-   `triggers.crons = ["0 9 * * *"]` whose `scheduled` handler POSTs
-   `https://gotefigure.com/api/orders/reconcile` with the token (report-only) and logs the
-   report; alerting = reading its tail logs, or forward non-empty drift to a notification
-   later. The token lives as that Worker's secret too.
-2. **Custom entry wrapper:** wrap the adapter's `handle` in a hand-rolled entry that also
-   exports `scheduled`. More invasive (deploy-config surgery on the adapter's generated
-   config); only worth it if a second Worker is unacceptable.
+Cloudflare Cron cannot invoke this worker directly. **The companion cron Worker is BUILT
+and staged at `cron-reconcile/`** (worker.js + wrangler.jsonc, daily 09:17 UTC = 02:17 PT):
+its `scheduled` handler POSTs the reconcile endpoint report-only (it can never send
+`apply`; backfill stays a human act), logs a compact drift line (error-level on any
+non-200 or non-zero drift so it stands out in `wrangler tail`), and fails closed without
+its `RECONCILE_TOKEN` secret. Deploy: `cd cron-reconcile && npx wrangler deploy`, then
+`npx wrangler secret put RECONCILE_TOKEN` (same value as the site worker's).
+
+Local proof observed 2026-07-23 (`wrangler dev --local --test-scheduled`, curl
+`/__scheduled`): the trigger fires the handler; with no token it logs
+`reconcile_cron_misconfigured` and makes zero calls; a fetch failure logs
+`reconcile_cron_fetch_failed` and stops. The live report-log line could NOT be observed
+locally (two local workerd sandboxes cannot reach each other over loopback, the known
+"Network connection lost" limit), so console step 5 doubles as its rehearsal: after
+deploying both workers, set the cron worker's `RECONCILE_URL` var to the preview host once,
+trigger it, and read the `reconcile_cron_report` line in `wrangler tail` before trusting
+the schedule. Alternative rejected: a custom entry wrapper exporting `scheduled` from the
+site worker (deploy-config surgery on the adapter's generated config, not worth it).
 
 ## Local proof (observed 2026-07-23, this branch)
 - `npx vitest run tests/reconcile.test.ts`: 20/20 PASS, covering: report-only writes
