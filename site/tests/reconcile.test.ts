@@ -318,6 +318,113 @@ describe('handleReconcileRequest (the endpoint pipeline)', () => {
   });
 });
 
+describe('paranoid-review fixtures (each reviewed defect becomes a test)', () => {
+  const pageResp = (results: unknown[], extra: Record<string, unknown> = {}) =>
+    new Response(JSON.stringify({ results, ...extra }), { status: 200, headers: { 'content-type': 'application/json' } });
+
+  it('MED: totalPages ABSENT on a FULL page marks truncated (never a silent under-pull)', async () => {
+    const fetchFn = (async () =>
+      pageResp(Array.from({ length: PAGE_SIZE }, (_, i) => remoteOrder(`f${i}`)), { total: 120 })) as unknown as typeof fetch;
+    const got = await fetchAllRemoteOrders(deps(newDb(), fetchFn));
+    expect(got.truncated).toBe(true);
+    expect(got.orders.length).toBe(PAGE_SIZE);
+  });
+  it('totalPages ABSENT on a PARTIAL page is a complete single-page pull (no false alarm)', async () => {
+    const fetchFn = (async () => pageResp([remoteOrder('only')], { total: 1 })) as unknown as typeof fetch;
+    const got = await fetchAllRemoteOrders(deps(newDb(), fetchFn));
+    expect(got.truncated).toBe(false);
+    expect(got.orders.length).toBe(1);
+  });
+  it('MED: a stringified totalPages ("2") still paginates (Number coercion)', async () => {
+    const calls: string[] = [];
+    const fetchFn = (async (input: any) => {
+      calls.push(String(input));
+      const page = Number(new URL(String(input)).searchParams.get('page') ?? '0');
+      return pageResp(page === 0 ? Array.from({ length: PAGE_SIZE }, (_, i) => remoteOrder(`s${i}`)) : [remoteOrder('s_last')], {
+        total: PAGE_SIZE + 1,
+        totalPages: '2',
+      });
+    }) as unknown as typeof fetch;
+    const got = await fetchAllRemoteOrders(deps(newDb(), fetchFn));
+    expect(calls.length).toBe(2);
+    expect(got.orders.length).toBe(PAGE_SIZE + 1);
+    expect(got.truncated).toBe(false);
+  });
+  it('MED: aggregate short of FW\'s own `total` marks truncated (the wire count is not thrown away)', async () => {
+    const fetchFn = (async () => pageResp([remoteOrder('one')], { total: 120, totalPages: 1 })) as unknown as typeof fetch;
+    const got = await fetchAllRemoteOrders(deps(newDb(), fetchFn));
+    expect(got.truncated).toBe(true);
+  });
+  it('MED: 429 surfaces distinctly as fw_rate_limited', async () => {
+    const fetchFn = (async () => new Response('slow down', { status: 429 })) as unknown as typeof fetch;
+    await expect(fetchAllRemoteOrders(deps(newDb(), fetchFn))).rejects.toThrow('fw_rate_limited');
+  });
+  it('LOW: duplicate id across pages is deduped and applied counts REAL inserts only', async () => {
+    const fetchFn = (async (input: any) => {
+      const page = Number(new URL(String(input)).searchParams.get('page') ?? '0');
+      const items =
+        page === 0
+          ? [...Array.from({ length: PAGE_SIZE - 1 }, (_, i) => remoteOrder(`d${i}`)), remoteOrder('dup')]
+          : [remoteOrder('dup'), remoteOrder('d_tail')];
+      return pageResp(items, { total: PAGE_SIZE + 1, totalPages: 2 });
+    }) as unknown as typeof fetch;
+    const db = newDb();
+    const report = await runReconcile(deps(db, fetchFn), { apply: true });
+    expect(report.ok).toBe(true);
+    expect(report.remoteCount).toBe(PAGE_SIZE + 1); // dup collapsed
+    expect(report.applied).toBe(PAGE_SIZE + 1);     // equals rows that actually exist
+    expect(count(db)).toBe(PAGE_SIZE + 1);
+    expect(report.missingLocalCount).toBe(PAGE_SIZE + 1);
+  });
+  it('LOW: a truncated pull suppresses missingRemote (a prefix is not full truth)', async () => {
+    const fetchFn = (async (input: any) => {
+      const page = Number(new URL(String(input)).searchParams.get('page') ?? '0');
+      return pageResp([remoteOrder(`t${page}`)], { total: 999999, totalPages: 999999 });
+    }) as unknown as typeof fetch;
+    const db = newDb();
+    await seedWebhookOrder(db, 'healthy_local', '2026-07-18T10:00:00.100000+00:00');
+    const report = await runReconcile(deps(db, fetchFn));
+    expect(report.truncated).toBe(true);
+    expect(report.missingRemote).toEqual([]); // NOT reported as phantom drift
+    expect(report.missingRemoteCount).toBe(0);
+  });
+  it('LOW: a non-JSON 200 maps to fw_fetch_failed (no SyntaxError text leaks into the report)', async () => {
+    const fetchFn = (async () =>
+      new Response('<html>FW error page</html>', { status: 200, headers: { 'content-type': 'text/html' } })) as unknown as typeof fetch;
+    const report = await runReconcile(deps(newDb(), fetchFn));
+    expect(report.ok).toBe(false);
+    expect(report.error).toBe('fw_fetch_failed');
+    expect(JSON.stringify(report)).not.toContain('FW error page');
+  });
+  it('LOW: a local D1 failure answers 500 (ours), not 502 (upstream)', async () => {
+    const { fetchFn } = fwStub([remoteOrder('x')]);
+    const brokenDb = {
+      prepare() {
+        throw new Error('D1 down');
+      },
+    } as any;
+    const res = await handleReconcileRequest(
+      new Request('https://x/api/orders/reconcile', { method: 'POST', headers: { 'x-reconcile-token': TOKEN }, body: '{}' }),
+      { db: brokenDb, fwBasic: BASIC, fetchFn, apiBase: 'https://fw.test', token: TOKEN },
+    );
+    expect(res.status).toBe(500);
+    expect(((await res.json()) as any).error).toBe('storage_failed');
+  });
+  it('LOW: an oversized body is 413, sibling posture with the webhook route', async () => {
+    const db = newDb();
+    const { fetchFn } = fwStub([]);
+    const res = await handleReconcileRequest(
+      new Request('https://x/api/orders/reconcile', {
+        method: 'POST',
+        headers: { 'x-reconcile-token': TOKEN },
+        body: '{"pad":"' + 'x'.repeat(5000) + '"}',
+      }),
+      { ...deps(db, fetchFn), token: TOKEN },
+    );
+    expect(res.status).toBe(413);
+  });
+});
+
 describe('pagination backstop', () => {
   it('stops at MAX_PAGES and reports truncated instead of silently capping', async () => {
     // A stub that claims an absurd totalPages so the loop would run away without the cap.

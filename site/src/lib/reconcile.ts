@@ -37,6 +37,7 @@ export const FW_API_BASE = 'https://api.fourthwall.com';
 export const LIST_ORDERS_PATH = '/open-api/v1.0/order';
 export const PAGE_SIZE = 50;
 export const MAX_PAGES = 40; // 2,000 orders; far above this shop's scale, a runaway backstop
+export const MAX_RECONCILE_BODY_BYTES = 4_096; // the whole legal body is ~40 chars; 4KB is generous
 
 export interface RemoteOrder {
   id: string;
@@ -75,13 +76,17 @@ export interface ReconcileReport {
   error?: string;
   remoteCount?: number;
   localCount?: number;
-  /** FW has these, local D1 does not: the dropped-delivery class. */
+  /** FW has these, local D1 does not: the dropped-delivery class. Capped at REPORT_CAP entries. */
   missingLocal?: { fwId: string; friendlyId: string | null }[];
-  /** Local D1 has these, FW does not: phantom rows, investigate by hand. */
+  /** Local D1 has these, FW does not: phantom rows, investigate by hand. Capped at REPORT_CAP entries. */
   missingRemote?: { fwId: string; friendlyId: string | null }[];
-  /** True when pagination stopped at MAX_PAGES before totalPages: counts are then a floor. */
+  /** EXACT drift counts, never capped (the id lists above slice at REPORT_CAP). */
+  missingLocalCount?: number;
+  missingRemoteCount?: number;
+  /** True when the pull is not provably complete (MAX_PAGES hit, unreadable totalPages on a
+   * full page, or the aggregate came up short of FW's own `total`): counts are then a floor. */
   truncated?: boolean;
-  applied?: number; // rows inserted by backfill (0 in report-only mode)
+  applied?: number; // rows actually inserted by backfill per D1 meta.changes (0 in report-only mode)
 }
 
 const str = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v.trim() : null);
@@ -102,17 +107,26 @@ export function extractRemoteOrder(item: unknown): RemoteOrder | null {
   };
 }
 
+export const FETCH_TIMEOUT_MS = 10_000; // per page; a hung FW connection must not hold the request open
+
 /**
  * Pull every order from FW's List Orders, paginating page 0..totalPages-1 (bounded by
  * MAX_PAGES). Throws on any non-200 (a 401/403 means the key is wrong or revoked; the
- * caller fails closed rather than reporting an empty shop as "no drift").
+ * caller fails closed rather than reporting an empty shop as "no drift"; a 429 surfaces
+ * distinctly as fw_rate_limited). Completeness is VERIFIED, not assumed (paranoid-review
+ * MED): totalPages is coerced through Number(), an unverifiable totalPages on a full page
+ * marks the pull truncated instead of silently stopping, and the aggregate is cross-checked
+ * against the response's own `total` after the loop, so a contract drift can never read as
+ * a clean, complete report.
  */
 export async function fetchAllRemoteOrders(deps: ReconcileDeps, sinceIso?: string): Promise<{ orders: RemoteOrder[]; truncated: boolean }> {
   const fetchFn = deps.fetchFn ?? fetch;
   const base = deps.apiBase ?? FW_API_BASE;
   const auth = 'Basic ' + btoa(deps.fwBasic as string);
   const orders: RemoteOrder[] = [];
+  const seen = new Set<string>(); // pagination shift while orders arrive can repeat an id across pages
   let truncated = false;
+  let reportedTotal: number | null = null;
 
   for (let page = 0; ; page++) {
     if (page >= MAX_PAGES) {
@@ -123,16 +137,35 @@ export async function fetchAllRemoteOrders(deps: ReconcileDeps, sinceIso?: strin
     if (sinceIso) qs.set('createdAt[gt]', sinceIso);
     const res = await fetchFn(`${base}${LIST_ORDERS_PATH}?${qs}`, {
       headers: { authorization: auth, accept: 'application/json' },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
+    if (res.status === 429) throw new Error('fw_rate_limited');
     if (res.status !== 200) throw new Error(`fw_list_orders_${res.status}`);
-    const body = (await res.json()) as { results?: unknown[]; totalPages?: number };
-    for (const item of body.results ?? []) {
+    const body = (await res.json()) as { results?: unknown[]; total?: unknown; totalPages?: unknown };
+    const pageItems = Array.isArray(body.results) ? body.results : [];
+    for (const item of pageItems) {
       const o = extractRemoteOrder(item);
-      if (o) orders.push(o);
+      if (o && !seen.has(o.id)) {
+        seen.add(o.id);
+        orders.push(o);
+      }
     }
-    const totalPages = typeof body.totalPages === 'number' ? body.totalPages : 0;
+    const totalNum = Number(body.total);
+    if (Number.isFinite(totalNum) && totalNum >= 0) reportedTotal = totalNum;
+
+    const totalPages = Number(body.totalPages); // coerce: a stringified "2" must still paginate
+    if (!Number.isFinite(totalPages) || totalPages < 1) {
+      // Unverifiable pagination. A partial page proves we reached the end; a FULL page with
+      // no readable totalPages means there may be more we cannot see: flag it, never
+      // silently stop (the lane's whole purpose is completeness).
+      if (pageItems.length >= PAGE_SIZE) truncated = true;
+      break;
+    }
     if (page + 1 >= totalPages) break;
   }
+  // Cross-check against FW's own count (received on the wire; throwing it away was the
+  // reviewed defect). Fewer aggregated than reported = an under-pull we cannot explain.
+  if (!truncated && reportedTotal !== null && orders.length < reportedTotal) truncated = true;
   return { orders, truncated };
 }
 
@@ -151,7 +184,10 @@ export async function runReconcile(deps: ReconcileDeps, opts: { apply?: boolean;
   try {
     remote = await fetchAllRemoteOrders(deps, opts.sinceIso);
   } catch (e) {
-    return { ok: false, error: e instanceof Error ? e.message : 'fw_fetch_failed' };
+    // Allowlist error strings: only our own named fw_* codes reach the report. A raw
+    // message (e.g. a JSON SyntaxError quoting an FW error page) never leaks outward.
+    const msg = e instanceof Error && /^fw_[a-z0-9_]+$/.test(e.message) ? e.message : 'fw_fetch_failed';
+    return { ok: false, error: msg };
   }
 
   let localRows: Record<string, unknown>[];
@@ -169,10 +205,11 @@ export async function runReconcile(deps: ReconcileDeps, opts: { apply?: boolean;
   const missingLocal = remote.orders
     .filter((o) => !localById.has(o.id))
     .map((o) => ({ fwId: o.id, friendlyId: o.friendlyId }));
-  // A bounded `sinceIso` pull sees only a remote WINDOW; older local rows are absent from it
-  // for the innocent reason that they predate the filter. missing_remote is only meaningful
-  // on a FULL pull, so a windowed run reports it empty rather than as false drift.
-  const missingRemote = opts.sinceIso
+  // A bounded `sinceIso` pull sees only a remote WINDOW, and a truncated pull sees only a
+  // remote PREFIX; local rows absent from either are absent for the innocent reason that
+  // the pull did not cover them. missing_remote is only meaningful on a provably-complete
+  // full pull, so partial pulls report it empty rather than as false phantom drift.
+  const missingRemote = opts.sinceIso || remote.truncated
     ? []
     : localRows
         .filter((r) => !remoteById.has(String(r.fw_id)))
@@ -187,15 +224,17 @@ export async function runReconcile(deps: ReconcileDeps, opts: { apply?: boolean;
       // raw_event marks provenance so a backfilled row is distinguishable from a delivered one.
       const marker = JSON.stringify({ type: 'RECONCILE_BACKFILL', backfilledAt: new Date().toISOString(), data: o });
       try {
-        await deps.db
+        const result = (await deps.db
           .prepare(
             `INSERT INTO orders (fw_id, friendly_id, email, line_items, shipping_status, raw_event, event_ts, status_event_ts)
              VALUES (?1, ?2, ?3, ?4, 'unknown', ?5, 0, 0)
              ON CONFLICT(fw_id) DO NOTHING`,
           )
           .bind(o.id, o.friendlyId, o.email, o.offers ? JSON.stringify(o.offers) : '[]', marker)
-          .run();
-        applied++;
+          .run()) as { meta?: { changes?: number } } | undefined;
+        // Count what D1 reports it INSERTED, not the attempt: a DO NOTHING no-op (webhook
+        // raced us between the SELECT and this INSERT) must not inflate `applied`.
+        applied += Number(result?.meta?.changes ?? 0) > 0 ? 1 : 0;
       } catch {
         return {
           ok: false,
@@ -214,6 +253,8 @@ export async function runReconcile(deps: ReconcileDeps, opts: { apply?: boolean;
     localCount: localRows.length,
     missingLocal: missingLocal.slice(0, REPORT_CAP),
     missingRemote: missingRemote.slice(0, REPORT_CAP),
+    missingLocalCount: missingLocal.length,
+    missingRemoteCount: missingRemote.length,
     truncated: remote.truncated,
     applied,
   };
@@ -269,10 +310,20 @@ export async function handleReconcileRequest(request: Request, deps: ReconcileEn
     return json({ ok: false, error: 'unauthorized' }, 401);
   }
 
+  // Body cap, sibling-posture with the webhook route. Trusted-caller-only exposure (the
+  // read sits behind the token check), so a post-buffer length check is proportionate here;
+  // the Content-Length fast-reject still refuses an honestly-declared oversized body unread.
+  const clRaw = request.headers.get('content-length');
+  const cl = clRaw == null ? NaN : Number(clRaw);
+  if (Number.isFinite(cl) && cl > MAX_RECONCILE_BODY_BYTES) {
+    return json({ ok: false, error: 'payload_too_large' }, 413);
+  }
+
   let apply = false;
   let sinceIso: string | undefined;
   try {
     const text = await request.text();
+    if (text.length > MAX_RECONCILE_BODY_BYTES) return json({ ok: false, error: 'payload_too_large' }, 413);
     if (text) {
       const body = JSON.parse(text) as Record<string, unknown>;
       apply = body.apply === true;
@@ -286,5 +337,8 @@ export async function handleReconcileRequest(request: Request, deps: ReconcileEn
   }
 
   const report = await runReconcile(deps, { apply, sinceIso });
-  return json(report, report.ok ? 200 : 502);
+  // Status honesty: local failures are OURS (500), upstream FW failures are a bad gateway
+  // (502). Mislabeling a D1 error as upstream sends the operator hunting the wrong system.
+  const status = report.ok ? 200 : report.error === 'storage_failed' || report.error === 'server_misconfigured' ? 500 : 502;
+  return json(report, status);
 }
