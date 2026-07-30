@@ -31,8 +31,14 @@ tonight (dashboard state is not readable from this repo); verify each when click
 
 7. Delete the OLD public Google Sheet of collected emails (pre-D1 era; exposed until
    removed; it is not part of this system).
-8. Vercel dashboard: remove the stale gotefigure project/integration (console noise only;
-   the 7/23 guard confirmed no backend impact).
+8. **URGENT, upgraded by the 2026-07-29 guard battery (RED finding 1): the stale Vercel
+   project is not just console noise.** `gotefigure.vercel.app` publicly serves a
+   pre-hardening static build: /store 200 with price payloads, /vault 200, and the vault
+   gallery bytes (`/art/v3/og/og1.jpg` 200). That is the S4 + S6 protected data classes
+   alive on a second origin, guarded only by a client-side localStorage redirect. Fix is
+   one console action: DELETE the Vercel `gotefigure` project (also stops the failing
+   auto-builds on every push); at minimum disconnect its Git integration AND remove the
+   `gotefigure.vercel.app` alias. Full evidence: the 2026-07-29 guard report.
 
 ## Copy debt discovered tonight (owner call, not cleanup-clicks)
 

@@ -41,11 +41,18 @@ A receiver that is live but misconfigured burns real deliveries permanently. Ful
    npx wrangler secret put FW_WEBHOOK_SECRET    # exact value shown by Fourthwall for THIS webhook
    npx wrangler secret put FW_API_BASIC         # shop-level API key for the Platform API (Basic auth)
    npx wrangler secret put RECONCILE_TOKEN      # long random string you generate; used by the cron/curl caller
+   npx wrangler secret put GATE_CODE            # guard 2026-07-29 RED 2: the live Worker holds ONLY
+   npx wrangler secret put GATE_SIGNING_KEY     # TURNSTILE_SECRET_KEY; the gate secrets were never set,
+                                                # so nobody (Rotem included) can open /store or /vault today
    ```
    If the webhook is created as a Platform App (not a dashboard webhook), also set the
    non-secret header name: `FW_WEBHOOK_SIG_HEADER=x-fourthwall-hmac-apps-sha256`.
    Re-verify at cutover (flagged `not verified` in the runbook): the exact `user:pass`
    composition of `FW_API_BASIC` for a shop-level key. Confirm with one live List Orders call.
+   After step 4, re-probe the gate: `POST /api/gate` with a wrong code should answer 403
+   `wrong_code`, not 500 `server_misconfigured` (the guard's 4e check). Note the migrations
+   in step 2 are also what create `gate_attempts`; without them the gate 500s even with
+   secrets set.
 
 4. **Deploy:** `cd site && npm run deploy` (catalog-lint, build, dist-lint gate the deploy).
 
