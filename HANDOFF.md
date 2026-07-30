@@ -1,11 +1,57 @@
 # GoteFigure — HANDOFF / current context (read this first)
 
-> The dated W1 session-close block below is the CURRENT truth. The 2026-07-02 narrative
-> further down is old context (says Vercel/Astro-6; the live stack is Cloudflare Workers).
+> The dated 2026-07-29 block below is the CURRENT truth. Everything under it (the 7/10 W1
+> close, the 2026-07-02 narrative) is history kept for context; where they disagree, the
+> newest dated block wins.
 
 ---
 
-## W1 SESSION CLOSE — 2026-07-10 Fri 23:00 PT (Opus 3-window sprint, /wrap)
+## TRUTH-SYNC, 2026-07-29 Wed evening (W2 backend lane)
+
+### What is actually merged and live
+- `origin/main` = `16ee26a`. The F1-F6 webhook hardening MERGED as PR #12 (2026-07-18);
+  the old "w1-orders branch unmerged / perf WebP not live" story below is STALE: verified
+  2026-07-29, `w1-orders-real-perf-copy-2026-07-10` is an ancestor of main AND live
+  gotefigure.com serves the WebP set, so the orders + perf + copy work is merged and live.
+- Live gotefigure.com serves the Worker build (guard 4a), store SEALED (302), subscribers
+  captured in D1 (last guard read: 4 rows). Orders still record NOTHING by design:
+  `FW_WEBHOOK_SECRET` unprovisioned, endpoint fail-closes 500 (guard 4d PENDING).
+- Live defect confirmed 2026-07-29: `gotefigure.com/info` = 404 while the After Hours page
+  links to it ("meanwhile: the sketchbooks"). Fix built on `fix/info-index`.
+- CI auto-deploy still intentionally off (`CLOUDFLARE_API_TOKEN` unset): merge != live,
+  every deploy is a manual `npm run deploy`.
+
+### Open branches + PRs (all pushed, nothing stranded)
+- **PR #13** `feat/orders-reconcile` @ 1d86bde: the backfill + reconcile lane,
+  re-verified 2026-07-29 (124/124, lints green, zero-conflict merge). Click list:
+  `docs/PR13-MERGE-ONECLICK.md`.
+- **`feat/storefront-lights-up-rebased`**: the approved Direction A storefront rebased onto
+  main PLUS the two-shirt truth cut (mushroom tee + rabbit tee at the decided $40/$35),
+  the pre-sale window state machine (pre/open/post, no countdowns, boolean sold-out only:
+  `docs/PRESALE-WINDOW-DESIGN.md`), and the runbook §6 Part B wiring (store pages consume
+  the provider seam; pin stays `mock`). The original `feat/storefront-lights-up` is
+  untouched for history.
+- **`fix/info-index`**: /info no longer 404s (the live After Hours "sketchbooks" link).
+- **`docs/oneclick-2026-07-29`**: this truth-sync + the one-click, upgrade-assessment,
+  and post-cutover-cleanup docs + the W2 sprint log.
+
+### Decisions of record now encoded in the repo (never re-litigate in code)
+- Drop 1 = exactly two shirts; $40 list / $35 waitlist said in dollars, loudly; window
+  T-0 through T+13; post-window sells at $40 till gone then vaults; sold-out copy only
+  when true; NO countdown widgets; NO numeric stock counts on the site (Fourthwall caps
+  carry scarcity); CC1717 sizing table + runs-small note on PDPs (numbers pend the
+  official spec sheet at the WNM visit); stickers stay OUT of the catalog.
+
+### Rotem-only console list (unchanged in kind, consolidated)
+- PR merges (#13 first; then the storefront-rebased PR after his design ratifications).
+- The webhook cutover clicks in `docs/PR13-MERGE-ONECLICK.md` (remote migrations ->
+  secrets -> deploy -> test delivery -> register webhook -> reconcile).
+- Fourthwall products + storefront token (runbook §6 Part A) before any provider flip.
+- The dashboard hygiene in `docs/POST-CUTOVER-CLEANUP.md`.
+
+---
+
+## W1 SESSION CLOSE: 2026-07-10 Fri 23:00 PT (Opus 3-window sprint, /wrap) [HISTORY; superseded above]
 
 W1 is isolation-bound: it does NOT write or commit the vault (W3 is the sole vault committer).
 So this repo `HANDOFF.md` is the status file, and the vault-destined items are parked in the
