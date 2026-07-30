@@ -51,7 +51,7 @@
 
 ---
 
-## W1 SESSION CLOSE — 2026-07-10 Fri 23:00 PT (Opus 3-window sprint, /wrap) [HISTORY; superseded above]
+## W1 SESSION CLOSE: 2026-07-10 Fri 23:00 PT (Opus 3-window sprint, /wrap) [HISTORY; superseded above]
 
 W1 is isolation-bound: it does NOT write or commit the vault (W3 is the sole vault committer).
 So this repo `HANDOFF.md` is the status file, and the vault-destined items are parked in the
