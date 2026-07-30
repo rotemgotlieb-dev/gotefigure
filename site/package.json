@@ -15,7 +15,7 @@
     "lint:dist": "node scripts/dist-lint.mjs",
     "lint:scroll": "node scripts/scroll-canary.mjs",
     "verify": "node scripts/catalog-lint.mjs && node scripts/scroll-canary.mjs && astro build && node scripts/dist-lint.mjs && vitest run",
-    "deploy": "node scripts/catalog-lint.mjs && node scripts/scroll-canary.mjs && astro build && node scripts/dist-lint.mjs && wrangler deploy"
+    "deploy": "node scripts/catalog-lint.mjs && node scripts/scroll-canary.mjs && vitest run && astro build && node scripts/dist-lint.mjs && wrangler deploy"
   },
   "dependencies": {
     "@fontsource-variable/shantell-sans": "^5.2.7",

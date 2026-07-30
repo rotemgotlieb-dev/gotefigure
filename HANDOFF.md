@@ -142,7 +142,7 @@ for real** once the look is settled.
 - **Cadence is MONTHLY, not daily.** Owner is busy; daily was too much. Kill every "drawn daily" /
   "DAY 1,847" / live-streaming claim. Frame **rarity** (one drop a month, limited, never reprinted,
   vaulted forever) as the selling point — it's honest AND the biggest conversion lever.
-- The **artwork** is genuinely human-made — every PRODUCT drawing is Rotem's hand; keep it honest,
+- The **artwork** is genuinely human-made: every PRODUCT drawing is Rotem's hand; keep it honest,
   nothing over-claimed. (LAW REVISED 2026-07-18, Rotem live: AI generation is now PERMITTED for site
   staging/environments/composites around the real art, per-asset with his approval; every asset gets a
   recorded medium-of-origin class, and "hand-drawn" claims must be true of the ART they point at.
