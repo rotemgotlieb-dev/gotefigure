@@ -24,8 +24,10 @@ export interface Pricing {
 }
 
 /**
- * Validate the owner-edited config, failing the BUILD loudly on dishonest states
- * (fail-loud ethos, same as the provider seam's own guards).
+ * Validate the owner-edited config, failing the VERIFY SUITE loudly on dishonest
+ * states (fail-loud ethos, same as the provider seam's own guards). Measured
+ * 2026-07-29: astro build alone prints per-page errors but exits 0 with zero-byte
+ * pages, so the deploy script runs vitest first; the test suite is the real gate.
  */
 export function validateWindowConfig(raw: unknown): WindowConfig {
   const cfg = (raw ?? {}) as Partial<WindowConfig>;
