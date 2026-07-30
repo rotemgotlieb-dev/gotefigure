@@ -1,12 +1,22 @@
 ---
 // Drop-grid tile (design lines 170-257): art, kind chip, brush name + pink underline that
-// draws on hover + two hanging drips, price, quick-add with rising ink pool, vaulted overlay.
+// draws on hover + two hanging drips, price, quick-add with rising ink pool, sold-out overlay.
+// Commerce truth (name, price, availability) arrives via the provider seam through props;
+// presentation stays on the Piece (docs/PRESALE-WINDOW-DESIGN.md). No counts, ever.
 import type { Piece } from '../lib/drop';
-import { isBetween, dropLeftShort, money } from '../lib/drop';
+import { money } from '../lib/drop';
+import type { Product } from '../lib/commerce/types';
 
-interface Props { piece: Piece; delay?: number; }
-const { piece: p, delay = 0 } = Astro.props;
+interface Props {
+  piece: Piece;
+  product: Product;
+  /** Rendered in place of quick-add when the window has not opened (honest pre state). */
+  statusLine?: string | null;
+  delay?: number;
+}
+const { piece: p, product, statusLine = null, delay = 0 } = Astro.props;
 const dark = !!p.original;
+const buyable = product.available;
 ---
 <article
   data-tile
@@ -15,17 +25,16 @@ const dark = !!p.original;
   data-rv-d={delay || undefined}
   class:list={['tile', { dark }]}
 >
-  {p.hero && !isBetween && <span class="corner mono">{dropLeftShort}</span>}
   {dark && <span class="corner mono">1 of 1</span>}
 
-  <a class="tile-link" href={`/piece/${p.id}/`} aria-label={`${p.name}, ${p.kindShort}, ${money(p.price)}`}></a>
+  <a class="tile-link" href={`/piece/${p.id}/`} aria-label={`${product.name}, ${p.kindShort}, ${money(product.price)}`}></a>
 
   <div class="artbox" class:list={[{ 'paper-well': dark }]}>
     <img data-tart src={p.art} alt="" style={`max-width:${p.tileArtMax}`} loading="lazy" />
   </div>
   <div class="kind">{p.kindShort}</div>
   <div class="namewrap">
-    <h3>{p.name}</h3>
+    <h3>{product.name}</h3>
     <svg viewBox="0 0 100 7" preserveAspectRatio="none" aria-hidden="true" class="u-svg">
       <path data-u d={p.underline} pathLength="1" fill="none" stroke="#DA7285" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="1" stroke-dashoffset="1"></path>
     </svg>
@@ -34,16 +43,19 @@ const dark = !!p.original;
       <path data-dr d="M91 0.4 C91.3 2 91.2 3.6 91 5 C90.8 6.2 90.2 6.3 90 5.1 C89.9 3.4 90 1.8 90.2 0.4 Z" fill="#DA7285" opacity=".8" style="transform:scaleY(0);transform-origin:90px 0px;transition:transform .7s cubic-bezier(.25,.6,.3,1) .6s"></path>
     </svg>
   </div>
-  <div class="price">{money(p.price)}</div>
-  <button data-quickadd={p.id} type="button" class="qa">
-    <span data-qa-lbl>+ Quick add</span>
-    <span data-qa-pool aria-hidden="true"></span>
-  </button>
+  <div class="price">{money(product.price)}</div>
+  {buyable && (
+    <button data-quickadd={p.id} type="button" class="qa">
+      <span data-qa-lbl>+ Quick add</span>
+      <span data-qa-pool aria-hidden="true"></span>
+    </button>
+  )}
+  {!buyable && !p.soldOut && statusLine && <div class="paper-note mono">{statusLine}</div>}
   {dark && <div class="paper-note mono">the actual paper →</div>}
 
-  {isBetween && (
+  {p.soldOut && (
     <div class="vaulted" class:list={[{ dark }]}>
-      <span>{dark ? 'sold · vaulted' : 'vaulted'}</span>
+      <span>{dark ? 'sold · vaulted' : 'sold out · vaulted'}</span>
     </div>
   )}
 </article>
@@ -109,7 +121,7 @@ const dark = !!p.original;
     pointer-events: none;
     transition: height 1.8s cubic-bezier(.22, .55, .3, 1);
   }
-  .paper-note { margin-top: 16px; font-size: 15px; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); }
+  .paper-note { margin-top: 16px; font-size: 15px; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); font-family: var(--font-scrawl); }
   .tile.dark .paper-note { color: var(--dark-tile-muted); }
 
   .vaulted {

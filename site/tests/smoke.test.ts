@@ -23,9 +23,8 @@ describe('built routes', () => {
   it.each([
     'store/index.html',
     'vault/index.html',
-    'piece/sticker/index.html',
-    'piece/tee/index.html',
-    'piece/original/index.html',
+    'piece/mushroom-tee/index.html',
+    'piece/rabbit-tee/index.html',
   ])('%s is NOT statically built (gated pre-launch surface: Worker-rendered only, review #1/#2)', (p) => {
     expect(existsSync(join(dist, p))).toBe(false);
     expect(existsSync(join(__dirname, '..', 'dist', p))).toBe(false);
@@ -125,12 +124,12 @@ describe('store — the drop (Worker-rendered behind the gate; content asserted 
     expect(html).toContain('gate_attempts');
   });
 
-  it('mounts the scroll brush-stroke + arrival + home main', () => {
+  it('mounts the scroll brush-stroke + arrival + home main (hero id is data-driven)', () => {
     expect(html).toContain('data-home-main');
     expect(html).toContain('id="gf-line"');
     expect(html).toContain('id="gf-word"');
     expect(html).toContain('data-arrival-root');
-    expect(html).toContain('data-next-drop');
+    expect(html).toContain('data-hero-id');
   });
 
   it('renders the nav + bag + flood overlay', () => {
@@ -140,18 +139,31 @@ describe('store — the drop (Worker-rendered behind the gate; content asserted 
     expect(html).toContain('gf-flood');
   });
 
-  it('renders all allowlisted pieces with ink CTAs + quick add', () => {
-    for (const name of ['Goggle Rabbit', 'Kaleido Plate', 'Trippy 1.1', 'Pink Rabbit', 'Bloom Study no.4']) {
+  it('renders the two-shirt drop with ink CTAs + quick add (Rotem 2026-07-25: exactly two shirts)', () => {
+    for (const name of ['The Mushroom Tee', 'The Rabbit Tee']) {
       expect(html).toContain(name);
     }
     expect(html).toContain('data-ink-btn');
     expect(html).toContain('data-quickadd');
-    expect(html).toContain('This month');
+    expect(html).toContain('The drop');
   });
 
-  it('countdown teaser template compiled into the worker (hero CTA + stock badge are runtime-computed, not assertable as literals)', () => {
-    expect(html).toContain('next drop');
-    expect(html).toContain('data-count-dd');
+  it('the window teaser shipped; countdown widgets are gone everywhere (WNM Plan 85)', () => {
+    expect(html).toContain('the window');
+    expect(html).not.toContain('data-count-dd');
+    expect(html).not.toContain('data-countdown');
+    expect(html).not.toContain('data-next-drop');
+  });
+
+  it('the loud waitlist framing compiled in, dollars never percent-off (GoteFigure.md:27)', () => {
+    expect(html).toContain('join the waitlist, you get it for $');
+    expect(html).not.toMatch(/\d+\s*% off/i);
+  });
+
+  it('no numeric scarcity claims: the old edition counters are dead', () => {
+    expect(html).not.toContain('dropLeft');
+    expect(html).not.toContain('editionSize');
+    expect(html).not.toContain('left. never reprinted');
   });
 
   it('maker is visible: portrait + first person + signature', () => {
@@ -168,6 +180,17 @@ describe('piece pages (gated: Worker-rendered, content in the server bundle)', (
     expect(serverBundle).toContain('never reprinted');
     expect(serverBundle).toContain('Claim the original');
     expect(serverBundle).toContain('one buyer, one wall');
+  });
+
+  it('CC1717 sizing table + the runs-small note shipped on the PDP (WNM Plan 84)', () => {
+    expect(serverBundle).toContain('width armpit to armpit, length shoulder to hem');
+    expect(serverBundle).toContain('garment-dyed cotton arrives pre-shrunk');
+    expect(serverBundle).toContain('18.25');
+    expect(serverBundle).toContain('30.75');
+  });
+
+  it('sold-out copy exists only behind the boolean flag (honesty law)', () => {
+    expect(serverBundle).toContain('sold out. vaulted, never reprinted');
   });
 });
 

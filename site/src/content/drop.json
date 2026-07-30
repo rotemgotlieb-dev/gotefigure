@@ -1,7 +1,11 @@
 {
-  "_comment": "OWNER CONTROL SURFACE: the drop state machine. dropState: 'live' (drop on sale) | 'between' (countdown, everything vaulted). dropLeft = items remaining in this edition. nextDropDate is local time.",
-  "dropState": "live",
-  "editionSize": 50,
-  "dropLeft": 31,
-  "nextDropDate": "2026-07-31T17:00:00"
+  "_comment": "OWNER CONTROL SURFACE: the pre-sale window (docs/PRESALE-WINDOW-DESIGN.md). Both dates null = the honest pre state while T-0 is unpicked (production lane unconfirmed until the WNM visit). When T-0 is picked, set BOTH as ISO-8601 with an explicit offset (America/Los_Angeles); the decided window length is 14 days, T-0 through T+13. pricing is decided on record: Projects/GoteFigure.md line 27 (2026-07-23), 40 list / 35 waitlist, said in dollars, never percent-off.",
+  "window": {
+    "opensAt": null,
+    "closesAt": null
+  },
+  "pricing": {
+    "list": 40,
+    "waitlist": 35
+  }
 }

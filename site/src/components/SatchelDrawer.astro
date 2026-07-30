@@ -8,16 +8,25 @@
 // WITHOUT the payload, so the pre-launch catalog never bakes into public static HTML.
 // The client script parses data-pieces per render and refreshes it on astro:before-swap,
 // so a drawer persisted from a public page picks the payload up on the first gated page.
-import { pieces, money } from '../lib/drop';
+import { commerce, isMockMode } from '../lib/commerce';
+import { pieceById } from '../lib/drop';
 import InkButton from './InkButton.astro';
 
 interface Props { catalog?: boolean }
 const { catalog = false } = Astro.props;
 
+// Commerce truth (name, price) from the provider seam; presentation (kindShort, art) joins
+// per slug (docs/PRESALE-WINDOW-DESIGN.md). Only computed on gated pages (catalog=true).
 const pieceMap = catalog
-  ? Object.fromEntries(pieces.map((p) => [p.id, {
-      name: p.name, kindShort: p.kindShort, price: p.price, art: p.art,
-    }]))
+  ? Object.fromEntries((await commerce.getProducts()).map((prod) => {
+      const piece = pieceById(prod.slug);
+      return [prod.slug, {
+        name: prod.name,
+        kindShort: piece?.kindShort ?? prod.type,
+        price: prod.price,
+        art: piece?.art ?? prod.artSrc,
+      }];
+    }))
   : null;
 
 // sealed-badge boil: 3 pre-generated wobbly circles stepped at ~6fps (no animated filters — §7.6.3)
@@ -40,7 +49,7 @@ function wobblyCircle(seed: number): string {
 }
 const boilVariants = [11, 47, 83].map(wobblyCircle);
 ---
-<div class="gf-satchel" data-satchel hidden data-pieces={pieceMap ? JSON.stringify(pieceMap) : undefined}>
+<div class="gf-satchel" data-satchel hidden data-provider={isMockMode ? 'mock' : 'fourthwall'} data-pieces={pieceMap ? JSON.stringify(pieceMap) : undefined}>
   <div class="backdrop" data-satchel-close></div>
   <aside role="dialog" aria-modal="true" aria-label="Your bag">
 
@@ -60,10 +69,11 @@ const boilVariants = [11, 47, 83].map(wobblyCircle);
 
       <div class="totals" data-totals hidden>
         <div class="line mono"><span>subtotal</span><span data-subtotal></span></div>
-        <div class="line mono ship"><span>shipping</span><span>free (US)</span></div>
+        <div class="line mono ship"><span>shipping</span><span>set at checkout</span></div>
         <div class="total"><span>Total</span><span data-total></span></div>
         <InkButton label="Seal the order" seal wide size="lg" />
-        <div class="proto mono" data-ink-obstacle>prototype · nothing is charged</div>
+        {isMockMode && <div class="proto mono" data-ink-obstacle>prototype · nothing is charged</div>}
+        <div class="proto err mono" data-checkout-error role="alert" aria-live="assertive" hidden></div>
       </div>
     </div>
 
@@ -130,6 +140,7 @@ const boilVariants = [11, 47, 83].map(wobblyCircle);
   .line.ship { padding-bottom: 12px; }
   .total { display: flex; justify-content: space-between; font-size: 20px; font-weight: 700; padding: 10px 0 18px; border-top: 1px solid rgba(22, 19, 15, .12); }
   .proto { font-size: 15px; font-weight: 700; letter-spacing: .09em; color: var(--hand-muted); text-align: center; margin-top: 12px; width: fit-content; margin-left: auto; margin-right: auto; }
+  .proto.err { color: var(--pink); }
   /* seal button label stays mono in the drawer (skin scope) */
   .totals :global(.gf-ink-btn .gf-lbl-ink),
   .totals :global(.gf-ink-btn .gf-lbl-paper),
@@ -232,9 +243,33 @@ const boilVariants = [11, 47, 83].map(wobblyCircle);
     };
     const showSealed = () => { bagState.hidden = true; sealedState.hidden = false; };
 
+    // Seal routes through the provider seam: mock keeps the local ritual; fourthwall
+    // dynamically imports the checkout bridge (the chunk carries no catalog literals) and
+    // redirects to hosted checkout. Bridge failure is LOUD: visible error, bag kept, never
+    // a fake "sealed" state (docs/PRESALE-WINDOW-DESIGN.md).
+    const errEl = root.querySelector<HTMLElement>('[data-checkout-error]');
+    const onSeal = async () => {
+      if ((root.dataset.provider || 'mock') === 'fourthwall') {
+        if (errEl) { errEl.hidden = true; errEl.textContent = ''; }
+        try {
+          const { sealViaFourthwall } = await import('../lib/commerce/checkout-fourthwall');
+          const url = await sealViaFourthwall(satchel.rows());
+          if (!url) throw new Error('no checkout url');
+          location.assign(url);
+        } catch {
+          if (errEl) {
+            errEl.textContent = 'checkout could not start. nothing was charged, your bag is safe. try again.';
+            errEl.hidden = false;
+          }
+        }
+        return;
+      }
+      satchel.seal(); render(); showSealed();
+    };
+
     addEventListener('gf:drawer', ((e: CustomEvent) => (e.detail === 'open' ? open() : close())) as EventListener);
     addEventListener('gf:cart', render);
-    addEventListener('gf:sealed', () => { satchel.seal(); render(); showSealed(); });
+    addEventListener('gf:sealed', () => { void onSeal(); });
     root.querySelectorAll('[data-satchel-close]').forEach((el) => el.addEventListener('click', close));
     root.querySelector('[data-keep-looking]')?.addEventListener('click', close);
 

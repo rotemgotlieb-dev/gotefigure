@@ -3,7 +3,8 @@
 // Wired ahead of `npm run build` / `verify` / `deploy`. Zero dependencies. Fails (exit 1) on:
 //
 //   A. DEDUP (now enforced): a sellable-product literal (piece name from content/pieces.json,
-//      or slug/name from lib/commerce/catalog.mock.ts) appearing in ANY src file outside the
+//      the ONE catalog truth since the 2026-07-29 two-shirt cut; catalog.mock.ts retired,
+//      the mock provider derives from pieces.json) appearing in ANY src file outside the
 //      catalog sources. One catalog truth per fact; retiring a piece must never leave a
 //      hardcoded ghost. (Vault-archive names are deliberately NOT enforced: "OG Rabbit" as
 //      brand-character prose in about/404 is a look-alike, not inventory duplication.)
@@ -41,7 +42,6 @@ const CATALOG_SOURCES = [
   'src/content/drop.json',
   'src/content/vault.json',
   'src/content/drops.json',
-  'src/lib/commerce/catalog.mock.ts',
   'src/lib/commerce/overlay.ts',
 ];
 
@@ -85,21 +85,20 @@ const FW_TOKEN = process.env.PUBLIC_FW_STOREFRONT_TOKEN ?? envFile.PUBLIC_FW_STO
 }
 
 // ---------- gather catalog literals ---------------------------------------------------------
+// catalog.mock.ts retired 2026-07-29 (two-shirt cut): the mock provider now DERIVES its
+// products from pieces.json (lib/commerce/catalog.ts), so pieces.json is the one literal
+// source and the extraction is structural JSON, not a regex that can silently break.
 const piecesJson = JSON.parse(readFileSync(join(SITE, 'src/content/pieces.json'), 'utf8'));
 const pieceNames = piecesJson.pieces.map((p) => p.name);
+const literals = [...new Set(pieceNames)];
 
-const mockTs = readFileSync(join(SITE, 'src/lib/commerce/catalog.mock.ts'), 'utf8');
-const mockSlugs = [...mockTs.matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]);
-const mockNames = [...mockTs.matchAll(/name:\s*'([^']+)'/g)].map((m) => m[1]);
-
-// length guard: never enforce a literal so short it matches prose by accident
-const literals = [...new Set([...pieceNames, ...mockSlugs, ...mockNames])].filter((l) => l.length >= 5);
-
-// extraction floor (S4 #6): a broken name/slug regex must fail loudly, never silently
-// shrink the enforced set until rule A is scanning for nothing.
-const MIN_LITERALS = 10;
-if (literals.length < MIN_LITERALS) {
-  fail(`[A dedup] literal extraction collected only ${literals.length} (< ${MIN_LITERALS}) - the pieces.json/catalog.mock.ts extraction is broken; rule A would be scanning for nothing`);
+// extraction floor (S4 #6, reworked with the cut): an empty catalog or a name too short
+// to be a meaningful dedup tripwire fails loudly; every piece contributes exactly its name.
+const MIN_LITERAL_LENGTH = 5;
+if (pieceNames.length < 1) {
+  fail('[A dedup] pieces.json carries zero pieces - rule A would be scanning for nothing');
+} else if (pieceNames.some((n) => typeof n !== 'string' || n.length < MIN_LITERAL_LENGTH)) {
+  fail(`[A dedup] a piece name is shorter than ${MIN_LITERAL_LENGTH} chars - too short to be a meaningful dedup tripwire; lengthen the name`);
 }
 
 // ---------- walk src -------------------------------------------------------------------------
