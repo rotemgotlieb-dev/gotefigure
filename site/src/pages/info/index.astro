@@ -1,0 +1,39 @@
+---
+// /info index (fix 2026-07-29): the live After Hours page links "meanwhile: the sketchbooks"
+// to /info, which 404'd because only contact/privacy/shipping existed under info/. This is
+// the smallest honest page that keeps that promise: point to where the sketchbooks actually
+// live (the daily-drawing videos on /about and the YouTube channel) and index the paperwork
+// pages. No new claims, no new copy voice; same .info shell as its siblings.
+import Layout from '../../layouts/Layout.astro';
+import { CHANNEL_URL } from '../../lib/youtube';
+---
+<Layout title="Info · GoteFigure" description="The sketchbooks, and the paperwork: contact, shipping, privacy.">
+  <section class="info">
+    <h1>Meanwhile</h1>
+
+    <h2>The sketchbooks</h2>
+    <p>
+      The drawings live on the <a href="/about/" class="squiggle">about page</a> and over on
+      <a href={CHANNEL_URL} target="_blank" rel="noopener" class="squiggle">YouTube</a>.
+      The art on this site comes straight out of that sketchbook.
+    </p>
+
+    <h2>The paperwork</h2>
+    <ul class="index-list">
+      <li><a href="/info/contact/" class="squiggle">Contact</a>: one artist, one inbox.</li>
+      <li><a href="/info/shipping/" class="squiggle">Shipping &amp; returns</a></li>
+      <li><a href="/info/privacy/" class="squiggle">Privacy</a>: barely anything is collected.</li>
+    </ul>
+
+    <p class="margin-note">lost? the rabbit was too. start at <a href="/" class="squiggle">the door</a></p>
+  </section>
+</Layout>
+
+<style>
+  .info { max-width: 680px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24); }
+  .info h1 { margin-bottom: var(--s-6); }
+  .info h2 { margin: var(--s-8) 0 var(--s-2); font-size: var(--text-lg); }
+  .info p { margin-bottom: var(--s-3); }
+  .index-list { list-style: none; margin: 0; padding: 0; }
+  .index-list li { margin-bottom: var(--s-2); }
+</style>
