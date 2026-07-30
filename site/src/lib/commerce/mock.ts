@@ -1,7 +1,8 @@
-// Mock provider — placeholder catalog + a working local cart so the whole UX is real
-// except payment. Cart ops run only in the browser (island); products at build time too.
+// Mock provider: the derived two-shirt catalog + a working local cart so the whole UX is
+// real except payment. Cart ops run only in the browser (island); products at build time too.
+// Catalog truth: content/pieces.json via catalog.ts (ONE truth, docs/PRESALE-WINDOW-DESIGN.md).
 import type { Cart, CommerceProvider, LineItem } from './types';
-import { MOCK_CATALOG } from './catalog.mock';
+import { buildCatalog } from './catalog';
 
 const CART_KEY = 'gf-mock-cart';
 
@@ -29,7 +30,7 @@ function save(cart: Cart): Cart {
 // variantId format used by the UI: "<slug>::<variant.id>"
 function findVariant(variantId: string) {
   const [slug, vid] = variantId.split('::');
-  const product = MOCK_CATALOG.find((p) => p.slug === slug);
+  const product = buildCatalog().find((p) => p.slug === slug);
   const variant = product?.variants.find((v) => v.id === vid);
   if (!product || !variant) throw new Error(`unknown variant: ${variantId}`);
   return { product, variant };
@@ -37,10 +38,10 @@ function findVariant(variantId: string) {
 
 export const mockProvider: CommerceProvider = {
   async getProducts() {
-    return MOCK_CATALOG;
+    return buildCatalog();
   },
   async getProduct(slug) {
-    return MOCK_CATALOG.find((p) => p.slug === slug) ?? null;
+    return buildCatalog().find((p) => p.slug === slug) ?? null;
   },
   async createCart() {
     return save(emptyCart('mock'));

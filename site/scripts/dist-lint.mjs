@@ -7,12 +7,15 @@
 // unknown URL. Zero dependencies.
 //
 // Fails (exit 1) on:
-//   1. any sellable-catalog literal (piece name from content/pieces.json, or slug/name
-//      from lib/commerce/catalog.mock.ts) inside any dist/client/ HTML or JS file
+//   1. any sellable-catalog literal (piece name from content/pieces.json, the ONE catalog
+//      truth since the 2026-07-29 two-shirt cut; catalog.mock.ts retired, the mock provider
+//      derives from pieces.json) inside any dist/client/ HTML or JS file
 //   2. a serialized price payload ("price": - raw or its HTML-escaped &quot; form) in
 //      the same files
-//   3. literal-extraction underflow (< MIN_LITERALS collected) - a broken extraction
-//      regex must fail loudly, never silently scan for nothing
+//   3. literal-extraction underflow - the floor is STRUCTURAL now: every piece in
+//      pieces.json must contribute its name (JSON parsing cannot silently shrink the way
+//      the old regex-over-TS extraction could), each name must be long enough to be a
+//      meaningful tripwire, and an empty catalog fails outright
 //   4. dist/client missing (the tripwire must run against a fresh build)
 //
 // Deliberately NOT enforced: vault-archive names (vault.json). "OG Rabbit" appears as
@@ -27,7 +30,7 @@ import { fileURLToPath } from 'node:url';
 
 const SITE = dirname(fileURLToPath(import.meta.url)) + '/..'; // site/
 const CLIENT = join(SITE, 'dist/client');
-const MIN_LITERALS = 10;
+const MIN_LITERAL_LENGTH = 5;
 
 const failures = [];
 const pass = (msg) => console.log(`  PASS  ${msg}`);
@@ -50,14 +53,15 @@ pass('[net] dist/.assetsignore emitted (server/**, .dev.vars, wrangler.json)');
 // ---------- gather the same catalog literals catalog-lint enforces --------------------------
 const piecesJson = JSON.parse(readFileSync(join(SITE, 'src/content/pieces.json'), 'utf8'));
 const pieceNames = piecesJson.pieces.map((p) => p.name);
-const mockTs = readFileSync(join(SITE, 'src/lib/commerce/catalog.mock.ts'), 'utf8');
-const mockSlugs = [...mockTs.matchAll(/slug:\s*'([^']+)'/g)].map((m) => m[1]);
-const mockNames = [...mockTs.matchAll(/name:\s*'([^']+)'/g)].map((m) => m[1]);
-const literals = [...new Set([...pieceNames, ...mockSlugs, ...mockNames])].filter((l) => l.length >= 5);
+const literals = [...new Set(pieceNames)];
 
-if (literals.length < MIN_LITERALS) {
-  fail(`[extract] only ${literals.length} catalog literals collected (< ${MIN_LITERALS}) - the extraction regex is broken; a tripwire scanning for nothing passes everything`);
-} else pass(`[extract] ${literals.length} catalog literals collected (>= ${MIN_LITERALS})`);
+// Structural floor: an empty catalog, or any name too short to be a meaningful tripwire,
+// fails loudly. Every piece must contribute exactly its name (no regex to silently break).
+if (pieceNames.length < 1) {
+  fail('[extract] pieces.json carries zero pieces - a tripwire scanning for nothing passes everything');
+} else if (pieceNames.some((n) => typeof n !== 'string' || n.length < MIN_LITERAL_LENGTH)) {
+  fail(`[extract] a piece name is shorter than ${MIN_LITERAL_LENGTH} chars - too short to be a meaningful leak tripwire; lengthen the name`);
+} else pass(`[extract] ${literals.length} catalog literals collected (all ${pieceNames.length} piece names, each >= ${MIN_LITERAL_LENGTH} chars)`);
 
 // ---------- scan every public HTML + JS artifact ---------------------------------------------
 const PRICE_PATTERNS = [/"price"\s*:/, /&quot;price&quot;\s*:/];

@@ -1,7 +1,11 @@
 // Store UI glue (design store logic, lines 1893-2018): size pills + pick-a-size guard,
-// add-to-bag flows for hero/PDP ink CTAs, seal, tabs filter, PDP view thumbs, notify/subscribe.
+// add-to-bag flows for hero/PDP ink CTAs, seal, tabs filter, PDP view thumbs, and the REAL
+// waitlist capture (the old notify/subscribe handlers faked success and stored nothing,
+// the same silent email-loss class this repo paid for twice; now they post to
+// /api/subscribe through the shared hardened helper, source 'drops').
 import { defineModule } from './core';
 import { satchel } from '../lib/satchel';
+import { wireEmailCapture } from '../lib/email-capture';
 
 defineModule('store-ui', () => {
   const destroys: (() => void)[] = [];
@@ -29,8 +33,12 @@ defineModule('store-ui', () => {
     if (add) {
       const errEls = document.querySelectorAll<HTMLElement>('[data-size-error]');
       if (add === 'hero') {
+        // The hero piece id is data-driven (data-hero-id on the page), never hardcoded:
+        // the old literal 'tee' broke the moment the real catalog landed.
+        const heroId = document.querySelector<HTMLElement>('[data-hero-id]')?.dataset.heroId;
+        if (!heroId) return;
         if (!sizeSel) { errEls.forEach((el) => { el.hidden = false; }); return; }
-        satchel.add('tee', sizeSel);
+        satchel.add(heroId, sizeSel);
       } else if (add === 'pdp') {
         const page = document.querySelector<HTMLElement>('[data-piece-page]');
         const id = page?.dataset.pieceId || '';
@@ -83,16 +91,12 @@ defineModule('store-ui', () => {
     destroys.push(() => thumbs.removeEventListener('click', onThumb));
   }
 
-  // ---- notify / subscribe forms (prototype: success state only)
-  for (const [formSel, doneSel] of [['[data-notify]', '[data-notified]'], ['[data-subscribe]', '[data-subscribed]']] as const) {
-    const form = document.querySelector<HTMLFormElement>(formSel);
-    const done = document.querySelector<HTMLElement>(doneSel);
-    if (form && done) {
-      const onSubmit = (e: Event) => { e.preventDefault(); form.hidden = true; done.hidden = false; };
-      form.addEventListener('submit', onSubmit);
-      destroys.push(() => form.removeEventListener('submit', onSubmit));
-    }
-  }
+  // ---- waitlist / knock forms: REAL capture through /api/subscribe (server-side Turnstile
+  // + gf_hp honeypot + allowlisted source; done-state only on a true {ok:true}). Same
+  // storage key as the /about form so one signup reads as done across surfaces.
+  document.querySelectorAll<HTMLElement>('[data-store-capture]').forEach((root) => {
+    destroys.push(wireEmailCapture(root, { source: 'drops', storageKey: 'gf-drops-email' }));
+  });
 
   return () => destroys.forEach((d) => d());
 });

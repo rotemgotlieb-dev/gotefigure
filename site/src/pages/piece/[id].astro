@@ -1,34 +1,38 @@
 ---
-// PIECE — the placard PDP (design lines 330-409). art | worn | detail views; worn is a labeled
-// placeholder until the owner drops the real photo (never invent stand-ins — HANDOFF rule).
+// PIECE, the placard PDP (design lines 330-409). art | worn | detail views; worn is a labeled
+// placeholder until the owner drops the real photo (never invent stand-ins, HANDOFF rule).
+// Commerce truth (name, price, availability) comes from the provider seam; presentation
+// (art crops, placard voice, sizing table) stays site-side (docs/PRESALE-WINDOW-DESIGN.md).
 // GATED (review 2026-07-10 #1): renders on the Worker behind the same signed cookie as /store,
 // so the pre-launch catalog is not prerendered + publicly fetchable. Was getStaticPaths/static.
 export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import InkButton from '../../components/InkButton.astro';
-import {
-  pieces, drop, isLive, isBetween, dropLow, money, SIZES,
-} from '../../lib/drop';
+import { commerce, purchasable, scarcityLine, windowCopy } from '../../lib/commerce';
+import { currentPhase, windowConfig, pricing, pieceById, money } from '../../lib/drop';
 import { GATE_COOKIE, gateOpen } from '../../lib/gate';
 
 if (!(await gateOpen(Astro.cookies.get(GATE_COOKIE)?.value))) return Astro.redirect('/', 302);
 
-const p = pieces.find((x) => x.id === Astro.params.id);
-if (!p) return Astro.redirect('/store', 302);
+const p = pieceById(Astro.params.id ?? '');
+const product = p ? await commerce.getProduct(p.id) : null;
+if (!p || !product) return Astro.redirect('/store', 302);
 
-const scarcity = isLive
-  ? (p.original ? '1 of 1, one buyer, one wall' : `${drop.left} of ${drop.editionSize} left. never reprinted`)
-  : 'vaulted, this piece will never be reprinted';
-const cta = p.original ? `Claim the original · ${money(p.price)}` : `Add to bag · ${money(p.price)}`;
+// Phase per REQUEST (never module-cached; the Worker isolate must not straddle T-0).
+const phase = currentPhase();
+const copy = windowCopy(phase, windowConfig, pricing);
+const buyable = purchasable(phase, p.soldOut) && product.available;
+const scarcity = p.original ? '1 of 1, one buyer, one wall' : scarcityLine(phase, p.soldOut);
+const cta = p.original ? `Claim the original · ${money(product.price)}` : `Add to bag · ${money(product.price)}`;
 ---
-<Layout title={`${p.name} · GoteFigure`} description={p.desc} gated>
+<Layout title={`${product.name} · GoteFigure`} description={p.desc} gated>
   <div class="piece" data-piece-page data-piece-id={p.id} data-sized={p.sized ? '1' : undefined}>
     <a href="/#shop" class="back mono">← the drop</a>
 
     <div class="cols">
       <div>
         <div class="stage">
-          <div class="view art" data-view="art" role="img" aria-label={p.name} style={`width:${p.artW};background-image:url('${p.art}')`}></div>
+          <div class="view art" data-view="art" role="img" aria-label={product.name} style={`width:${p.artW};background-image:url('${p.art}')`}></div>
           <div class="view worn" data-view="worn" hidden>
             <span class="mono">ON-BODY / IN-ROOM PHOTO<br />the real shot lands here</span>
           </div>
@@ -43,34 +47,47 @@ const cta = p.original ? `Claim the original · ${money(p.price)}` : `Add to bag
 
       <div>
         <div class="kind">{p.kind}</div>
-        <h1 class="brush">{p.name}</h1>
-        <div class="price">{money(p.price)}</div>
+        <h1 class="brush">{product.name}</h1>
+        <div class="price">{money(product.price)}</div>
         <p class="desc">{p.desc}</p>
 
-        {p.sized && (
+        {buyable && p.sized && (
           <>
             <div class="sizes" data-sizes>
-              {SIZES.map((s) => <button type="button" data-size={s}>{s}</button>)}
+              {p.sizes.map((s) => <button type="button" data-size={s}>{s}</button>)}
             </div>
             <div class="size-error" data-size-error hidden>Pick a size first.</div>
           </>
         )}
 
-        <div class="scarcity mono" style={`color:${dropLow || p.original ? 'var(--pink)' : 'var(--hand-muted)'}`}>
+        <div class="scarcity mono" style={`color:${p.soldOut || p.original ? 'var(--pink)' : 'var(--hand-muted)'}`}>
           <span class="pulse-dot"></span>{scarcity}
         </div>
 
-        {isLive && <div class="cta"><InkButton label={cta} add="pdp" wide size="lg" /></div>}
-        {isBetween && <div class="vaulted-cta mono">Vaulted, gone for good</div>}
+        {buyable && <div class="cta"><InkButton label={cta} add="pdp" wide size="lg" /></div>}
+        {!buyable && p.soldOut && <div class="vaulted-cta mono">Sold out. Vaulted, gone for good</div>}
+        {!buyable && !p.soldOut && <div class="vaulted-cta mono">{copy.priceLine}</div>}
 
-        <div class="trust mono" data-ink-obstacle>free US shipping · 30-day size swaps · secure checkout</div>
+        <div class="trust mono" data-ink-obstacle>secure checkout</div>
 
         <div class="metabox">
           <div class="meta mono">{p.meta}</div>
           {p.sized && (
             <details>
               <summary class="mono">measurements ▾</summary>
-              <div class="mono measurements">XS 18" · S 19.5" · M 21" · L 23" · XL 25", chest laid flat.<br />Cold wash inside-out, hang dry. The print ages with you.</div>
+              <div class="measurements">
+                <table class="size-table mono">
+                  <thead><tr><th>size</th><th>width</th><th>length</th></tr></thead>
+                  <tbody>
+                    {p.sizing.map((r) => (
+                      <tr><td>{r.size}</td><td>{r.width}"</td><td>{r.length}"</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+                <div class="mono size-how">width armpit to armpit, length shoulder to hem. inches, laid flat.</div>
+                <div class="mono fit-note">{p.fitNote}</div>
+                <div class="mono size-care">Cold wash inside-out, hang dry. The print ages with you.</div>
+              </div>
             </details>
           )}
         </div>
@@ -143,6 +160,11 @@ const cta = p.original ? `Claim the original · ${money(p.price)}` : `Add to bag
   details { font-size: 16px; color: var(--muted-dark); }
   summary { cursor: pointer; font-size: 15px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--hand-muted); padding: 6px 0; }
   .measurements { font-size: 16px; line-height: 2; padding-top: 8px; }
+  .size-table { border-collapse: collapse; margin-bottom: 8px; }
+  .size-table th, .size-table td { text-align: left; padding: 4px 14px 4px 0; border-bottom: 1px solid rgba(22, 19, 15, .12); font-size: 15px; }
+  .size-table th { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--hand-muted); }
+  .size-how, .fit-note, .size-care { font-size: 15px; line-height: 1.7; }
+  .fit-note { color: var(--ink); }
 
   .notewrap { display: flex; align-items: flex-end; justify-content: space-between; gap: 14px; }
   .note { font-size: 24px; line-height: 1.4; color: var(--body-soft); margin: 0; max-width: 24ch; transform: rotate(-1deg); }
