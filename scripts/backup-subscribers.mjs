@@ -101,5 +101,8 @@ try {
 
   log('done: SUCCESS');
 } catch (e) {
-  die(e?.message || String(e));
+  // launchd failures logged a bare "Command failed" with stderr thrown away
+  // (five undiagnosable FAILs in backup.log); keep the tail so the log can say why.
+  const stderr = e?.stderr ? String(e.stderr).trim().slice(-500) : '';
+  die((e?.message || String(e)) + (stderr ? ` | stderr: ${stderr}` : ''));
 }
