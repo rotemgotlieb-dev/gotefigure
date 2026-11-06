@@ -1,5 +1,5 @@
 ---
-// HTML shell — v3 (Fable 5 store design). Header + satchel drawer + flood overlay persist;
+// HTML shell: v3 (Fable 5 store design). Header + satchel drawer + flood overlay persist;
 // grain overlay; fonts: Nanum Brush (display) / Kalam + Reenie Beanie (hand skin) / Space Mono.
 import { ClientRouter } from 'astro:transitions';
 import '@fontsource/nanum-brush-script';
@@ -19,20 +19,25 @@ import SatchelDrawer from '../components/SatchelDrawer.astro';
 // the page. Public prerendered pages (about, 404, info/*) MUST leave it false, or the full
 // pre-launch catalog bakes into static HTML anyone can fetch (S4 adversarial review,
 // CRITICAL finding, 2026-07-10). Enforced post-build by scripts/dist-lint.mjs.
-interface Props { title: string; description: string; dark?: boolean; gated?: boolean; }
-const { title, description, dark = false, gated = false } = Astro.props;
+// `open`: skips the pre-launch bounce to the After Hours door. Only for pages that must be
+// readable by anyone while the store is closed (the /privacy and /data-deletion legal pages
+// a Meta app review links to). Leave it false everywhere else.
+interface Props { title: string; description: string; dark?: boolean; gated?: boolean; open?: boolean; }
+const { title, description, dark = false, gated = false, open = false } = Astro.props;
 ---
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline>
-      // Pre-launch: the shop is closed. Every store page bounces to the After Hours door (/) unless
-      // the author has unlocked preview via the code on the door (localStorage 'gf-store-open'). Runs
-      // pre-paint so the closed store never flashes.
-      try { if (!localStorage.getItem('gf-store-open')) location.replace('/'); } catch (e) {}
-    </script>
+    {!open && (
+      <script is:inline>
+        // Pre-launch: the shop is closed. Every store page bounces to the After Hours door (/) unless
+        // the author has unlocked preview via the code on the door (localStorage 'gf-store-open'). Runs
+        // pre-paint so the closed store never flashes.
+        try { if (!localStorage.getItem('gf-store-open')) location.replace('/'); } catch (e) {}
+      </script>
+    )}
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#F7F5F0" />
@@ -55,7 +60,7 @@ const { title, description, dark = false, gated = false } = Astro.props;
     <div transition:persist="cart" style="position: relative; z-index: var(--z-drawer);">
       <SatchelDrawer catalog={gated} />
     </div>
-    <!-- flood-to-navigate overlay — persists across swaps; driven by animations/flood-nav -->
+    <!-- flood-to-navigate overlay: persists across swaps; driven by animations/flood-nav -->
     <svg class="gf-flood" transition:persist="flood" aria-hidden="true" preserveAspectRatio="none"
       style="position:fixed;inset:0;width:100vw;height:100dvh;z-index:9000;pointer-events:none;opacity:0;display:block;will-change:opacity">
       <path class="gf-flood-path" d="" fill="#16130F"></path>

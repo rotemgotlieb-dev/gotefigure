@@ -1,0 +1,64 @@
+---
+// Data deletion instructions for GoteDev Analytics (the "data deletion URL" Meta's app review
+// asks for). Public on purpose: `open` skips the pre-launch bounce so Meta's reviewers can read it.
+import Layout from '../layouts/Layout.astro';
+import { GOTEDEV_LEGAL as L, hasRealEmail } from '../lib/gotedev-legal';
+---
+<Layout title={`Data deletion · ${L.app}`} description={`How to have data deleted from ${L.app}.`} open>
+  <section class="info">
+    <h1>Data deletion</h1>
+    <p><strong>{L.app}</strong>. Last updated {L.effective}.</p>
+    <p>
+      {L.app} is the tool Rotem Gotlieb uses to publish to and read his own Facebook Pages and
+      Instagram accounts. If it holds data about you, for example because you commented on one of
+      his posts, you can have it deleted.
+    </p>
+
+    <h2>How to ask</h2>
+    <p>
+      Email
+      {hasRealEmail
+        ? <a href={`mailto:${L.contactEmail}?subject=Data%20deletion%20request`} class="squiggle">{L.contactEmail}</a>
+        : <span>{L.contactEmail}</span>}
+      with the subject <strong>"Data deletion request"</strong>. In the message, name the account the
+      request is about: your Facebook name or your Instagram username. A link to the post or comment
+      helps, but is not required.
+    </p>
+    <p>
+      The same steps cover the operator's own data: the access tokens and post records for his
+      accounts are deleted the same way.
+    </p>
+
+    <h2>What is deleted</h2>
+    <p>
+      Everything the app holds about the named account: stored comments, the public name or username
+      attached to them, and any analytics or records linked to that account. For the operator's own
+      accounts, this also includes the access tokens and post records. Deletion is completed within
+      {L.deletionDays} days of the request, and you will get a reply confirming it.
+    </p>
+    <p>
+      Deleting data from the app does not remove a comment from Facebook or Instagram itself. To
+      remove a comment from the platform, delete it there.
+    </p>
+
+    <h2>Removing the app's access</h2>
+    <p>
+      If you connected an account to {L.app}, removing the app under Facebook Settings &gt; Apps and
+      Websites (or Instagram Settings &gt; Apps and websites) revokes its access. People who only
+      commented never connected an account, so an email request is all that is needed.
+    </p>
+
+    <h2>More</h2>
+    <p>
+      How the app handles data is described in the
+      <a href="/privacy/" class="squiggle">Privacy Policy</a>.
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .info { max-width: 680px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24); }
+  .info h1 { margin-bottom: var(--s-6); }
+  .info h2 { margin: var(--s-8) 0 var(--s-2); font-size: var(--text-lg); }
+  .info p { margin-bottom: var(--s-3); }
+</style>

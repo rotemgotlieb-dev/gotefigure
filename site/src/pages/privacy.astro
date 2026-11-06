@@ -1,0 +1,86 @@
+---
+// Privacy policy for GoteDev Analytics, the Meta app Rotem uses on his own Pages and Instagram
+// accounts. Public on purpose: `open` skips the pre-launch bounce so Meta's reviewers can read it.
+import Layout from '../layouts/Layout.astro';
+import { GOTEDEV_LEGAL as L, hasRealEmail } from '../lib/gotedev-legal';
+---
+<Layout title={`Privacy Policy · ${L.app}`} description={`How ${L.app} handles data: what it collects, how it is used, and how to have it deleted.`} open>
+  <section class="info">
+    <h1>Privacy Policy</h1>
+    <p><strong>{L.app}</strong>. Effective {L.effective}.</p>
+    <p>
+      {L.app} is a small tool that Rotem Gotlieb (the operator) uses to publish his own videos to
+      his own Facebook Pages and Instagram accounts, and to read the comments and analytics on those
+      posts. This policy explains what the app collects, how it is used, and how to have it deleted.
+      The app is operated by {L.operator}.
+    </p>
+
+    <h2>Who uses the app</h2>
+    <p>
+      The app has one user: its operator. It connects only to accounts he owns: the Facebook Pages
+      GoteDev, GoteFigure and Rotems Adventures, and the Instagram accounts gote.dev,
+      rotems_adventures and gotefigure. There is no sign-up, no public login and no advertising.
+    </p>
+
+    <h2>What the app collects</h2>
+    <p>
+      <strong>Access tokens</strong> that Meta issues so the app can act on the operator's own Pages
+      and accounts. <strong>Post records:</strong> a record of each post the app publishes to those
+      accounts. <strong>Public comments</strong> on those posts, as Meta provides them, including the
+      commenter's public name or username and the comment text. <strong>Analytics</strong> that Meta
+      provides for the operator's own Pages and accounts, such as the views and reach of his posts.
+    </p>
+    <p>
+      The app collects nothing else about other people. It does not read private messages, and it
+      does not collect contact details, location, or data about people who have not commented on the
+      operator's posts.
+    </p>
+
+    <h2>How the data is used</h2>
+    <p>
+      Only to run the operator's own accounts: publishing his posts, reading the comments on them,
+      and seeing how they perform. The data is not used for advertising, profiling or any other
+      purpose.
+    </p>
+
+    <h2>Where the data is stored</h2>
+    <p>
+      Access tokens and post records are stored on the operator's own computer. Comments and
+      analytics are read from Meta when he reviews his posts, and any copies the app keeps are stored
+      on that same computer. Data moves only between Meta's platform and that computer.
+    </p>
+
+    <h2>Sharing</h2>
+    <p>The app does not sell, rent or share data with anyone, unless the law requires it.</p>
+
+    <h2>Retention</h2>
+    <p>
+      Data is kept for {L.retention} or until a deletion request is handled, whichever comes first.
+      Access tokens stop working once the app's access is removed in Facebook or Instagram settings.
+    </p>
+
+    <h2>Deleting your data</h2>
+    <p>
+      Anyone can ask for their data to be deleted at any time. The steps are on the
+      <a href="/data-deletion/" class="squiggle">Data deletion</a> page.
+    </p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version will be posted on this page with a new effective date.</p>
+
+    <h2>Contact</h2>
+    <p>
+      Questions about this policy:
+      {hasRealEmail
+        ? <a href={`mailto:${L.contactEmail}`} class="squiggle">{L.contactEmail}</a>
+        : <span>{L.contactEmail}</span>}
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .info { max-width: 680px; margin: 0 auto; padding: var(--s-12) var(--s-6) var(--s-24); }
+  .info h1 { margin-bottom: var(--s-6); }
+  .info h2 { margin: var(--s-8) 0 var(--s-2); font-size: var(--text-lg); }
+  .info p { margin-bottom: var(--s-3); }
+</style>

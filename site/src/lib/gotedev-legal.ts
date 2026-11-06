@@ -1,0 +1,13 @@
+// Facts shared by the two GoteDev Analytics legal pages (/privacy and /data-deletion), the
+// URLs Meta's app review asks for. Fill each bracketed placeholder here once; both pages read
+// from this file. Nothing here is a GoteFigure store fact: the store's own policy is /info/privacy.
+export const GOTEDEV_LEGAL = {
+  app: 'GoteDev Analytics',
+  operator: '[BUSINESS NAME OR "Rotem Gotlieb, sole operator"]',
+  contactEmail: '[CONTACT EMAIL]',
+  deletionDays: '[DAYS, default 30]',
+  retention: '[RETENTION PERIOD]',
+  effective: 'November 6, 2026',
+} as const;
+
+export const hasRealEmail = GOTEDEV_LEGAL.contactEmail.includes('@');
