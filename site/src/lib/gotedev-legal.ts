@@ -3,10 +3,10 @@
 // from this file. Nothing here is a GoteFigure store fact: the store's own policy is /info/privacy.
 export const GOTEDEV_LEGAL = {
   app: 'GoteDev Analytics',
-  operator: '[BUSINESS NAME OR "Rotem Gotlieb, sole operator"]',
-  contactEmail: '[CONTACT EMAIL]',
-  deletionDays: '[DAYS, default 30]',
-  retention: '[RETENTION PERIOD]',
+  operator: 'Rotem Gotlieb, sole operator',
+  contactEmail: 'hello@gotefigure.com',
+  deletionDays: '30',
+  retention: 'access tokens until you revoke them; post records 12 months',
   effective: 'November 6, 2026',
 } as const;
 
